@@ -1,6 +1,6 @@
 import wx
 from dip import dip
-from themeColors import lightTheme, blueTheme
+from themes import lightTheme, blueTheme
 
 
 class CustomButton(wx.Control):    
@@ -8,20 +8,23 @@ class CustomButton(wx.Control):
     
     def __init__(self, parent, id=wx.ID_ANY, label:str="", pos=wx.DefaultPosition,
                  size=wx.DefaultSize, style=wx.NO_BORDER, validator=wx.DefaultValidator,
-                 name="CustomButton", theme:str="light"):
+                 name="CustomButton", theme:str="light", fontSize=10):
         super().__init__(parent, id, pos, size, style, validator, name)
 
         # control attributes
         self.label = label
         self._Theme = theme
         self._Enabled = True
+        self._fontSize = fontSize
 
         # state attributes
         self.pressed = False
         self.mouseHover = False
 
-        # initialize control colors
-        self.initializeColors()
+        # initialize control properties from theme
+        self.initializeProperties()
+
+        self.SetInitialSize(size)
         
         # set up autobufferedpaintdc
         self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
@@ -37,8 +40,8 @@ class CustomButton(wx.Control):
         self.Bind(wx.EVT_ENTER_WINDOW, self.OnMouseEnter)
         
         
-    def initializeColors(self):
-        """ Chooses a colors dictionary according to theme. """
+    def initializeProperties(self):
+        """ Chooses a properties dictionary according to theme. """
 
         if (self._Theme == "light"):
             self._themeDict = lightTheme
@@ -99,6 +102,11 @@ class CustomButton(wx.Control):
         dc.DrawRoundedRectangle(rect, dip(6))
 
         # draw text (centered)
+        dc.SetFont(wx.Font(self._fontSize,
+                           wx.FONTFAMILY_DEFAULT,
+                           wx.FONTSTYLE_NORMAL,
+                           wx.FONTWEIGHT_NORMAL,
+                           faceName=self._themeDict["fontFaceName"]))
         textWidth, textHeight = dc.GetTextExtent(self.label)
         textX = rect.GetX() + (rect.GetWidth() // 2) - (textWidth // 2)
         textY = rect.GetY() + (rect.GetHeight() // 2) - (textHeight // 2)
@@ -108,6 +116,35 @@ class CustomButton(wx.Control):
     def OnEraseBackground(self, event) -> None:
         """ Bound to prevent flickering. """
         pass
+
+
+    def DoGetBestClientSize(self) -> wx.Size:
+
+        """ Determines the best size for the contorl. """
+
+        # create font
+        font = wx.Font(self._fontSize,
+                       wx.FONTFAMILY_DEFAULT,
+                       wx.FONTSTYLE_NORMAL,
+                       wx.FONTWEIGHT_NORMAL,
+                       faceName=self._themeDict["fontFaceName"])
+
+        # create device context and set font to determine text dimensions
+        dc = wx.ClientDC(self)
+        dc.SetFont(font)
+
+        # get label dimensions
+        textWidth, textHeight = dc.GetTextExtent(self.label)
+
+        # margins for sides
+        leftRightMargins = dip(20)
+        topBottomMargins = dip(5)
+
+        # final control dimensions
+        width = leftRightMargins*2 + textWidth
+        height = topBottomMargins*2 + textHeight
+        
+        return wx.Size(width, height)
     
 
     def OnLeftDown(self, event) -> None:
@@ -167,9 +204,11 @@ if __name__ == "__main__":
             panel.SetBackgroundColour(blueTheme["background"])
 
             # custom control
-            self.button = CustomButton(panel, label="Click Me", pos=wx.Point(50, 50), size=wx.Size(300, 40), theme="blue")
+            #self.button = CustomButton(panel, label="Click Me", pos=wx.Point(50, 50), size=wx.Size(300, 40), theme="blue")
+            self.button = CustomButton(panel, label="Click Me", pos=wx.Point(50, 50), theme="blue")
             # native control
-            wx.Button(panel, label="Click Me", pos=(50, 100), size=(300, 40)) 
+            #wx.Button(panel, label="Click Me", pos=(50, 100), size=(300, 40))
+            wx.Button(panel, label="Click Me", pos=(50, 100)) 
 
             #self.Bind(wx.EVT_BUTTON, self.OnButtonClicked, self.button)
             self.Show()

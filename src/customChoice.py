@@ -146,7 +146,7 @@ class ChoicesPanel(wx.Panel):
             if pair[1].Contains(x, y):
 
                 # change color (applied when drawn)
-                self.choiceBackgroundColors[index] = self._themeDict["brushHover"]
+                self.choiceBackgroundColors[index] = self._themeDict["brushPressed"]
 
         self.Refresh()
 

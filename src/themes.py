@@ -33,6 +33,8 @@ lightTheme = {
     "brushPressed": wx.Colour(76, 102, 156),
     "brushHover": wx.Colour(220, 220, 220),
     "brushDisabled": wx.Colour(200, 200, 200),
+    # font
+    "fontFaceName": "Verdana",
 }
 
 # ------------------- BLUE THEME -------------------------
@@ -55,4 +57,6 @@ blueTheme = {
     "brushPressed": wx.Colour(16, 31, 110),
     "brushHover": wx.Colour(23, 53, 115),
     "brushDisabled": wx.Colour(200, 200, 200),
+    # font
+    "fontFaceName": "Verdana",
     }
