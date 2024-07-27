@@ -1,5 +1,5 @@
 """
-themeColors.py: Theme colors and drawing objects for the custom controls.
+themeColors.py: Theme colors for the custom controls.
 
 Currently defined themes:
 - light
@@ -24,15 +24,15 @@ lightTheme = {
     "textForegroundHover": wx.BLACK,
     "textForegroundDisabled": wx.Colour(170, 170, 170),
     # pens
-    "penDefault": wx.Pen(wx.Colour(150, 150, 150), width=1, style=wx.PENSTYLE_SOLID),
-    "penPressed": wx.Pen(wx.Colour(8, 40, 107), width=1, style=wx.PENSTYLE_SOLID),
-    "penHover": wx.Pen(wx.Colour(65, 26, 222), width=1, style=wx.PENSTYLE_SOLID),
-    "penDisabled": wx.Pen(wx.Colour(220, 220, 220), width=1, style=wx.PENSTYLE_SOLID),
+    "penDefault": wx.Colour(150, 150, 150),
+    "penPressed": wx.Colour(8, 40, 107),
+    "penHover": wx.Colour(65, 26, 222),
+    "penDisabled": wx.Colour(220, 220, 220),
     # brushes
-    "brushDefault": wx.Brush(wx.WHITE, wx.BRUSHSTYLE_SOLID),
-    "brushPressed": wx.Brush(wx.Colour(76, 102, 156), wx.BRUSHSTYLE_SOLID),
-    "brushHover": wx.Brush(wx.Colour(220, 220, 220), wx.BRUSHSTYLE_SOLID),
-    "brushDisabled": wx.Brush(wx.Colour(200, 200, 200), wx.BRUSHSTYLE_SOLID)
+    "brushDefault": wx.WHITE,
+    "brushPressed": wx.Colour(76, 102, 156),
+    "brushHover": wx.Colour(220, 220, 220),
+    "brushDisabled": wx.Colour(200, 200, 200),
 }
 
 # ------------------- BLUE THEME -------------------------
@@ -46,14 +46,13 @@ blueTheme = {
     "textForegroundHover": wx.Colour(200, 200, 200),
     "textForegroundDisabled": wx.Colour(170, 170, 170),
     # pens
-    "penDefault": wx.Pen(wx.Colour(39, 62, 177), width=1, style=wx.PENSTYLE_SOLID),
-    "penPressed": wx.Pen(wx.Colour(65, 26, 222), width=1, style=wx.PENSTYLE_SOLID),
-    "penHover": wx.Pen(wx.Colour(65, 26, 222), width=1, style=wx.PENSTYLE_SOLID),
-    "penDisabled": wx.Pen(wx.Colour(220, 220, 220), width=1, style=wx.PENSTYLE_SOLID),
+    "penDefault": wx.Colour(39, 62, 177),
+    "penPressed": wx.Colour(65, 26, 222),
+    "penHover": wx.Colour(65, 26, 222),
+    "penDisabled": wx.Colour(220, 220, 220),
     # brushes
-    "brushDefault": wx.Brush(wx.Colour(19, 53, 122), wx.BRUSHSTYLE_SOLID),
-    "brushPressed": wx.Brush(wx.Colour(16, 31, 110), wx.BRUSHSTYLE_SOLID),
-    "brushHover": wx.Brush(wx.Colour(23, 53, 115), wx.BRUSHSTYLE_SOLID),
-    "brushDisabled": wx.Brush(wx.Colour(200, 200, 200), wx.BRUSHSTYLE_SOLID)
-
+    "brushDefault": wx.Colour(19, 53, 122),
+    "brushPressed": wx.Colour(16, 31, 110),
+    "brushHover": wx.Colour(23, 53, 115),
+    "brushDisabled": wx.Colour(200, 200, 200),
     }

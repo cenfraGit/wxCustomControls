@@ -20,15 +20,15 @@ class ChoicesPanel(wx.Panel):
         # checking user clicks)
         self.choiceRectangles = {}
 
-        # used for when drawing in case the mouse is hovering
-        self.choiceBackgroundColors = [wx.WHITE for _ in self._Choices]
-
         # set up buffered paint dc
         self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
 
         # init colors
         self.InitializeColors()
-        self.SetBackgroundColour(self.colorBackground)
+        self.SetBackgroundColour(self._themeDict["brushDefault"])
+
+        # used for when drawing in case the mouse is hovering
+        self.choiceBackgroundColors = [self._themeDict["brushDefault"] for _ in self._Choices]
 
         # bind events
         self.Bind(wx.EVT_PAINT, self.OnPaint)
@@ -39,9 +39,12 @@ class ChoicesPanel(wx.Panel):
     def InitializeColors(self):
 
         if (self._Theme == "light"):
-            self.colorBackground = wx.WHITE
-            self.colorChoiceDefault = wx.WHITE
-            self.colorChoiceSelect = wx.Colour(81, 92, 243)
+            self._themeDict = lightTheme
+        elif (self._Theme == "blue"):
+            self._themeDict = blueTheme
+        else:
+            # invalid theme
+            self._themeDict = lightTheme
             
 
     def OnPaint(self, event):
@@ -53,16 +56,20 @@ class ChoicesPanel(wx.Panel):
 
     def Draw(self, dc: wx.AutoBufferedPaintDC):
 
+        # set choices font
+        dc.SetTextForeground(self._themeDict["textForegroundDefault"])
+        dc.SetFont(wx.Font(9, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, "Arial"))
+
         # reset rectangles?
         self.choiceRectangles = {}
 
         workingAreaRect = self.GetClientRect()
  
         # rectangle height
-        rectangleHeight = dip(25)
+        rectangleHeight = dip(35)
 
         # left text offset
-        leftMargin = dip(6)
+        leftMargin = dip(14)
 
         # variable for tracking Y position for drawing (with initial
         # offset)
@@ -76,8 +83,6 @@ class ChoicesPanel(wx.Panel):
 
             # save rectangle to dictionary
             self.choiceRectangles[choice] = rect
-            
-            #dc.DrawRectangle(rect)
 
             # draw color
             dc.SetPen(wx.TRANSPARENT_PEN)
@@ -85,6 +90,7 @@ class ChoicesPanel(wx.Panel):
             dc.DrawRectangle(rect)
             
             # draw choice
+            
             _, textHeight = dc.GetTextExtent(choice)
             dc.DrawText(choice, leftMargin, verticalOffset + (rectangleHeight//2) - (textHeight//2))
 
@@ -94,10 +100,14 @@ class ChoicesPanel(wx.Panel):
             if (index == len(self._Choices)-1):
                 break
             
-            # draw delimiter line
-            dc.SetPen(wx.Pen(wx.BLACK, width=3, style=wx.PENSTYLE_SOLID))
-            dc.DrawLine(0, verticalOffset, rect.GetWidth(), verticalOffset)
-
+        # draw borders
+        dc.SetPen(wx.Pen(self._themeDict["penDefault"], 1, wx.PENSTYLE_SOLID))
+        # left line
+        dc.DrawLine(0, 0, 0, verticalOffset)
+        # right line
+        dc.DrawLine(self._Reference.GetClientSize()[0]-1, 0, self._Reference.GetClientSize()[0]-1, verticalOffset)
+        # bottom line
+        dc.DrawLine(0, verticalOffset-1, self._Reference.GetClientSize()[0]-1, verticalOffset-1)
             
         # modify drop down menu size
         self.SetClientSize(self._Reference.GetClientSize()[0], verticalOffset)
@@ -126,7 +136,7 @@ class ChoicesPanel(wx.Panel):
         choice option."""
 
         # reset colors
-        self.choiceBackgroundColors = [self.colorChoiceDefault for _ in self._Choices]
+        self.choiceBackgroundColors = [self._themeDict["brushDefault"] for _ in self._Choices]
         
         x, y = event.GetPosition()
 
@@ -136,7 +146,7 @@ class ChoicesPanel(wx.Panel):
             if pair[1].Contains(x, y):
 
                 # change color (applied when drawn)
-                self.choiceBackgroundColors[index] = self.colorChoiceSelect
+                self.choiceBackgroundColors[index] = self._themeDict["brushHover"]
 
         self.Refresh()
 
@@ -197,9 +207,13 @@ class customChoice(wx.Control):
             # invalid theme
             self._themeDict = lightTheme
 
+
+    def GetValue(self):
+        return self._value
+
         
     def SetValue(self, value):
-        self.value = value
+        self._value = value
         self.Refresh()
         
 
@@ -227,12 +241,12 @@ class customChoice(wx.Control):
         # if not, draw with default colors
 
         if not self._Enabled:
-            dc.SetPen(self._themeDict["penDisabled"])
-            dc.SetBrush(self._themeDict["brushDisabled"])
+            dc.SetPen(wx.Pen(self._themeDict["penDisabled"], 1))
+            dc.SetBrush(wx.Brush(self._themeDict["brushDisabled"], wx.BRUSHSTYLE_SOLID))
             dc.SetTextForeground(self._themeDict["textForegroundDisabled"])
         else:
-            dc.SetPen(self._themeDict["penDefault"])
-            dc.SetBrush(self._themeDict["brushDefault"])
+            dc.SetPen(wx.Pen(self._themeDict["penDefault"], 1))
+            dc.SetBrush(wx.Brush(self._themeDict["brushDefault"], wx.BRUSHSTYLE_SOLID))
             dc.SetTextForeground(self._themeDict["textForegroundDefault"])
             """
             if self.pressed:
@@ -249,11 +263,12 @@ class customChoice(wx.Control):
                 dc.SetTextForeground(self.colorTextForegroundDefault)
             """
             
-        # draw border    
-        dc.DrawRoundedRectangle(rect, 6)
+        # draw border
+        dc.DrawRectangle(rect)
 
         # draw text (to the left)
         leftMargin = dip(10)
+        dc.SetFont(wx.Font(9, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
         textWidth, textHeight = dc.GetTextExtent(self._value)
         textX = leftMargin
         textY = rect.GetY() + (rect.GetHeight() // 2) - (textHeight // 2)
@@ -261,13 +276,14 @@ class customChoice(wx.Control):
         
         # draw drop down arrow
         rightMargin = dip(6)
-        width, height = dip(16), dip(4)
+        width, height = dip(10), dip(4)
         rectPosX = rect.GetWidth() - width - rightMargin
         rectPosY = (rect.GetHeight() // 2) - (height // 2)
+        # define icon area
         arrowRectangle = wx.Rect(rectPosX, rectPosY, width, height)
-        #dc.DrawRectangle(arrowRectangle)
-        dc.DrawLine(rectPosX, rectPosY, rectPosX+(width//2), rectPosY+height)
-        dc.DrawLine(rectPosX+(width//2), rectPosY+height, *arrowRectangle.GetTopRight())
+        dc.SetPen(wx.Pen(self._themeDict["textForegroundDefault"], 1, wx.PENSTYLE_SOLID))
+        dc.DrawLine(rectPosX+1, rectPosY, rectPosX+(width//2), rectPosY+height)
+        dc.DrawLine(rectPosX+(width//2), rectPosY+height, arrowRectangle.GetTopRight()[0], arrowRectangle.GetTopRight()[1]-1)
 
         
     def OnEraseBackground(self, event):
@@ -357,21 +373,32 @@ class customChoice(wx.Control):
 
 # for testing control directly
 if __name__ == "__main__":
-    import ctypes
-    ctypes.windll.shcore.SetProcessDpiAwareness(1)
+
+    from customButton import CustomButton
+    if (wx.Platform == "__WXMSW__"):
+        import ctypes
+        ctypes.windll.shcore.SetProcessDpiAwareness(1)
     
     class MyFrame(wx.Frame):
         def __init__(self):
-            super().__init__(None, title="Custom Example")
+            super().__init__(None, title="control test")
+            self.SetMinClientSize(dip(400, 400))
+            
             panel = wx.Panel(self)
-            panel.SetBackgroundColour(lightTheme["background"])
+            panel.SetBackgroundColour(blueTheme["background"])
 
 
             values = ["test1", "car1", "car2", "computer", "messageboxtext"]
-            self.choice = customChoice(panel, choices=values, value="computer", pos=wx.Point(50, 50), size=wx.Size(300, 40), theme="light")
+            self.choice = customChoice(panel, choices=values, value="computer", pos=wx.Point(50, 50), size=wx.Size(200, 40), theme="blue")
 
             wx.StaticText(panel, label="placeholder", pos=(55, 100))
             wx.StaticText(panel, label="placeholder", pos=(55, 150))
+
+
+            self.btn = CustomButton(panel, label="Print value", pos=wx.Point(300, 50), size=wx.Size(140, 40), theme="blue")
+
+            self.btn.Bind(wx.EVT_BUTTON, lambda e: print(self.choice.GetValue()))
+            
 
             self.Show()
 

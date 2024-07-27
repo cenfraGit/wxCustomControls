@@ -3,12 +3,12 @@ from dip import dip
 from themeColors import lightTheme, blueTheme
 
 
-class customButton(wx.Control):    
+class CustomButton(wx.Control):    
     """ Defines a custom button that supports themes. """
     
     def __init__(self, parent, id=wx.ID_ANY, label:str="", pos=wx.DefaultPosition,
                  size=wx.DefaultSize, style=wx.NO_BORDER, validator=wx.DefaultValidator,
-                 name="customButton", theme:str="light"):
+                 name="CustomButton", theme:str="light"):
         super().__init__(parent, id, pos, size, style, validator, name)
 
         # control attributes
@@ -78,21 +78,21 @@ class customButton(wx.Control):
         # 4. if not hovering, draw with default colors.
 
         if not self._Enabled:
-            dc.SetPen(self._themeDict["penDisabled"])
-            dc.SetBrush(self._themeDict["brushDisabled"])
+            dc.SetPen(wx.Pen(self._themeDict["penDisabled"], 1))
+            dc.SetBrush(wx.Brush(self._themeDict["brushDisabled"], wx.BRUSHSTYLE_SOLID))
             dc.SetTextForeground(self._themeDict["textForegroundDisabled"])
         else:
             if self.pressed:
-                dc.SetPen(self._themeDict["penPressed"])
-                dc.SetBrush(self._themeDict["brushPressed"])
+                dc.SetPen(wx.Pen(self._themeDict["penPressed"], 1))
+                dc.SetBrush(wx.Brush(self._themeDict["brushPressed"], wx.BRUSHSTYLE_SOLID))
                 dc.SetTextForeground(self._themeDict["textForegroundPressed"])
             elif self.mouseHover:
-                dc.SetPen(self._themeDict["penHover"])
-                dc.SetBrush(self._themeDict["brushHover"])
+                dc.SetPen(wx.Pen(self._themeDict["penHover"], 1))
+                dc.SetBrush(wx.Brush(self._themeDict["brushHover"], wx.BRUSHSTYLE_SOLID))
                 dc.SetTextForeground(self._themeDict["textForegroundHover"])
             else:
-                dc.SetPen(self._themeDict["penDefault"])
-                dc.SetBrush(self._themeDict["brushDefault"])
+                dc.SetPen(wx.Pen(self._themeDict["penDefault"], 1))
+                dc.SetBrush(wx.Brush(self._themeDict["brushDefault"], wx.BRUSHSTYLE_SOLID))
                 dc.SetTextForeground(self._themeDict["textForegroundDefault"])
             
         # draw border    
@@ -160,12 +160,12 @@ if __name__ == "__main__":
     class MyFrame(wx.Frame):
         
         def __init__(self):
-            super().__init__(None, title="custom control test")
+            super().__init__(None, title="control test")
             panel = wx.Panel(self)
             panel.SetBackgroundColour(blueTheme["background"])
 
             # custom control
-            self.button = customButton(panel, label="Click Me", pos=wx.Point(50, 50), size=wx.Size(300, 40), theme="blue")
+            self.button = CustomButton(panel, label="Click Me", pos=wx.Point(50, 50), size=wx.Size(300, 40), theme="blue")
             # native control
             wx.Button(panel, label="Click Me", pos=(50, 100), size=(300, 40)) 
 
