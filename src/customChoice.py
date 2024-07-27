@@ -1,5 +1,6 @@
 import wx
 from dip import dip
+from themeColors import lightTheme, blueTheme
 
 
 class ChoicesPanel(wx.Panel):
@@ -32,9 +33,6 @@ class ChoicesPanel(wx.Panel):
         # bind events
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_LEFT_DOWN, self.OnLeftDown)
-        #self.Bind(wx.EVT_LEFT_DCLICK, self.OnLeftDown)
-        #self.Bind(wx.EVT_LEAVE_WINDOW, self.OnMouseLeave)
-        #self.Bind(wx.EVT_ENTER_WINDOW, self.OnMouseEnter)
         self.Bind(wx.EVT_MOTION, self.OnMouseMotion)
 
 
@@ -44,7 +42,7 @@ class ChoicesPanel(wx.Panel):
             self.colorBackground = wx.WHITE
             self.colorChoiceDefault = wx.WHITE
             self.colorChoiceSelect = wx.Colour(81, 92, 243)
-        
+            
 
     def OnPaint(self, event):
         """ Handles the paint event. """
@@ -59,7 +57,7 @@ class ChoicesPanel(wx.Panel):
         self.choiceRectangles = {}
 
         workingAreaRect = self.GetClientRect()
-
+ 
         # rectangle height
         rectangleHeight = dip(25)
 
@@ -152,13 +150,13 @@ class ChoicesPanel(wx.Panel):
     
 
 
-class cChoice(wx.Control):
+class customChoice(wx.Control):
     
     """ Defines a custom choice control that supports themes. """
     
     def __init__(self, parent, id=wx.ID_ANY, value:str="", choices:list=[], pos=wx.DefaultPosition,
                  size=wx.DefaultSize, style=wx.NO_BORDER, validator=wx.DefaultValidator,
-                 name="cChoice", theme:str="light"):
+                 name="customChoice", theme:str="light"):
         super().__init__(parent, id, pos, size, style, validator, name)
 
         # control attributes
@@ -181,60 +179,23 @@ class cChoice(wx.Control):
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
         self.Bind(wx.EVT_LEFT_DOWN, self.OnLeftDown)
-        self.Bind(wx.EVT_LEFT_DCLICK, self.OnLeftDown)
+        if (wx.Platform == "__WXMSW__"):
+            self.Bind(wx.EVT_LEFT_DCLICK, self.OnLeftDown)
         self.Bind(wx.EVT_LEFT_UP, self.OnLeftUp)
         self.Bind(wx.EVT_LEAVE_WINDOW, self.OnMouseLeave)
         self.Bind(wx.EVT_ENTER_WINDOW, self.OnMouseEnter)
         
         
     def initializeColors(self):
-
         """ Initializes the button's colors according to theme. """
         
-
-        # get parent background color (for corners)
-        self.penBackground = wx.TRANSPARENT_PEN
-        self.brushBackground = wx.Brush(self.GetParent().GetBackgroundColour(), wx.BRUSHSTYLE_SOLID)
-        
-
         if (self._Theme == "light"):
-
-            # text
-            self.colorTextForegroundDefault = wx.BLACK
-            self.colorTextForegroundPressed = wx.WHITE
-            self.colorTextForegroundHover = wx.BLACK
-            self.colorTextForegroundDisabled = wx.Colour(170, 170, 170)
-            # pens
-            self.penDefault = wx.Pen(wx.Colour(150, 150, 150), width=1, style=wx.PENSTYLE_SOLID)
-            self.penPressed = wx.Pen(wx.Colour(8, 40, 107), width=1, style=wx.PENSTYLE_SOLID)
-            self.penHover = wx.Pen(wx.Colour(65, 26, 222), width=1, style=wx.PENSTYLE_SOLID)
-            self.penDisabled = wx.Pen(wx.Colour(220, 220, 220), width=1, style=wx.PENSTYLE_SOLID)
-            # brushes
-            self.brushPressed = wx.Brush(wx.Colour(76, 102, 156), wx.BRUSHSTYLE_SOLID)
-            self.brushHover = wx.Brush(wx.Colour(220, 220, 220), wx.BRUSHSTYLE_SOLID)
-            self.brushDefault = wx.Brush(wx.WHITE, wx.BRUSHSTYLE_SOLID)
-            self.brushDisabled = wx.Brush(wx.Colour(200, 200, 200), wx.BRUSHSTYLE_SOLID)
-            
+            self._themeDict = lightTheme
         elif (self._Theme == "blue"):
-
-            # text
-            self.colorTextForegroundDefault = wx.Colour(190, 190, 190)
-            self.colorTextForegroundPressed = wx.WHITE
-            self.colorTextForegroundHover = wx.Colour(200, 200, 200)
-            self.colorTextForegroundDisabled = wx.Colour(170, 170, 170)
-            # pens
-            self.penDefault = wx.Pen(wx.Colour(39, 62, 177), width=1, style=wx.PENSTYLE_SOLID)
-            self.penPressed = wx.Pen(wx.Colour(65, 26, 222), width=1, style=wx.PENSTYLE_SOLID)
-            self.penHover = wx.Pen(wx.Colour(65, 26, 222), width=1, style=wx.PENSTYLE_SOLID)
-            self.penDisabled = wx.Pen(wx.Colour(220, 220, 220), width=1, style=wx.PENSTYLE_SOLID)
-            # brushes
-            self.brushPressed = wx.Brush(wx.Colour(16, 31, 110), wx.BRUSHSTYLE_SOLID)
-            self.brushHover = wx.Brush(wx.Colour(23, 53, 115), wx.BRUSHSTYLE_SOLID)
-            self.brushDefault = wx.Brush(wx.Colour(19, 53, 122), wx.BRUSHSTYLE_SOLID)
-            self.brushDisabled = wx.Brush(wx.Colour(200, 200, 200), wx.BRUSHSTYLE_SOLID)
-            
+            self._themeDict = blueTheme
         else:
-            raise ValueError("Invalid theme.")
+            # invalid theme
+            self._themeDict = lightTheme
 
         
     def SetValue(self, value):
@@ -243,7 +204,6 @@ class cChoice(wx.Control):
         
 
     def OnPaint(self, event):
-
         """ Handles the paint event. """
         
         dc = wx.AutoBufferedPaintDC(self)
@@ -252,28 +212,28 @@ class cChoice(wx.Control):
         
 
     def Draw(self, dc: wx.AutoBufferedPaintDC):
-
         """ Draw the actual button. """
         
         rect = self.GetClientRect()
 
         # make backgrund transparent
-        dc.SetPen(self.penBackground)
-        dc.SetBrush(self.brushBackground)
+        dc.SetPen(wx.TRANSPARENT_PEN)
+        dc.SetBrush(wx.Brush(self.GetParent().GetBackgroundColour(), wx.BRUSHSTYLE_SOLID))
         dc.DrawRectangle(rect)
         
-        # check if the button is enabled, then check if pressed. if
-        # not, check if the mouse cursor is hovering on top of
-        # it. if not, draw with default colors.
+        # check if control is enabled
+        # if not, check if pressed
+        # if not, check if mouse is hovering
+        # if not, draw with default colors
 
         if not self._Enabled:
-            dc.SetPen(self.penDisabled)
-            dc.SetBrush(self.brushDisabled)
-            dc.SetTextForeground(self.colorTextForegroundDisabled)
+            dc.SetPen(self._themeDict["penDisabled"])
+            dc.SetBrush(self._themeDict["brushDisabled"])
+            dc.SetTextForeground(self._themeDict["textForegroundDisabled"])
         else:
-            dc.SetPen(self.penDefault)
-            dc.SetBrush(self.brushDefault)
-            dc.SetTextForeground(self.colorTextForegroundDefault)
+            dc.SetPen(self._themeDict["penDefault"])
+            dc.SetBrush(self._themeDict["brushDefault"])
+            dc.SetTextForeground(self._themeDict["textForegroundDefault"])
             """
             if self.pressed:
                 dc.SetPen(self.penPressed)
@@ -398,18 +358,17 @@ class cChoice(wx.Control):
 # for testing control directly
 if __name__ == "__main__":
     import ctypes
-    from themeColors import backgroundBlue, backgroundLight
     ctypes.windll.shcore.SetProcessDpiAwareness(1)
     
     class MyFrame(wx.Frame):
         def __init__(self):
             super().__init__(None, title="Custom Example")
             panel = wx.Panel(self)
-            panel.SetBackgroundColour(backgroundLight)
+            panel.SetBackgroundColour(lightTheme["background"])
 
 
             values = ["test1", "car1", "car2", "computer", "messageboxtext"]
-            self.choice = cChoice(panel, choices=values, value="computer", pos=wx.Point(50, 50), size=wx.Size(300, 40), theme="light")
+            self.choice = customChoice(panel, choices=values, value="computer", pos=wx.Point(50, 50), size=wx.Size(300, 40), theme="light")
 
             wx.StaticText(panel, label="placeholder", pos=(55, 100))
             wx.StaticText(panel, label="placeholder", pos=(55, 150))
