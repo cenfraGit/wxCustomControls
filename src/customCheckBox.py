@@ -1,28 +1,31 @@
 import wx
 from dip import dip
+from themeColors import lightTheme, blueTheme
 
 
-class cCheckBox(wx.Control):
+class CustomCheckBox(wx.Control):
     
     """ Defines a custom checkbox control that supports themes. """
     
-    def __init__(self, parent, id=wx.ID_ANY, value:str="", choices:list=[], pos=wx.DefaultPosition,
+    def __init__(self, parent, id=wx.ID_ANY, label:str="", state=False, pos=wx.DefaultPosition,
                  size=wx.DefaultSize, style=wx.NO_BORDER, validator=wx.DefaultValidator,
-                 name="cChoice", theme:str="light"):
+                 name="CustomCheckBox", theme:str="light"):
         super().__init__(parent, id, pos, size, style, validator, name)
 
         # control attributes
-        self._value = value
-        self._choices = choices
+        self._label = label
         self._Theme = theme # light or dark
         self._Enabled = True
 
         # state attributes
-        self.pressed = False
+        self._state = state # the actual state of the checkbutton
         self.mouseHover = False
 
         # initialize control colors
         self.initializeColors()
+
+        # set up attributes
+        self.setUpControlAttributes()
         
         # set up autobufferedpaintdc
         self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
@@ -31,119 +34,110 @@ class cCheckBox(wx.Control):
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
         self.Bind(wx.EVT_LEFT_DOWN, self.OnLeftDown)
-        self.Bind(wx.EVT_LEFT_DCLICK, self.OnLeftDown)
+        if (wx.Platform == "__WXMSW__"):
+            self.Bind(wx.EVT_LEFT_DCLICK, self.OnLeftDown)
         self.Bind(wx.EVT_LEFT_UP, self.OnLeftUp)
         self.Bind(wx.EVT_LEAVE_WINDOW, self.OnMouseLeave)
         self.Bind(wx.EVT_ENTER_WINDOW, self.OnMouseEnter)
         
         
     def initializeColors(self):
-
         """ Initializes the button's colors according to theme. """
         
-
-        # get parent background color (for corners)
-        self.penBackground = wx.TRANSPARENT_PEN
-        self.brushBackground = wx.Brush(self.GetParent().GetBackgroundColour(), wx.BRUSHSTYLE_SOLID)
-        
-
         if (self._Theme == "light"):
-
-            # text
-            self.colorTextForegroundDefault = wx.BLACK
-            self.colorTextForegroundPressed = wx.WHITE
-            self.colorTextForegroundHover = wx.BLACK
-            self.colorTextForegroundDisabled = wx.Colour(170, 170, 170)
-            # pens
-            self.penDefault = wx.Pen(wx.Colour(150, 150, 150), width=1, style=wx.PENSTYLE_SOLID)
-            self.penPressed = wx.Pen(wx.Colour(8, 40, 107), width=1, style=wx.PENSTYLE_SOLID)
-            self.penHover = wx.Pen(wx.Colour(65, 26, 222), width=1, style=wx.PENSTYLE_SOLID)
-            self.penDisabled = wx.Pen(wx.Colour(220, 220, 220), width=1, style=wx.PENSTYLE_SOLID)
-            # brushes
-            self.brushPressed = wx.Brush(wx.Colour(76, 102, 156), wx.BRUSHSTYLE_SOLID)
-            self.brushHover = wx.Brush(wx.Colour(220, 220, 220), wx.BRUSHSTYLE_SOLID)
-            self.brushDefault = wx.Brush(wx.WHITE, wx.BRUSHSTYLE_SOLID)
-            self.brushDisabled = wx.Brush(wx.Colour(200, 200, 200), wx.BRUSHSTYLE_SOLID)
-            
+            self._themeDict = lightTheme
         elif (self._Theme == "blue"):
-
-            # text
-            self.colorTextForegroundDefault = wx.Colour(190, 190, 190)
-            self.colorTextForegroundPressed = wx.WHITE
-            self.colorTextForegroundHover = wx.Colour(200, 200, 200)
-            self.colorTextForegroundDisabled = wx.Colour(170, 170, 170)
-            # pens
-            self.penDefault = wx.Pen(wx.Colour(39, 62, 177), width=1, style=wx.PENSTYLE_SOLID)
-            self.penPressed = wx.Pen(wx.Colour(65, 26, 222), width=1, style=wx.PENSTYLE_SOLID)
-            self.penHover = wx.Pen(wx.Colour(65, 26, 222), width=1, style=wx.PENSTYLE_SOLID)
-            self.penDisabled = wx.Pen(wx.Colour(220, 220, 220), width=1, style=wx.PENSTYLE_SOLID)
-            # brushes
-            self.brushPressed = wx.Brush(wx.Colour(16, 31, 110), wx.BRUSHSTYLE_SOLID)
-            self.brushHover = wx.Brush(wx.Colour(23, 53, 115), wx.BRUSHSTYLE_SOLID)
-            self.brushDefault = wx.Brush(wx.Colour(19, 53, 122), wx.BRUSHSTYLE_SOLID)
-            self.brushDisabled = wx.Brush(wx.Colour(200, 200, 200), wx.BRUSHSTYLE_SOLID)
-            
+            self._themeDict = blueTheme
         else:
-            raise ValueError("Invalid theme.")
+            # invalid theme
+            self._themeDict = lightTheme
+
+
+    def GetValue(self):
+        """ Return the state of the checkbox. """
+        return self._state
 
         
-    def SetValue(self, value):
-        self.value = value
+    def SetValue(self, state: bool):
+        self._state = state
+        self.Refresh()
+
+
+    def SetLabel(self, label):
+        self._label = label
         self.Refresh()
         
 
     def OnPaint(self, event):
-
-        """ Handles the paint event. """
-        
+        """ Handles the paint event. """        
         dc = wx.AutoBufferedPaintDC(self)
         dc.Clear()
         self.Draw(dc)
+
+
+    def paintFirstTimeToDetermineDimensions(self):
+        """ Paints the control one time to get text dimensions """
+        #dc = wx.AutoBufferedPaintDC(self)
+        
+        #dc.SetFont()
+
+
+    def setUpControlAttributes(self):
+        """ Control appearance attributes used in the drawing loop. """
+        self.checkBoxLeftMargin = dip(5)
+        self.checkBoxTopMargin = dip(5)
+        self.checkBoxSquareSize = dip(15)
         
 
     def Draw(self, dc: wx.AutoBufferedPaintDC):
-
-        """ Draw the actual button. """
+        """ Draw the control. """
         
         rect = self.GetClientRect()
 
         # make backgrund transparent
-        dc.SetPen(self.penBackground)
-        dc.SetBrush(self.brushBackground)
+        dc.SetPen(wx.TRANSPARENT_PEN)
+        #dc.SetBrush(wx.Brush(self.GetParent().GetBackgroundColour(), wx.BRUSHSTYLE_SOLID))
+        dc.SetBrush(wx.Brush(wx.GREEN))
         dc.DrawRectangle(rect)
+
+        #if not self._Enabled:
+
+        dc.SetPen(wx.Pen(self._themeDict["penDefault"], width=1))
+        dc.SetBrush(wx.Brush(self._themeDict["brushDefault"], wx.BRUSHSTYLE_SOLID))
+        dc.DrawRectangle(self.checkBoxLeftMargin, self.checkBoxTopMargin, self.checkBoxSquareSize, self.checkBoxSquareSize)
+
+        dc.DrawText(self._label, self.checkBoxLeftMargin*2+self.checkBoxSquareSize, 0)
+
+        if self._state:
+            dc.SetPen(wx.Pen(self._themeDict["penPressed"], 1))
+            dc.SetBrush(wx.Brush(self._themeDict["brushPressed"]))
+            dc.DrawRectangle(self.checkBoxLeftMargin, self.checkBoxTopMargin, self.checkBoxSquareSize, self.checkBoxSquareSize)
+
+            
+
+
+        """
         
-        # check if the button is enabled, then check if pressed. if
-        # not, check if the mouse cursor is hovering on top of
-        # it. if not, draw with default colors.
+        # check if control is enabled
+        # if not, check if pressed
+        # if not, check if mouse is hovering
+        # if not, draw with default colors
 
         if not self._Enabled:
-            dc.SetPen(self.penDisabled)
-            dc.SetBrush(self.brushDisabled)
-            dc.SetTextForeground(self.colorTextForegroundDisabled)
+            dc.SetPen(wx.Pen(self._themeDict["penDisabled"], 1))
+            dc.SetBrush(wx.Brush(self._themeDict["brushDisabled"], wx.BRUSHSTYLE_SOLID))
+            dc.SetTextForeground(self._themeDict["textForegroundDisabled"])
         else:
-            dc.SetPen(self.penDefault)
-            dc.SetBrush(self.brushDefault)
-            dc.SetTextForeground(self.colorTextForegroundDefault)
-            """
-            if self.pressed:
-                dc.SetPen(self.penPressed)
-                dc.SetBrush(self.brushPressed)
-                dc.SetTextForeground(self.colorTextForegroundPressed)
-            elif self.mouseHover:
-                dc.SetPen(self.penHover)
-                dc.SetBrush(self.brushHover)
-                dc.SetTextForeground(self.colorTextForegroundHover)
-            else:
-                dc.SetPen(self.penDefault)
-                dc.SetBrush(self.brushDefault)
-                dc.SetTextForeground(self.colorTextForegroundDefault)
-            """
+            dc.SetPen(wx.Pen(self._themeDict["penDefault"], 1))
+            dc.SetBrush(wx.Brush(self._themeDict["brushDefault"], wx.BRUSHSTYLE_SOLID))
+            dc.SetTextForeground(self._themeDict["textForegroundDefault"])
             
-        # draw border    
-        dc.DrawRoundedRectangle(rect, 6)
+        # draw border
+        dc.DrawRectangle(rect)
 
         # draw text (to the left)
         leftMargin = dip(10)
+        dc.SetFont(wx.Font(9, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
         textWidth, textHeight = dc.GetTextExtent(self._value)
         textX = leftMargin
         textY = rect.GetY() + (rect.GetHeight() // 2) - (textHeight // 2)
@@ -151,13 +145,15 @@ class cCheckBox(wx.Control):
         
         # draw drop down arrow
         rightMargin = dip(6)
-        width, height = dip(16), dip(4)
+        width, height = dip(10), dip(4)
         rectPosX = rect.GetWidth() - width - rightMargin
         rectPosY = (rect.GetHeight() // 2) - (height // 2)
+        # define icon area
         arrowRectangle = wx.Rect(rectPosX, rectPosY, width, height)
-        #dc.DrawRectangle(arrowRectangle)
-        dc.DrawLine(rectPosX, rectPosY, rectPosX+(width//2), rectPosY+height)
-        dc.DrawLine(rectPosX+(width//2), rectPosY+height, *arrowRectangle.GetTopRight())
+        dc.SetPen(wx.Pen(self._themeDict["textForegroundDefault"], 1, wx.PENSTYLE_SOLID))
+        dc.DrawLine(rectPosX+1, rectPosY, rectPosX+(width//2), rectPosY+height)
+        dc.DrawLine(rectPosX+(width//2), rectPosY+height, arrowRectangle.GetTopRight()[0], arrowRectangle.GetTopRight()[1]-1)
+        """
 
         
     def OnEraseBackground(self, event):
@@ -166,26 +162,18 @@ class cCheckBox(wx.Control):
     
 
     def OnLeftDown(self, event):
-
-        # invert status
-        self.pressed = not self.pressed
-
-        if self.pressed:
-            # open choices panel
-            self.createChoicesPanel()
-        else:
-            # destroy choices panel
-            try:
-                self.destroyChoicesPanel()
-            except:
-                pass
+        """ Handler for when the checkbox is clicked. """
         
+        # invert status
+        self._state = not self._state
+        # redraw
         self.Refresh()
         event.Skip()
 
 
     def OnLeftUp(self, event):
-        if self.pressed:
+        """ ? """
+        if self._state:
             pass
             #self.Refresh()
             #wx.PostEvent(self, wx.PyCommandEvent(wx.EVT_BUTTON.typeId, self.GetId()))
@@ -218,28 +206,6 @@ class cCheckBox(wx.Control):
     def Disable(self):
         self.Enable(False)
 
-
-    def createChoicesPanel(self):
-        
-        """ Creates and displays the drop down menu that displays the choices. """
-
-        # return if choices list is empty
-        if len(self._choices) == 0:
-            return
-
-        rect = self.GetClientRect()
-        
-        self.choicesPanel = ChoicesPanel(parent=self.GetParent(),
-                                         size=(500, 500), pos=(50, 50+rect.GetHeight()),
-                                         choices=self._choices, theme=self._Theme, reference=self)
-        #self.choicesPanel.SetBackgroundColour(wx.GREEN)
-        self.GetParent().Refresh()
-
-    def destroyChoicesPanel(self):
-        """ Destroys the existing reference to the choices panel. """
-        self.choicesPanel.Destroy()
-        self.GetParent().Refresh()
-
         
 
         
@@ -247,22 +213,29 @@ class cCheckBox(wx.Control):
 
 # for testing control directly
 if __name__ == "__main__":
-    import ctypes
-    from themeColors import backgroundBlue, backgroundLight
-    ctypes.windll.shcore.SetProcessDpiAwareness(1)
+
+    #from customButton import CustomButton
+    if (wx.Platform == "__WXMSW__"):
+        import ctypes
+        ctypes.windll.shcore.SetProcessDpiAwareness(1)
     
     class MyFrame(wx.Frame):
         def __init__(self):
-            super().__init__(None, title="Custom Example")
+            super().__init__(None, title="control test")
+            self.SetMinClientSize(dip(400, 400))
+
+            theme = "light"
+            
             panel = wx.Panel(self)
-            panel.SetBackgroundColour(backgroundLight)
+            panel.SetBackgroundColour(lightTheme["background"] if theme=="light" else blueTheme["background"])
+
+            self.control = CustomCheckBox(panel, label="testing", state=False, pos=wx.Point(50, 50), size=wx.Size(200, 40), theme=theme)
 
 
-            values = ["test1", "car1", "car2", "computer", "messageboxtext"]
-            self.choice = cChoice(panel, choices=values, value="computer", pos=wx.Point(50, 50), size=wx.Size(300, 40), theme="light")
 
-            wx.StaticText(panel, label="placeholder", pos=(55, 100))
-            wx.StaticText(panel, label="placeholder", pos=(55, 150))
+            #self.btn = CustomButton(panel, label="Print value", pos=wx.Point(300, 50), size=wx.Size(140, 40), theme="blue")
+            #self.btn.Bind(wx.EVT_BUTTON, lambda e: print(self.choice.GetValue()))
+            
 
             self.Show()
 

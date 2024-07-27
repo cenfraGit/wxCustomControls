@@ -160,13 +160,13 @@ class ChoicesPanel(wx.Panel):
     
 
 
-class customChoice(wx.Control):
+class CustomChoice(wx.Control):
     
     """ Defines a custom choice control that supports themes. """
     
     def __init__(self, parent, id=wx.ID_ANY, value:str="", choices:list=[], pos=wx.DefaultPosition,
                  size=wx.DefaultSize, style=wx.NO_BORDER, validator=wx.DefaultValidator,
-                 name="customChoice", theme:str="light"):
+                 name="CustomChoice", theme:str="light"):
         super().__init__(parent, id, pos, size, style, validator, name)
 
         # control attributes
@@ -248,20 +248,6 @@ class customChoice(wx.Control):
             dc.SetPen(wx.Pen(self._themeDict["penDefault"], 1))
             dc.SetBrush(wx.Brush(self._themeDict["brushDefault"], wx.BRUSHSTYLE_SOLID))
             dc.SetTextForeground(self._themeDict["textForegroundDefault"])
-            """
-            if self.pressed:
-                dc.SetPen(self.penPressed)
-                dc.SetBrush(self.brushPressed)
-                dc.SetTextForeground(self.colorTextForegroundPressed)
-            elif self.mouseHover:
-                dc.SetPen(self.penHover)
-                dc.SetBrush(self.brushHover)
-                dc.SetTextForeground(self.colorTextForegroundHover)
-            else:
-                dc.SetPen(self.penDefault)
-                dc.SetBrush(self.brushDefault)
-                dc.SetTextForeground(self.colorTextForegroundDefault)
-            """
             
         # draw border
         dc.DrawRectangle(rect)
@@ -389,7 +375,8 @@ if __name__ == "__main__":
 
 
             values = ["test1", "car1", "car2", "computer", "messageboxtext"]
-            self.choice = customChoice(panel, choices=values, value="computer", pos=wx.Point(50, 50), size=wx.Size(200, 40), theme="blue")
+            self.choice = CustomChoice(panel, choices=values, value="computer", pos=wx.Point(50, 50), size=wx.Size(200, 40), theme="blue")
+            #self.choice.Disable()
 
             wx.StaticText(panel, label="placeholder", pos=(55, 100))
             wx.StaticText(panel, label="placeholder", pos=(55, 150))

@@ -154,8 +154,10 @@ class CustomButton(wx.Control):
         
 # testing
 if __name__ == "__main__":
-    import ctypes
-    ctypes.windll.shcore.SetProcessDpiAwareness(1)
+
+    if (wx.Platform == "__WXMSW__"):
+        import ctypes
+        ctypes.windll.shcore.SetProcessDpiAwareness(1)
     
     class MyFrame(wx.Frame):
         
