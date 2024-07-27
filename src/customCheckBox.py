@@ -1,10 +1,9 @@
 import wx
 from dip import dip
-from themeColors import lightTheme, blueTheme
+from themes import lightTheme, blueTheme
 
 
-class CustomCheckBox(wx.Control):
-    
+class CustomCheckBox(wx.Control):    
     """ Defines a custom checkbox control that supports themes. """
     
     def __init__(self, parent, id=wx.ID_ANY, label:str="", state=False, pos=wx.DefaultPosition,
@@ -229,7 +228,7 @@ if __name__ == "__main__":
             panel = wx.Panel(self)
             panel.SetBackgroundColour(lightTheme["background"] if theme=="light" else blueTheme["background"])
 
-            self.control = CustomCheckBox(panel, label="testing", state=False, pos=wx.Point(50, 50), size=wx.Size(200, 40), theme=theme)
+            self.control = CustomCheckBox(panel, label="testing", state=False, pos=wx.Point(50, 50), size=wx.Size(*dip(200, 40)), theme=theme)
 
 
 

@@ -8,7 +8,7 @@ class CustomButton(wx.Control):
     
     def __init__(self, parent, id=wx.ID_ANY, label:str="", pos=wx.DefaultPosition,
                  size=wx.DefaultSize, style=wx.NO_BORDER, validator=wx.DefaultValidator,
-                 name="CustomButton", theme:str="light", fontSize=10):
+                 name="CustomButton", theme:str="light", fontSize=8):
         super().__init__(parent, id, pos, size, style, validator, name)
 
         # control attributes
@@ -24,6 +24,7 @@ class CustomButton(wx.Control):
         # initialize control properties from theme
         self.initializeProperties()
 
+        # set up control size
         self.SetInitialSize(size)
         
         # set up autobufferedpaintdc
@@ -120,7 +121,7 @@ class CustomButton(wx.Control):
 
     def DoGetBestClientSize(self) -> wx.Size:
 
-        """ Determines the best size for the contorl. """
+        """ Determines the best size for the control. """
 
         # create font
         font = wx.Font(self._fontSize,
@@ -201,11 +202,11 @@ if __name__ == "__main__":
         def __init__(self):
             super().__init__(None, title="control test")
             panel = wx.Panel(self)
-            panel.SetBackgroundColour(blueTheme["background"])
+            panel.SetBackgroundColour(lightTheme["background"])
 
             # custom control
             #self.button = CustomButton(panel, label="Click Me", pos=wx.Point(50, 50), size=wx.Size(300, 40), theme="blue")
-            self.button = CustomButton(panel, label="Click Me", pos=wx.Point(50, 50), theme="blue")
+            self.button = CustomButton(panel, label="Click Me", pos=wx.Point(50, 50), theme="light")
             # native control
             #wx.Button(panel, label="Click Me", pos=(50, 100), size=(300, 40))
             wx.Button(panel, label="Click Me", pos=(50, 100)) 
