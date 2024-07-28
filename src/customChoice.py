@@ -178,8 +178,8 @@ class CustomChoice(wx.Control):
         self.leftMargin = dip(10)
         self.topBottomMargins = dip(5)
 
-        self.rightArrowMargin = dip(6)
-        self.arrowWidth, self.arrowHeight = dip(10), dip(5)
+        self.rightArrowMargin = dip(7)
+        self.arrowWidth, self.arrowHeight = dip(10), dip(3)
 
         # state attributes
         self.pressed = False
@@ -262,7 +262,7 @@ class CustomChoice(wx.Control):
         dc.DrawRectangle(rect)
 
         # draw text (to the left)
-        dc.SetFont(wx.Font(9, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
+        dc.SetFont(wx.Font(self._fontSize, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
         textWidth, textHeight = dc.GetTextExtent(self._value)
         textX = self.leftMargin
         textY = rect.GetY() + (rect.GetHeight() // 2) - (textHeight // 2)
@@ -273,7 +273,7 @@ class CustomChoice(wx.Control):
         rectPosY = (rect.GetHeight() // 2) - (self.arrowHeight // 2)
         # define icon area
         arrowRectangle = wx.Rect(rectPosX, rectPosY, self.arrowWidth, self.arrowHeight)
-        dc.SetPen(wx.Pen(self._themeDict["textForegroundDefault"], 1, wx.PENSTYLE_SOLID))
+        dc.SetPen(wx.Pen(self._themeDict["textForegroundDefault"], 2, wx.PENSTYLE_SOLID))        
         dc.DrawLine(rectPosX, rectPosY, rectPosX+(self.arrowWidth//2), rectPosY+self.arrowHeight)
         dc.DrawLine(rectPosX+(self.arrowWidth//2), rectPosY+self.arrowHeight, arrowRectangle.GetTopRight()[0], arrowRectangle.GetTopRight()[1])
 
@@ -311,7 +311,7 @@ class CustomChoice(wx.Control):
             maxHeight = textHeight if (textHeight > maxHeight) else maxHeight        
 
         # final control dimensions
-        width = self.leftMargin + maxWidth + dip(50)
+        width = self.leftMargin + maxWidth + (self.rightArrowMargin*3)
         height = self.topBottomMargins*2 + maxHeight
         return wx.Size(width, height)
     
@@ -379,10 +379,17 @@ class CustomChoice(wx.Control):
             return
 
         rect = self.GetClientRect()
-        
+
+        # get choice position to place panel beneath it
+        controlPosition = self.GetPosition()
+
         self.choicesPanel = ChoicesPanel(parent=self.GetParent(),
-                                         size=(500, 500), pos=(50, 50+rect.GetHeight()),
-                                         choices=self._choices, theme=self._Theme, reference=self)
+                                         choices=self._choices,
+                                         theme=self._Theme,
+                                         reference=self,
+                                         pos=(controlPosition[0], controlPosition[1]+rect.GetHeight())
+                                         )
+        
         
         #self.GetParent().Refresh()
 
@@ -417,7 +424,6 @@ if __name__ == "__main__":
 
 
             values = ["test1", "car1", "car2", "computer", "messageboxtext"]
-            #self.choice = CustomChoice(panel, choices=values, value="computer", pos=wx.Point(50, 50), size=wx.Size(200, 40), theme="blue")
             self.choice = CustomChoice(panel, choices=values, value="computer", pos=wx.Point(50, 50), theme="blue")
             #self.choice.Disable()
 
