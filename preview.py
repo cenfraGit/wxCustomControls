@@ -9,7 +9,7 @@ Self-note: change panel to a scrollable panel to display more controls.
 import wx
 from src.dip import dip
 from src.themes import lightTheme, blueTheme
-from src import CustomButton, CustomChoice, CustomCheckBox
+from src import CustomButton, CustomChoice, CustomCheckBox, CustomTextCtrl
 if wx.Platform == "__WXMSW__":
     import ctypes
     ctypes.windll.shcore.SetProcessDpiAwareness(1)
@@ -46,6 +46,10 @@ class PreviewPanel(wx.Panel):
         # checkbox
         controlCheckBox = CustomCheckBox(parent=self, label="Control Test", state=False, theme=theme)
         self.sizer.Add(controlCheckBox, pos=(2, 0), flag=wx.ALIGN_CENTER)
+
+        # textctrl
+        controlTextCtrl = CustomTextCtrl(parent=self, value="test", theme=theme)
+        self.sizer.Add(controlTextCtrl, pos=(3, 0), flag=wx.ALIGN_CENTER)
 
         self.sizer.AddGrowableCol(0, 1)
         self.SetSizer(self.sizer)

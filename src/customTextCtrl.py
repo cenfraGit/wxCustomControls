@@ -1,35 +1,31 @@
 import wx
-if __name__ == "__main__":
-    from dip import dip
-    from themes import lightTheme, blueTheme
-else:
-    from .dip import dip
-    from .themes import lightTheme, blueTheme
+from .dip import dip
+from .themes import lightTheme, blueTheme
 
 
-class CustomCheckBox(wx.Control):    
-    """ Defines a custom checkbox control that supports themes. """
+class CustomTextCtrl(wx.Control):    
+    """ Defines a custom text control that supports themes. """
     
-    def __init__(self, parent, id=wx.ID_ANY, label:str="", state=False, pos=wx.DefaultPosition,
+    def __init__(self, parent, id=wx.ID_ANY, value:str="", pos=wx.DefaultPosition,
                  size=wx.DefaultSize, style=wx.NO_BORDER, validator=wx.DefaultValidator,
-                 name="CustomCheckBox", theme:str="light", fontSize=8):
+                 name="CustomTextCtrl", theme:str="light", fontSize=8):
         super().__init__(parent, id, pos, size, style, validator, name)
 
         # control attributes
-        self._label = label
+        self._value = list(value.strip()) # a list of characters ['a', 'b', 'c']
         self._Theme = theme # light or dark
         self._Enabled = True
         self._fontSize = fontSize
 
         # state attributes
-        self._state = state # the actual state of the checkbutton
         self.mouseHover = False
+        self._hasFocus = False
+        self.cursorBlinkStatus = True
+        self._cursorLocation = len(value)-1 if value.strip() != "" else 0
         
         # control appearance attributes
-        self.checkBoxLeftMargin = dip(5)
-        self.checkBoxTopMargin = dip(5)
-        self.checkBoxSquareSize = dip(15)
-        self.checkBoxSquareSelectedSize = dip(10)
+        self.leftPadding = dip(5)
+        self.verticalPadding = dip(5)
 
         # initialize control colors
         self.initializeColors()
@@ -40,6 +36,14 @@ class CustomCheckBox(wx.Control):
         # set up autobufferedpaintdc
         self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
 
+        # change mouse cursor
+        self.SetCursor(wx.Cursor(wx.CURSOR_IBEAM))
+
+        # set timer for blinking cursor
+        self.timer = wx.Timer(self)
+        self.timerBlinkMS = 600
+        self.Bind(wx.EVT_TIMER, self.OnTimer, self.timer)
+
         # bind control events
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
@@ -49,6 +53,9 @@ class CustomCheckBox(wx.Control):
         self.Bind(wx.EVT_LEFT_UP, self.OnLeftUp)
         self.Bind(wx.EVT_LEAVE_WINDOW, self.OnMouseLeave)
         self.Bind(wx.EVT_ENTER_WINDOW, self.OnMouseEnter)
+
+        self.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
+        self.Bind(wx.EVT_KILL_FOCUS, self.OnKillFocus)
         
         
     def initializeColors(self) -> None:
@@ -63,18 +70,14 @@ class CustomCheckBox(wx.Control):
             self._themeDict = lightTheme
 
 
-    def GetValue(self) -> bool:
-        """ Return the state of the checkbox. """
-        return self._state
+    def GetValue(self) -> str:
+        """ Return the state of the control. """
+        # convert list of characters to string
+        return str(self._value)
 
         
-    def SetValue(self, state: bool) -> None:
-        self._state = state
-        self.Refresh()
-
-
-    def SetLabel(self, label) -> None:
-        self._label = label
+    def SetValue(self, value: str) -> None:
+        self._value = list(value)
         self.Refresh()
         
 
@@ -93,7 +96,6 @@ class CustomCheckBox(wx.Control):
         # make backgrund transparent
         dc.SetPen(wx.TRANSPARENT_PEN)
         dc.SetBrush(wx.Brush(self.GetParent().GetBackgroundColour(), wx.BRUSHSTYLE_SOLID))
-        #dc.SetBrush(wx.Brush(wx.GREEN))
         dc.DrawRectangle(rect)
 
         # set font
@@ -104,7 +106,37 @@ class CustomCheckBox(wx.Control):
                            faceName=self._themeDict["fontFaceName"]))
         dc.SetTextForeground(self._themeDict["textForegroundDefault"])
 
-        #if not self._Enabled:
+        # get max text height and vertical offset
+        _, maxTextHeight = dc.GetTextExtent("A")
+        verticalOffset = (((self.verticalPadding*2) + maxTextHeight) // 2) - (maxTextHeight//2) # ?
+
+        # draw control
+        dc.SetPen(wx.Pen(self._themeDict["penDefault"], 1))
+        dc.SetBrush(wx.Brush(self._themeDict["brushDefault"], wx.BRUSHSTYLE_SOLID))
+        dc.DrawRoundedRectangle(rect, 10)
+
+        # horizontal character offset
+        horizontalOffset = self.leftPadding
+
+        # draw text
+        for index, character in enumerate(self._value):
+
+            textWidth, textHeight = dc.GetTextExtent(character)
+
+            dc.DrawText(character, horizontalOffset, verticalOffset)
+
+            # draw caret
+            if self._hasFocus and (self._cursorLocation == index) and self.cursorBlinkStatus:
+                dc.SetPen(wx.Pen(self._themeDict["penPressed"], 2))
+                dc.DrawLine(horizontalOffset, self.verticalPadding, horizontalOffset, self.verticalPadding+textHeight+self.verticalPadding)
+                
+            
+
+
+            horizontalOffset += textWidth
+
+
+        """
 
         if not self._Enabled:
             # draw checkbox
@@ -177,6 +209,8 @@ class CustomCheckBox(wx.Control):
                     selectionRect = wx.Rect(leftOffset, topOffset, self.checkBoxSquareSelectedSize, self.checkBoxSquareSelectedSize)
                     dc.DrawRectangle(selectionRect)
 
+        """
+
         
     def OnEraseBackground(self, event) -> None:
         """ Bound to prevent flickering. """
@@ -186,6 +220,7 @@ class CustomCheckBox(wx.Control):
     def DoGetBestClientSize(self) -> wx.Size:
         """ Determines the best size for the control. """
 
+        """
         # create font
         font = wx.Font(self._fontSize,
                        wx.FONTFAMILY_DEFAULT,
@@ -204,26 +239,45 @@ class CustomCheckBox(wx.Control):
         width = (self.checkBoxLeftMargin*2) + self.checkBoxSquareSize + textWidth + dip(5)
         height = (self.checkBoxTopMargin*2) + max(self.checkBoxSquareSize, textHeight)
 
-        return wx.Size(width, height)    
+        return wx.Size(width, height)
+        """
+        return wx.Size(200, 40)
     
 
     def OnLeftDown(self, event) -> None:
-        """ Handler for when the checkbox is clicked. """
+        """ Handler for when the control is clicked. """
         
         # invert status
-        self._state = not self._state
+        #self._state = not self._state
         # redraw
+
         self.Refresh()
         event.Skip()
 
 
     def OnLeftUp(self, event) -> None:
         """ ? """
-        if self._state:
-            pass
+        pass
             #self.Refresh()
             #wx.PostEvent(self, wx.PyCommandEvent(wx.EVT_BUTTON.typeId, self.GetId()))
         event.Skip()
+
+
+    def OnSetFocus(self, event):
+        self._hasFocus = True
+        self.timer.Start(self.timerBlinkMS)
+        self.Refresh()
+
+
+    def OnKillFocus(self, event):
+        self._hasFocus = False
+        self.timer.Stop()
+        self.Refresh()
+
+
+    def OnTimer(self, event):
+        self.cursorBlinkStatus = not self.cursorBlinkStatus
+        self.Refresh()
         
 
     def OnMouseLeave(self, event) -> None:
@@ -236,6 +290,14 @@ class CustomCheckBox(wx.Control):
         self.mouseHover = True
         self.Refresh()
         event.Skip()
+
+
+    def AcceptsFocusFromKeyboard(self) -> bool:
+        return True
+
+
+    def AcceptsFocus(self):
+        return True
         
 
     def Enable(self, enable=True) -> None:
