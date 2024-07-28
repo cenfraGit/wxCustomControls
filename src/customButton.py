@@ -1,6 +1,10 @@
 import wx
-from dip import dip
-from themes import lightTheme, blueTheme
+if __name__ == "__main__":
+    from dip import dip
+    from themes import lightTheme, blueTheme
+else:
+    from .dip import dip
+    from .themes import lightTheme, blueTheme
 
 
 class CustomButton(wx.Control):    

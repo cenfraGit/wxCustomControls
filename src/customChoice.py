@@ -1,6 +1,10 @@
 import wx
-from dip import dip
-from themes import lightTheme, blueTheme
+if __name__ == "__main__":
+    from dip import dip
+    from themes import lightTheme, blueTheme
+else:
+    from .dip import dip
+    from .themes import lightTheme, blueTheme
 
 
 class ChoicesPanel(wx.Panel):
@@ -10,8 +14,6 @@ class ChoicesPanel(wx.Panel):
 
     def __init__(self, reference, choices:list=[], theme:str="light", *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        #self.Raise()
 
         # attributse
         self._Choices = choices
@@ -71,7 +73,9 @@ class ChoicesPanel(wx.Panel):
         workingAreaRect = self.GetClientRect()
  
         # rectangle height
-        rectangleHeight = dip(35)
+        rectangleVerticalMargins = dip(7)
+        textWidth, textHeight = dc.GetTextExtent("A") # arbitrary character to get dimensions
+        rectangleHeight = textHeight + (2*rectangleVerticalMargins)
 
         # left text offset
         leftMargin = dip(14)
@@ -85,6 +89,7 @@ class ChoicesPanel(wx.Panel):
 
             # get rectangle area
             rect = wx.Rect(0, verticalOffset, workingAreaRect.GetWidth(), rectangleHeight)
+            #rect = wx.Rect(0, verticalOffset, workingAreaRect.GetWidth(), textHeight+(2*rectangleVerticalMargins))
 
             # save rectangle to dictionary
             self.choiceRectangles[choice] = rect
@@ -139,8 +144,6 @@ class ChoicesPanel(wx.Panel):
         """Changes color of selection when the mouse hovers the
         choice option."""
 
-        print(event.GetPosition())
-
         # reset colors
         self.choiceBackgroundColors = [self._themeDict["brushDefault"] for _ in self._Choices]
         
@@ -154,6 +157,8 @@ class ChoicesPanel(wx.Panel):
                 # change color (applied when drawn)
                 self.choiceBackgroundColors[index] = self._themeDict["brushPressed"]
 
+        # make sure panel is in front
+        self.Raise()
         self.Refresh()
 
     
@@ -331,7 +336,7 @@ class CustomChoice(wx.Control):
             except:
                 pass
         
-        self.Refresh()
+        #self.Refresh()
         event.Skip()
 
 
@@ -371,7 +376,6 @@ class CustomChoice(wx.Control):
 
 
     def createChoicesPanel(self):
-        
         """ Creates and displays the drop down menu that displays the choices. """
 
         # return if choices list is empty
@@ -387,17 +391,13 @@ class CustomChoice(wx.Control):
                                          choices=self._choices,
                                          theme=self._Theme,
                                          reference=self,
-                                         pos=(controlPosition[0], controlPosition[1]+rect.GetHeight())
-                                         )
+                                         pos=(controlPosition[0], controlPosition[1]+rect.GetHeight()))
         
-        
-        #self.GetParent().Refresh()
-
 
     def destroyChoicesPanel(self):
         """ Destroys the existing reference to the choices panel. """
         self.choicesPanel.Destroy()
-        self.GetParent().Refresh()
+        #self.GetParent().Refresh()
 
     
 
@@ -425,7 +425,6 @@ if __name__ == "__main__":
 
             values = ["test1", "car1", "car2", "computer", "messageboxtext"]
             self.choice = CustomChoice(panel, choices=values, value="computer", pos=wx.Point(50, 50), theme="blue")
-            #self.choice.Disable()
 
             wx.StaticText(panel, label="placeholder", pos=(55, 100))
             wx.StaticText(panel, label="placeholder", pos=(55, 150))
