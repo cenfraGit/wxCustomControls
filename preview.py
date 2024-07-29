@@ -20,7 +20,7 @@ class PreviewPanel(wx.Panel):
         super().__init__(*args, **kwargs)
 
         # available themes: "light", "blue"
-        theme = "light"
+        theme = "blue"
 
         # background panel color
         if theme=="light":
@@ -48,7 +48,7 @@ class PreviewPanel(wx.Panel):
         self.sizer.Add(controlCheckBox, pos=(2, 0), flag=wx.ALIGN_CENTER)
 
         # textctrl
-        controlTextCtrl = CustomTextCtrl(parent=self, value="testingvalues", theme=theme, fontSize=12, size=(50, 50))
+        controlTextCtrl = CustomTextCtrl(parent=self, value="testingvalues", theme=theme)
         #controlTextCtrl.Disable()
         self.sizer.Add(controlTextCtrl, pos=(3, 0), flag=wx.ALIGN_CENTER)
 

@@ -69,7 +69,6 @@ class CustomTextCtrl(wx.Control):
         self.Bind(wx.EVT_KILL_FOCUS, self.OnKillFocus)
 
         # keyboard events
-        #self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
         self.Bind(wx.EVT_CHAR, self.OnChar)
         
         
@@ -194,36 +193,15 @@ class CustomTextCtrl(wx.Control):
         # we draw the rectangle with selected pen and brush
         dc.DrawRectangle(controlAreaRect)
 
-        
-        # now we draw the input characters. We first must check if the
-        # entire string fits within the text box (in case the user
-        # specified a smaller control size manually):
-        # we get the entire string dimensions
-        textWidth, textHeight = dc.GetTextExtent(self.GetValue())
-        # we check if the string fits
-        entireTextFits = textWidth < (controlAreaRect.GetWidth() - self.leftPadding*2)
 
-        #print("fits", entireTextFits)
-
-        # we will now choose a slice of characters that will be
-        # drawn. If the text doesnt fit, the slice will be characters
-        # that are close to the caret. If the text fits, the slice will be all characters.
-
-        #dc.DrawText(self.GetValue(), horizontalOffset, 10)
-
-        # first iterate through all characters and get their width, height and rectangle.
-        # then, if caret is moving right and showing more characters, draw backwards?
-        # if caret is moving left and showing, draw frontwards?
-
-        # we will draw all characters, but shift the horizontal offset so that there is a 'movable window'
-
-        # self.stringOffset
+        # create default textHeight value for the caret in case the
+        # next loop does not enter.
+        _, textHeight = dc.GetTextExtent("A")
         
 
-
-        # save character rectangles and dimensions: create list where
-        # data will be stored. this list will keep the data once the
-        # rendering is over, so the rectangle data can be analized
+        # save character rectangles and dimensions: create a list
+        # where data will be stored. this list will keep the data once
+        # the rendering is over, so the rectangle data can be used
         # from the keyboard and mouse events
         self.characterRectangles = []
         for character in self._Value:
@@ -248,8 +226,12 @@ class CustomTextCtrl(wx.Control):
         # draw characters, each with the string offset
         for character, rectangle in self.characterRectangles:
             dc.DrawText(character, rectangle.GetX() + self.stringOffset, rectangle.GetY())
+            
 
         # ------------------- DRAW CARET --------------------
+
+        if not self._cursorBlinkStatus:
+            return
         
         # _caretX: the X coordinate of the beginning of the character
         # (meaning it points to the previous character)
@@ -264,46 +246,19 @@ class CustomTextCtrl(wx.Control):
                 # take the right side X coordinate of the character's
                 # rectangle before itself.
                 self._caretX = self.characterRectangles[self._cursorLocation-1][1].GetTopRight()[0]
-                print("new", self.characterRectangles[self._cursorLocation-1])
             else:
                 self._caretX = self.characterRectangles[self._cursorLocation][1].GetX()
         # else, just draw at poisition 0
         else:
             self._caretX = self.leftPadding
         # draw caret considering string offset
-        dc.SetPen(wx.Pen(self._themeDict["penDefault"], 1))
+        dc.SetPen(wx.Pen(self._themeDict["textForegroundDefault"], 2))
         dc.DrawLine(self._caretX+self.stringOffset,
                     self.verticalPadding,
                     self._caretX+self.stringOffset,
                     self.verticalPadding+textHeight)
 
-
-
-        """
-        
-        for index, character in enumerate(self._Value):
-
-            textWidth, textHeight = dc.GetTextExtent(character)
-
-            textY =  (rect.GetHeight()//2 - (textHeight//2)) # the Y coordinate for the text
-            dc.DrawText(character, horizontalOffset, textY)
-
-            # draw caret
-            if self._hasFocus and (self._cursorLocation == index) and self._cursorBlinkStatus:
-                dc.SetPen(wx.Pen(self._themeDict["penPressed"], 2))
-                dc.DrawLine(horizontalOffset, textY, horizontalOffset, textY + textHeight)
-                
-            
-
-
-            horizontalOffset += textWidth
-
-        """
-
-
-   
-
-        
+    
     def OnEraseBackground(self, event) -> None:
         """ Bound to prevent flickering. """
         pass
@@ -335,12 +290,41 @@ class CustomTextCtrl(wx.Control):
 
 
     def OnLeftDown(self, event) -> None:
-        """ Handler for when the control is clicked. """
-        
-        # invert status
-        #self._state = not self._state
-        # redraw
+        """Handler for when the control is clicked. It positions the
+        caret at where the control was clicked."""
 
+        controlAreaRect = self.GetClientRect()
+
+        # get where the click happened
+        x, y = event.GetPosition()
+        x -= self.stringOffset
+
+        # for each of the character's rectangles, check if the
+        # rectangle contains the coordinates clicked by the user.
+        # divide the characters rectangle into two halves: left and
+        # right. this might help the user position the caret where
+        # they desire.
+        found = False
+        for index, characterRectangleTuple in enumerate(self.characterRectangles):
+            # if the character clicked on the letter
+            if characterRectangleTuple[1].Contains(x, controlAreaRect.GetHeight()//2):
+                found = True
+                middlePoint = characterRectangleTuple[1].GetX() + (characterRectangleTuple[1].GetWidth()//2)
+                # now determine if its the left or right side of the letter
+                if (x < middlePoint):
+                    self._cursorLocation = index
+                elif (x > middlePoint):
+                    self._cursorLocation = index+1
+
+        # if the click position was not found on any rectangle
+        if (found == False):
+            self._cursorLocation = len(self._Value)
+
+        # draw cursor and reset timer
+        self.timer.Stop()
+        self._cursorBlinkStatus = True
+        self.timer.Start(self.timerBlinkMS)
+        
         self.Refresh()
         event.Skip()
 
@@ -392,12 +376,18 @@ class CustomTextCtrl(wx.Control):
 
         # ----------- SPECIAL KEYS -------------
 
+        if (specialKey == wx.WXK_UP) or (specialKey == wx.WXK_DOWN):
+            event.Skip()
+            return
+
         # check if left arrow
-        if (specialKey == wx.WXK_LEFT):
+        elif (specialKey == wx.WXK_LEFT):
             
             # move cursor to the left
             if (self._cursorLocation > 0):
                 self._cursorLocation -= 1
+            else:
+                return
 
             # the caretX will be out of bounds if its less than 0, so
             # no variable is declared
@@ -406,9 +396,6 @@ class CustomTextCtrl(wx.Control):
             # cursor moving more than the left padding)
             if (caretXAbsolute < self.leftPadding):
                 self.stringOffset += self.characterRectangles[self._cursorLocation][1].GetWidth()
-
-            #print(caretXAbsolute)
-            print(self._cursorLocation)
 
                 
             # draw cursor and reset timer
@@ -427,6 +414,8 @@ class CustomTextCtrl(wx.Control):
             # move cursor to the left
             if (self._cursorLocation < len(self._Value)):
                 self._cursorLocation += 1
+            else:
+                return
 
             # check if out of bounds (to the right side)
             clientRightX = self.GetClientRect().GetTopRight()[0]
@@ -436,8 +425,6 @@ class CustomTextCtrl(wx.Control):
                 self.stringOffset -= widthTraveled
 
 
-            print(self._cursorLocation)
-            
             # draw cursor and reset timer
             self.timer.Stop()
             self._cursorBlinkStatus = True
@@ -448,12 +435,40 @@ class CustomTextCtrl(wx.Control):
             self.Refresh()
             return
         
-        # check if delete character
+        # check if backspace character
         elif (specialKey == wx.WXK_BACK):
             # delete character before cursor
             if self._cursorLocation > 0:
                 self._Value.pop(self._cursorLocation-1)
                 self._cursorLocation -= 1
+            else:
+                return
+
+            # the caretX will be out of bounds if its less than 0, so
+            # no variable is declared
+            caretXAbsolute = self._caretX + self.stringOffset - self.leftPadding
+            # if its out of bounds to the left (we do not want the
+            # cursor moving more than the left padding)
+            if (caretXAbsolute < self.leftPadding):
+                self.stringOffset += self.characterRectangles[self._cursorLocation][1].GetWidth()
+                
+            # draw cursor and reset timer
+            self.timer.Stop()
+            self._cursorBlinkStatus = True
+            self.timer.Start(self.timerBlinkMS)
+            # exit
+            event.Skip()
+            self.Refresh()
+            return
+
+        # check if delete character
+        elif (specialKey == wx.WXK_DELETE):
+            # delete character at cursor position
+            # do not move cursor
+            try:
+                self._Value.pop(self._cursorLocation)
+            except:
+                pass
             # draw cursor and reset timer
             self.timer.Stop()
             self._cursorBlinkStatus = True
@@ -467,21 +482,30 @@ class CustomTextCtrl(wx.Control):
 
         # ----------- CHARACTERS -------------
 
-        # draw character
+        # insert character to list
         self._Value.insert(self._cursorLocation, character)
         # move cursor to the right (along inserted character)
         self._cursorLocation += 1
 
-        # check if out of bounds
-        clientWidth = self.GetClientRect().GetWidth()
-        if (self._caretX > clientWidth - (2*self.leftPadding)):
-            self.stringOffset -= self.characterRectangles[self._cursorLocation][1].GetWidth()
+        # we need to create a dc and set the font because the new
+        # added character is not in the self.characterRectangles
+        # list. Therefore, we must get the character width ourselves
+        # in order to handle out of bounds problems
+        dc = wx.ClientDC(self)
+        dc.SetFont(wx.Font(self._fontSize,
+                           wx.FONTFAMILY_DEFAULT,
+                           wx.FONTSTYLE_NORMAL,
+                           wx.FONTWEIGHT_NORMAL,
+                           faceName=self._themeDict["fontFaceName"]))
+        characterWidth, _ = dc.GetTextExtent(character)
 
+        # check if out of bounds (to the right side)
+        clientRightX = self.GetClientRect().GetTopRight()[0]
+        widthTraveled = characterWidth
+        caretXAbsolute = self._caretX + self.stringOffset + widthTraveled
+        if (caretXAbsolute > clientRightX-self.leftPadding):
+            self.stringOffset -= widthTraveled
 
-
-
-        
-        print("cursor location:", self._cursorLocation)
         event.Skip()
         self.Refresh()
 
@@ -508,41 +532,3 @@ class CustomTextCtrl(wx.Control):
     def Disable(self) -> None:
         self.Enable(False)
 
-        
-
-        
-
-
-# for testing control directly
-if __name__ == "__main__":
-
-    #from customButton import CustomButton
-    if (wx.Platform == "__WXMSW__"):
-        import ctypes
-        ctypes.windll.shcore.SetProcessDpiAwareness(1)
-    from customButton import CustomButton
-    
-    class MyFrame(wx.Frame):
-        def __init__(self):
-            super().__init__(None, title="control test")
-            self.SetMinClientSize(dip(400, 400))
-
-            theme = "light"
-            
-            panel = wx.Panel(self)
-            panel.SetBackgroundColour(lightTheme["background"] if theme=="light" else blueTheme["background"])
-
-            self.control = CustomCheckBox(panel, label="testing", state=False, pos=wx.Point(50, 50), theme=theme)
-            #self.control.Disable()
-
-            self.btn = CustomButton(panel, label="Print state", pos=wx.Point(300, 50), size=wx.Size(140, 40), theme=theme)
-            self.btn.Bind(wx.EVT_BUTTON, lambda e: print(self.control.GetValue()))
-            
-
-            self.Show()
-
-            
-
-    app = wx.App(False)
-    frame = MyFrame()
-    app.MainLoop()
