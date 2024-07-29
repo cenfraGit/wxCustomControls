@@ -48,7 +48,7 @@ class PreviewPanel(wx.Panel):
         self.sizer.Add(controlCheckBox, pos=(2, 0), flag=wx.ALIGN_CENTER)
 
         # textctrl
-        controlTextCtrl = CustomTextCtrl(parent=self, value="testintadkfjas;dlkfjas;df", theme=theme, fontSize=12)
+        controlTextCtrl = CustomTextCtrl(parent=self, value="testingvalues", theme=theme, fontSize=12, size=(50, 50))
         #controlTextCtrl.Disable()
         self.sizer.Add(controlTextCtrl, pos=(3, 0), flag=wx.ALIGN_CENTER)
 
