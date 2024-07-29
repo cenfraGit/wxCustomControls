@@ -24,7 +24,7 @@ class CustomTextCtrl(wx.Control):
         # control state
         self._mouseHover = False
         self._hasFocus = False
-        self._cursorBlinkStatus = True
+        self._cursorBlinkStatus = False
         #self._cursorLocation = len(value)-1 if value.strip() != "" else 0
         self._cursorLocation = 0
         #self._cursorX = 0 # x position
@@ -341,12 +341,15 @@ class CustomTextCtrl(wx.Control):
         self._hasFocus = True
         self.timer.Start(self.timerBlinkMS)
         self.Refresh()
+        event.Skip()
 
 
     def OnKillFocus(self, event):
         self._hasFocus = False
         self.timer.Stop()
+        self._cursorBlinkStatus = False
         self.Refresh()
+        event.Skip()
 
 
     def OnTimer(self, event):
@@ -498,13 +501,16 @@ class CustomTextCtrl(wx.Control):
                            wx.FONTWEIGHT_NORMAL,
                            faceName=self._themeDict["fontFaceName"]))
         characterWidth, _ = dc.GetTextExtent(character)
+        previousCharacterWidth, _ = dc.GetTextExtent(self._Value[self._cursorLocation-1-1])
 
         # check if out of bounds (to the right side)
         clientRightX = self.GetClientRect().GetTopRight()[0]
-        widthTraveled = characterWidth
-        caretXAbsolute = self._caretX + self.stringOffset + widthTraveled
-        if (caretXAbsolute > clientRightX-self.leftPadding):
-            self.stringOffset -= widthTraveled
+        # if the new caret position exceeds the text box area (after
+        # adding the new character and the previous character),
+        # increase string offset note: leftPadding is used as a right
+        # padding
+        while (self._caretX + self.stringOffset + characterWidth + previousCharacterWidth) > (clientRightX - self.leftPadding):
+            self.stringOffset -= characterWidth + previousCharacterWidth
 
         event.Skip()
         self.Refresh()
