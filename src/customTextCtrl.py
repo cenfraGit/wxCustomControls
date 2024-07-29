@@ -25,10 +25,9 @@ class CustomTextCtrl(wx.Control):
         self._mouseHover = False
         self._hasFocus = False
         self._cursorBlinkStatus = False
-        #self._cursorLocation = len(value)-1 if value.strip() != "" else 0
         self._cursorLocation = 0
-        #self._cursorX = 0 # x position
         self._Enabled = True
+        self._SelectionFirstAndLast = (0, 3)
 
         # used to shift all text if needed by caret.
         self.stringOffset = 0
@@ -224,7 +223,25 @@ class CustomTextCtrl(wx.Control):
 
         
         # draw characters, each with the string offset
-        for character, rectangle in self.characterRectangles:
+        #for character, rectangle in self.characterRectangles:
+        #    dc.DrawText(character, rectangle.GetX() + self.stringOffset, rectangle.GetY())
+
+        for index, charactersRectangles in enumerate(self.characterRectangles):
+            # unpack values
+            character, rectangle = charactersRectangles
+            # if the character index is inside the selection range, we
+            # draw a rectangle on the background
+            if index in range(*self._SelectionFirstAndLast):
+                # highlight background
+                dc.SetPen(wx.TRANSPARENT_PEN)
+                dc.SetBrush(wx.Brush(self._themeDict["textSelection"]))
+                dc.DrawRectangle(rectangle.GetX() + self.stringOffset, rectangle.GetY(), rectangle.GetWidth(), rectangle.GetHeight())
+                # change foreground color to make more readable
+                dc.SetTextForeground(self._themeDict["textForegroundSelection"])
+            else:
+                dc.SetBrush(wx.Brush(self._themeDict["brushDefault"]))
+                dc.SetTextForeground(self._themeDict["textForegroundDefault"])
+            
             dc.DrawText(character, rectangle.GetX() + self.stringOffset, rectangle.GetY())
             
 
@@ -480,8 +497,6 @@ class CustomTextCtrl(wx.Control):
             event.Skip()
             self.Refresh()
             return
-    
-
 
         # ----------- CHARACTERS -------------
 

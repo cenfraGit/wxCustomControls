@@ -23,6 +23,7 @@ lightTheme = {
     "textForegroundPressed": wx.WHITE,
     "textForegroundHover": wx.BLACK,
     "textForegroundDisabled": wx.Colour(170, 170, 170),
+    "textForegroundSelection": wx.WHITE,
     # pens
     "penDefault": wx.Colour(150, 150, 150),
     "penPressed": wx.Colour(8, 40, 107),
@@ -35,6 +36,7 @@ lightTheme = {
     "brushDisabled": wx.Colour(200, 200, 200),
     # font
     "fontFaceName": "Verdana",
+    "textSelection": wx.Colour(33, 42, 173),
 }
 
 # ------------------- BLUE THEME -------------------------
@@ -47,6 +49,7 @@ blueTheme = {
     "textForegroundPressed": wx.WHITE,
     "textForegroundHover": wx.Colour(200, 200, 200),
     "textForegroundDisabled": wx.Colour(170, 170, 170),
+    "textForegroundSelection": wx.WHITE,
     # pens
     "penDefault": wx.Colour(39, 62, 177),
     "penPressed": wx.Colour(65, 26, 222),
@@ -59,4 +62,5 @@ blueTheme = {
     "brushDisabled": wx.Colour(200, 200, 200),
     # font
     "fontFaceName": "Verdana",
+    "textSelection": wx.Colour(69, 77, 185),
     }
