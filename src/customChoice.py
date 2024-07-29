@@ -358,6 +358,10 @@ class CustomChoice(wx.Control):
         self.mouseHover = True
         self.Refresh()
         event.Skip()
+
+
+    def AcceptsFocusFromKeyboard(self) -> bool:
+        return False
         
 
     def Enable(self, enable=True):
