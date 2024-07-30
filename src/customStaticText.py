@@ -136,7 +136,7 @@ class CustomStaticText(wx.Control):
         dc.DrawRectangle(rect)
 
         # set text foreground
-        dc.SetTextForeground(self._ThemeDict["textForegroundDefault"])
+        dc.SetTextForeground(rgb(self._ThemeDict["textForegroundDefault"]))
 
         # offset accumulators these offsets control the position of
         # the characters. the horizontalOffset controls the horizontal
