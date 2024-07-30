@@ -13,6 +13,7 @@ from src import CustomPanel
 from src import CustomButton
 from src import CustomChoice
 from src import CustomCheckBox
+from src import CustomStaticText
 
 if wx.Platform == "__WXMSW__":
     import ctypes
@@ -43,6 +44,10 @@ class PreviewPanel(CustomPanel):
         # controlTextCtrl = CustomTextCtrl(parent=self, value="testingvalues", theme=theme)
         # #controlTextCtrl.Disable()
         # self.sizer.Add(controlTextCtrl, pos=(3, 0), flag=wx.ALIGN_CENTER)
+
+        # statictext
+        controlStaticText = CustomStaticText(parent=self, label=r"Control *test* hi now #italic# yes of \* *yes* test.", theme=theme)
+        self.sizer.Add(controlStaticText, pos=(4, 0), flag=wx.ALIGN_CENTER)
 
         self.sizer.AddGrowableCol(0, 1)
         self.SetSizer(self.sizer)

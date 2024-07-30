@@ -3,11 +3,13 @@ __all__ = [
     "customChoice",
     "customCheckBox",
     "customTextCtrl",
-    "customPanel"
+    "customPanel",
+    "customStaticText"
 ]
 
 from .customButton import CustomButton
-from.customChoice import CustomChoice
+from .customChoice import CustomChoice
 from .customCheckBox import CustomCheckBox
 from .customTextCtrl import CustomTextCtrl
 from .customPanel import CustomPanel
+from .customStaticText import CustomStaticText
