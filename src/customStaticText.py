@@ -269,7 +269,10 @@ class CustomStaticText(wx.Control):
         # our control's client rectangle.
         if (self._ParentWordWrap):
             newRect = wx.Rect(0, 0, self.GetParent().GetClientSize()[0], self._VerticalOffset+textHeight)
+            # update drawing area
             self.SetClientRect(newRect)
+            # update size
+            self.SetMinSize((self.GetParent().GetClientSize()[0], self._VerticalOffset+textHeight))
 
 
     def DrawCharacter(self, dc:wx.AutoBufferedPaintDC, character:str, x, y):

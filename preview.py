@@ -20,9 +20,11 @@ if wx.Platform == "__WXMSW__":
     import ctypes
     ctypes.windll.shcore.SetProcessDpiAwareness(1)
 
+#theme = "lightTheme"
+theme = "blueTheme"
 
 class PreviewPanel(CustomPanel):
-    def __init__(self, theme="lightTheme", *args, **kwargs):
+    def __init__(self, theme=theme, *args, **kwargs):
         super().__init__(theme, *args, **kwargs)
         
         # create sizer to position controls
@@ -52,10 +54,11 @@ class PreviewPanel(CustomPanel):
         self.sizer.Add(controlStaticText, pos=(4, 0), flag=wx.EXPAND)
 
         # staticboxbox
-        panelStaticText = CustomStaticBox(parent=self, label="test", theme=theme)
+        panelStaticText = CustomStaticBox(parent=self, label="Control Test", theme=theme, size=dip(-1, 50))
         self.sizer.Add(panelStaticText, pos=(5, 0), flag=wx.EXPAND)
+        #self.sizer.AddGrowableRow(5, 1)
         
-
+        
         self.sizer.AddGrowableCol(0, 1)
         self.SetSizer(self.sizer)
 
