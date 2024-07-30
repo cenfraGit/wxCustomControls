@@ -18,21 +18,21 @@ class CustomButton(wx.Control):
         
         self._Label = label
         self._Theme = theme
-        self._ThemeDict = {"a":2}
+        self._ThemeDict = {}
         self._FontSize = fontSize
         self._FaceName = faceName
 
         self._Enabled = True
         self._Pressed = False
         self._MouseHover = False
+        
 
         # -------------- APPEARANCE --------------
         
         self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
-
         self.setTheme(self._Theme)
-        
         self.SetInitialSize(size)
+        
 
         # -------------- EVENTS --------------
         

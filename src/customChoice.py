@@ -1,79 +1,93 @@
 import wx
+from .functions.rgb import rgb
+from .functions.getThemeDict import getThemeDict
 from .functions.dip import dip
 
 
 class ChoicesPanel(wx.Panel):
-
     """ Defines a panel that represents the drop down menu containing
     the choices in the cChoice control. """
 
-    def __init__(self, reference, choices:list=[], theme:str="light", *args, **kwargs):
+    def __init__(self, reference, choices:list=[],
+                 size=wx.DefaultSize, theme:str="lightTheme", *args,
+                 **kwargs):
         super().__init__(*args, **kwargs)
 
-        # attributse
+        # -------------- ATTRIBUTES --------------
+
         self._Choices = choices
         self._Theme = theme
+        self._ThemeDict = {}
         self._Reference = reference
 
         # dictionary where choice rectangles area are saved (for
         # checking user clicks)
         self.choiceRectangles = {}
 
-        # set up buffered paint dc
-        self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
+        # -------------- APPEARANCE --------------
 
-        # init colors
-        self.InitializeColors()
-        self.SetBackgroundColour(self._themeDict["brushDefault"])
+        self._PaddingVerticalRectangle = dip(7)
+        self._PaddingHorizontal = dip(14)
+
+        self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
+        self.setTheme(self._Theme)
+        self.SetInitialSize(size)
+
+        self.SetBackgroundColour(rgb(self._ThemeDict["brushDefault"]))
 
         # used for when drawing in case the mouse is hovering
-        self.choiceBackgroundColors = [self._themeDict["brushDefault"] for _ in self._Choices]
+        self.choiceBackgroundColors = [rgb(self._ThemeDict["brushDefault"]) for _ in self._Choices]
 
-        # bind events
+        # -------------- EVENTS --------------
+
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_LEFT_DOWN, self.OnLeftDown)
         self.Bind(wx.EVT_MOTION, self.OnMouseMotion)
 
         
-    def InitializeColors(self):
+    def setTheme(self, themeString:str) -> None:
+        """Sets the theme. If the theme is not valid, the first
+        available theme will be chosen. Or if we definitely didnt find
+        a theme, the rgb color will automatically display a random
+        color.
+        """
+        
+        # the getThemeDict returns the state of the operation and the
+        # theme dictionary. we do not need the state right now.
+        _, self._ThemeDict = getThemeDict(themeString)
 
-        if (self._Theme == "light"):
-            self._themeDict = lightTheme
-        elif (self._Theme == "blue"):
-            self._themeDict = blueTheme
-        else:
-            # invalid theme
-            self._themeDict = lightTheme
+        # refresh with changes
+        self.Refresh()
             
 
     def OnPaint(self, event):
         """ Handles the paint event. """
+        
         dc = wx.AutoBufferedPaintDC(self)
         dc.Clear()
         self.Draw(dc)
         
 
-    def Draw(self, dc: wx.AutoBufferedPaintDC):
+    def Draw(self, dc:wx.AutoBufferedPaintDC):
 
         # set choices font
-        dc.SetTextForeground(self._themeDict["textForegroundDefault"])
-        dc.SetFont(wx.Font(self._Reference._fontSize,
+        dc.SetTextForeground(rgb(self._ThemeDict["textForegroundDefault"]))
+        dc.SetFont(wx.Font(self._Reference._FontSize,
                            wx.FONTFAMILY_DEFAULT,
                            wx.FONTSTYLE_NORMAL,
-                           wx.FONTWEIGHT_NORMAL, False, self._themeDict["fontFaceName"]))
+                           wx.FONTWEIGHT_NORMAL,
+                           faceName=self._Reference._FaceName))
 
         # reset rectangles?
         self.choiceRectangles = {}
 
+        # get control rect
         workingAreaRect = self.GetClientRect()
  
         # rectangle height
-        rectangleVerticalMargins = dip(7)
-        textWidth, textHeight = dc.GetTextExtent("A") # arbitrary character to get dimensions
-        rectangleHeight = textHeight + (2*rectangleVerticalMargins)
+        textWidth, textHeight = dc.GetTextExtent("A")
+        rectangleHeight = 2 * self._PaddingVerticalRectangle + textHeight
 
-        # left text offset
-        leftMargin = dip(14)
 
         # variable for tracking Y position for drawing (with initial
         # offset)
@@ -96,7 +110,7 @@ class ChoicesPanel(wx.Panel):
             
             # draw choice
             _, textHeight = dc.GetTextExtent(choice)
-            dc.DrawText(choice, leftMargin, verticalOffset + (rectangleHeight//2) - (textHeight//2))
+            dc.DrawText(choice, self._PaddingHorizontal, verticalOffset + (rectangleHeight//2) - (textHeight//2))
 
             # offset
             verticalOffset += rectangleHeight
@@ -105,7 +119,7 @@ class ChoicesPanel(wx.Panel):
                 break
             
         # draw borders
-        dc.SetPen(wx.Pen(self._themeDict["penDefault"], 1, wx.PENSTYLE_SOLID))
+        dc.SetPen(wx.Pen(self._ThemeDict["penDefault"], 1, wx.PENSTYLE_SOLID))
         # left line
         dc.DrawLine(0, 0, 0, verticalOffset)
         # right line
@@ -113,7 +127,7 @@ class ChoicesPanel(wx.Panel):
         # bottom line
         dc.DrawLine(0, verticalOffset-1, self._Reference.GetClientSize()[0]-1, verticalOffset-1)
             
-        # modify drop down menu size
+        # update size in case the reference changed sizes
         self.SetClientSize(self._Reference.GetClientSize()[0], verticalOffset)
             
         
@@ -127,10 +141,12 @@ class ChoicesPanel(wx.Panel):
 
             if rectangle.Contains(x, y):
 
-                # not good
-                self._Reference._value = choice
+                #self._Reference._Value = choice
+                self._Reference.SetValue(choice)
                 self._Reference.Refresh()
-                self._Reference.pressed = False
+                self._Reference._Pressed = False
+                # post choice event
+                wx.PostEvent(self._Reference, wx.PyCommandEvent(wx.EVT_CHOICE.typeId, self._Reference.GetId()))
                 # close drop down menu
                 self.Destroy()
 
@@ -140,7 +156,7 @@ class ChoicesPanel(wx.Panel):
         choice option."""
 
         # reset colors
-        self.choiceBackgroundColors = [self._themeDict["brushDefault"] for _ in self._Choices]
+        self.choiceBackgroundColors = [rgb(self._ThemeDict["brushDefault"]) for _ in self._Choices]
         
         x, y = event.GetPosition()
 
@@ -150,51 +166,79 @@ class ChoicesPanel(wx.Panel):
             if pair[1].Contains(x, y):
 
                 # change color (applied when drawn)
-                self.choiceBackgroundColors[index] = self._themeDict["brushPressed"]
+                self.choiceBackgroundColors[index] = rgb(self._ThemeDict["brushPressed"])
 
         # make sure panel is in front
         self.Raise()
         self.Refresh()
 
-    
-            
+
+    def DoGetBestClientSize(self) -> wx.Size:
+        """ Determines the best size for the control. """
+
+        # create dc and font to measure text extents
+        dc = wx.ClientDC(self)
+        dc.SetFont(wx.Font(self._Reference._FontSize,
+                           wx.FONTFAMILY_DEFAULT,
+                           wx.FONTSTYLE_NORMAL,
+                           wx.FONTWEIGHT_NORMAL,
+                           faceName=self._Reference._FaceName))
+
+        # the width will be the same as the choices control
+        width = self._Reference.GetClientRect().GetWidth()
+
+        # for the height, we must get one rectangle's height and then
+        # multiply it by the amount of choices there are, assuming
+        # that the textHeight will be the same for all strings
+
+        # first we get the height from an arbitrary character
+        _, textHeight = dc.GetTextExtent("A")
+        # then we calculate the height for a single rectangle
+        rectangleHeight = 2 * self._PaddingVerticalRectangle + textHeight
+        # then we calculate the total height
+        height = rectangleHeight * len(self._Choices)
+        # return best size
+        return wx.Size(width, height)
+
 
 class CustomChoice(wx.Control):    
     """ Defines a custom choice control that supports themes. """
     
-    def __init__(self, parent, id=wx.ID_ANY, value:str="", choices:list=[], pos=wx.DefaultPosition,
-                 size=wx.DefaultSize, style=wx.NO_BORDER, validator=wx.DefaultValidator,
-                 name="CustomChoice", theme:str="light", fontSize=8):
+    def __init__(self, parent, id=wx.ID_ANY, value:str="",
+                 choices:list=[], pos=wx.DefaultPosition,
+                 size=wx.DefaultSize, style=wx.NO_BORDER,
+                 validator=wx.DefaultValidator, name="CustomChoice",
+                 theme:str="light", fontSize=8, faceName="Verdana"):
         super().__init__(parent, id, pos, size, style, validator, name)
 
-        # control attributes
-        self._value = value
-        self._choices = choices
-        self._Theme = theme # light or dark
+        # -------------- ATTRIBUTES --------------
+
+        self._Value = value
+        self._Choices = choices
+        self._Theme = theme
+        self._ThemeDict = {}
+        self._FontSize = fontSize
+        self._FaceName = faceName
+
         self._Enabled = True
-        self._fontSize = fontSize
+        self._Pressed = False
+        self._MouseHover = False
+        
 
-        # appearance
-        self.leftMargin = dip(10)
-        self.topBottomMargins = dip(5)
+        # -------------- APPEARANCE --------------
 
-        self.rightArrowMargin = dip(7)
+        self._PaddingHorizontal = dip(10)
+        self._PaddingVertical = dip(5)
+        self._PaddingHorizontalArrow = dip(7)   
         self.arrowWidth, self.arrowHeight = dip(10), dip(3)
 
-        # state attributes
-        self.pressed = False
-        self.mouseHover = False
-
-        # initialize control colors
-        self.initializeColors()
-
-        # set up control size
+        self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
+        self.setTheme(self._Theme)
         self.SetInitialSize(size)
         
-        # set up autobufferedpaintdc
-        self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
-
-        # bind control events
+        
+        # -------------- EVENTS --------------
+        
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
         self.Bind(wx.EVT_LEFT_DOWN, self.OnLeftDown)
@@ -204,27 +248,29 @@ class CustomChoice(wx.Control):
         self.Bind(wx.EVT_LEAVE_WINDOW, self.OnMouseLeave)
         self.Bind(wx.EVT_ENTER_WINDOW, self.OnMouseEnter)
         
-        
-    def initializeColors(self):
-        """ Initializes the button's colors according to theme. """
-        
-        if (self._Theme == "light"):
-            self._themeDict = lightTheme
-        elif (self._Theme == "blue"):
-            self._themeDict = blueTheme
-        else:
-            # invalid theme
-            self._themeDict = lightTheme
 
-
-    def GetValue(self):
-        return self._value
-
+    def setTheme(self, themeString:str) -> None:
+        """Sets the theme. If the theme is not valid, the first
+        available theme will be chosen. Or if we definitely didnt find
+        a theme, the rgb color will automatically display a random
+        color.
+        """
         
-    def SetValue(self, value):
-        self._value = value
+        # the getThemeDict returns the state of the operation and the
+        # theme dictionary. we do not need the state right now.
+        _, self._ThemeDict = getThemeDict(themeString)
+
+        # refresh with changes
         self.Refresh()
-        
+
+
+    def SetValue(self, value:str):
+        """ Sets the value of the control. """
+        self._Value = value
+        self.Refresh()
+ 
+    def GetValue(self):
+        return self._Value       
 
     def OnPaint(self, event):
         """ Handles the paint event. """
@@ -234,12 +280,12 @@ class CustomChoice(wx.Control):
         self.Draw(dc)
         
 
-    def Draw(self, dc: wx.AutoBufferedPaintDC):
-        """ Draw the actual button. """
+    def Draw(self, dc:wx.AutoBufferedPaintDC):
+        """ Draw the control. """
         
         rect = self.GetClientRect()
 
-        # make backgrund transparent
+        # draw background with parent color
         dc.SetPen(wx.TRANSPARENT_PEN)
         dc.SetBrush(wx.Brush(self.GetParent().GetBackgroundColour(), wx.BRUSHSTYLE_SOLID))
         dc.DrawRectangle(rect)
@@ -250,30 +296,31 @@ class CustomChoice(wx.Control):
         # if not, draw with default colors
 
         if not self._Enabled:
-            dc.SetPen(wx.Pen(self._themeDict["penDisabled"], 1))
-            dc.SetBrush(wx.Brush(self._themeDict["brushDisabled"], wx.BRUSHSTYLE_SOLID))
-            dc.SetTextForeground(self._themeDict["textForegroundDisabled"])
+            dc.SetPen(wx.Pen(rgb(self._ThemeDict["penDisabled"]), 1))
+            dc.SetBrush(wx.Brush(rgb(self._ThemeDict["brushDisabled"]), wx.BRUSHSTYLE_SOLID))
+            dc.SetTextForeground(rgb(self._ThemeDict["textForegroundDisabled"]))
         else:
-            dc.SetPen(wx.Pen(self._themeDict["penDefault"], 1))
-            dc.SetBrush(wx.Brush(self._themeDict["brushDefault"], wx.BRUSHSTYLE_SOLID))
-            dc.SetTextForeground(self._themeDict["textForegroundDefault"])
+            dc.SetPen(wx.Pen(rgb(self._ThemeDict["penDefault"]), 1))
+            dc.SetBrush(wx.Brush(rgb(self._ThemeDict["brushDefault"]), wx.BRUSHSTYLE_SOLID))
+            dc.SetTextForeground(rgb(self._ThemeDict["textForegroundDefault"]))
             
         # draw border
         dc.DrawRectangle(rect)
 
         # draw text (to the left)
-        dc.SetFont(wx.Font(self._fontSize, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
-        textWidth, textHeight = dc.GetTextExtent(self._value)
-        textX = self.leftMargin
+        dc.SetFont(wx.Font(self._FontSize, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, faceName=self._FaceName))
+        textWidth, textHeight = dc.GetTextExtent(self._Value)
+        textX = self._PaddingHorizontal
         textY = rect.GetY() + (rect.GetHeight() // 2) - (textHeight // 2)
-        dc.DrawText(self._value, textX, textY)
+        dc.SetTextForeground(wx.BLACK)
+        dc.DrawText(self._Value, textX, textY)
         
         # draw drop down arrow
-        rectPosX = rect.GetWidth() - self.arrowWidth - self.rightArrowMargin
+        rectPosX = rect.GetWidth() - self.arrowWidth - self._PaddingHorizontalArrow
         rectPosY = (rect.GetHeight() // 2) - (self.arrowHeight // 2)
         # define icon area
         arrowRectangle = wx.Rect(rectPosX, rectPosY, self.arrowWidth, self.arrowHeight)
-        dc.SetPen(wx.Pen(self._themeDict["textForegroundDefault"], 2, wx.PENSTYLE_SOLID))        
+        dc.SetPen(wx.Pen(self._ThemeDict["textForegroundDefault"], 2, wx.PENSTYLE_SOLID))        
         dc.DrawLine(rectPosX, rectPosY, rectPosX+(self.arrowWidth//2), rectPosY+self.arrowHeight)
         dc.DrawLine(rectPosX+(self.arrowWidth//2), rectPosY+self.arrowHeight, arrowRectangle.GetTopRight()[0], arrowRectangle.GetTopRight()[1])
 
@@ -287,11 +334,11 @@ class CustomChoice(wx.Control):
         """ Determines the best size for the control. """
 
         # create font
-        font = wx.Font(self._fontSize,
+        font = wx.Font(self._FontSize,
                        wx.FONTFAMILY_DEFAULT,
                        wx.FONTSTYLE_NORMAL,
                        wx.FONTWEIGHT_NORMAL,
-                       faceName=self._themeDict["fontFaceName"])
+                       faceName=self._FaceName)
 
         # create device context and set font to determine text dimensions
         dc = wx.ClientDC(self)
@@ -303,7 +350,7 @@ class CustomChoice(wx.Control):
         maxWidth = 0
         maxHeight = 0
 
-        for choice in self._choices:
+        for choice in self._Choices:
             # get dimensions
             textWidth, textHeight = dc.GetTextExtent(choice)
             # replace values
@@ -311,17 +358,17 @@ class CustomChoice(wx.Control):
             maxHeight = textHeight if (textHeight > maxHeight) else maxHeight        
 
         # final control dimensions
-        width = self.leftMargin + maxWidth + (self.rightArrowMargin*3)
-        height = self.topBottomMargins*2 + maxHeight
+        width = self._PaddingHorizontal + maxWidth + (self._PaddingHorizontalArrow*3)
+        height = self._PaddingVertical*2 + maxHeight
         return wx.Size(width, height)
     
 
     def OnLeftDown(self, event):
 
         # invert status
-        self.pressed = not self.pressed
+        self._Pressed = not self._Pressed
 
-        if self.pressed:
+        if self._Pressed:
             # open choices panel
             self.createChoicesPanel()
         else:
@@ -336,30 +383,26 @@ class CustomChoice(wx.Control):
 
 
     def OnLeftUp(self, event):
-        if self.pressed:
-            pass
-            #self.Refresh()
-            #wx.PostEvent(self, wx.PyCommandEvent(wx.EVT_BUTTON.typeId, self.GetId()))
+        event.Skip()
+
+
+    def OnMouseEnter(self, event):
+        self._MouseHover = True
+        self.Refresh()
         event.Skip()
         
 
     def OnMouseLeave(self, event):
-        self.mouseHover = False
+        self._MouseHover = False
         self.Refresh()
         event.Skip()
         
-
-    def OnMouseEnter(self, event):
-        self.mouseHover = True
-        self.Refresh()
-        event.Skip()
-
 
     def AcceptsFocusFromKeyboard(self) -> bool:
         return False
         
 
-    def Enable(self, enable=True):
+    def Enable(self, enable:bool=True):
         """
         Uses _Enable to define if the widget is enabled or not,
         instead of default behavior (problems redrawing after modal
@@ -378,7 +421,7 @@ class CustomChoice(wx.Control):
         """ Creates and displays the drop down menu that displays the choices. """
 
         # return if choices list is empty
-        if len(self._choices) == 0:
+        if len(self._Choices) == 0:
             return
 
         rect = self.GetClientRect()
@@ -387,7 +430,7 @@ class CustomChoice(wx.Control):
         controlPosition = self.GetPosition()
 
         self.choicesPanel = ChoicesPanel(parent=self.GetParent(),
-                                         choices=self._choices,
+                                         choices=self._Choices,
                                          theme=self._Theme,
                                          reference=self,
                                          pos=(controlPosition[0], controlPosition[1]+rect.GetHeight()))
@@ -396,48 +439,4 @@ class CustomChoice(wx.Control):
     def destroyChoicesPanel(self):
         """ Destroys the existing reference to the choices panel. """
         self.choicesPanel.Destroy()
-        #self.GetParent().Refresh()
-
-    
-
         
-
-        
-
-
-# for testing control directly
-if __name__ == "__main__":
-
-    from customButton import CustomButton
-    if (wx.Platform == "__WXMSW__"):
-        import ctypes
-        ctypes.windll.shcore.SetProcessDpiAwareness(1)
-    
-    class MyFrame(wx.Frame):
-        def __init__(self):
-            super().__init__(None, title="control test")
-            self.SetMinClientSize(dip(400, 400))
-            
-            panel = wx.Panel(self)
-            panel.SetBackgroundColour(blueTheme["background"])
-
-
-            values = ["test1", "car1", "car2", "computer", "messageboxtext"]
-            self.choice = CustomChoice(panel, choices=values, value="computer", pos=wx.Point(50, 50), theme="blue")
-
-            wx.StaticText(panel, label="placeholder", pos=(55, 100))
-            wx.StaticText(panel, label="placeholder", pos=(55, 150))
-
-
-            self.btn = CustomButton(panel, label="Print value", pos=wx.Point(300, 50), theme="blue")
-
-            self.btn.Bind(wx.EVT_BUTTON, lambda e: print(self.choice.GetValue()))
-            
-
-            self.Show()
-
-            
-
-    app = wx.App(False)
-    frame = MyFrame()
-    app.MainLoop()

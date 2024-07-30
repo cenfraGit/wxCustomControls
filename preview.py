@@ -14,6 +14,7 @@ import wx
 from src.functions.dip import dip
 from src import CustomPanel
 from src import CustomButton
+from src import CustomChoice
 
 if wx.Platform == "__WXMSW__":
     import ctypes
@@ -31,10 +32,10 @@ class PreviewPanel(CustomPanel):
         controlButton = CustomButton(parent=self, label="Control Test", theme=theme)
         self.sizer.Add(controlButton, pos=(0, 0), flag=wx.EXPAND)
 
-        # # choice
-        # choices = [f"value{counter}" for counter in range(10)]
-        # controlChoices = CustomChoice(parent=self, choices=choices, theme=theme)
-        # self.sizer.Add(controlChoices, pos=(1, 0), flag=wx.EXPAND)
+        # choice
+        choices = [f"value{counter}" for counter in range(10)]
+        controlChoice = CustomChoice(parent=self, choices=choices, theme=theme)
+        self.sizer.Add(controlChoice, pos=(1, 0), flag=wx.EXPAND)
 
         # # checkbox
         # controlCheckBox = CustomCheckBox(parent=self, label="Control Test", state=False, theme=theme)
@@ -47,6 +48,12 @@ class PreviewPanel(CustomPanel):
 
         self.sizer.AddGrowableCol(0, 1)
         self.SetSizer(self.sizer)
+
+        # -------------- TEST EVENTS --------------
+        
+        self.Bind(wx.EVT_BUTTON, lambda e: print("button event"), controlButton)
+        self.Bind(wx.EVT_CHOICE, lambda e: print("choice event"), controlChoice)
+        
 
         # refresh when the panel (and frame) changes size
         self.Bind(wx.EVT_SIZE, self.OnSize)
