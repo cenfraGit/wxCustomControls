@@ -31,3 +31,4 @@ class CustomPanel(wx.Panel):
         _, self._ThemeDict = getThemeDict(themeString)
 
         self.Refresh()
+

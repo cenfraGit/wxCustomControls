@@ -7,14 +7,12 @@ Self-note: change panel to a scrollable panel to display more controls.
 """
 
 import wx
-#from src.dip import dip
-#from src.themes import lightTheme, blueTheme
-#from src import CustomButton, CustomChoice, CustomCheckBox, CustomTextCtrl
 
 from src.functions.dip import dip
 from src import CustomPanel
 from src import CustomButton
 from src import CustomChoice
+from src import CustomCheckBox
 
 if wx.Platform == "__WXMSW__":
     import ctypes
@@ -22,7 +20,7 @@ if wx.Platform == "__WXMSW__":
 
 
 class PreviewPanel(CustomPanel):
-    def __init__(self, theme="lightTheme", *args, **kwargs):
+    def __init__(self, theme="blueTheme", *args, **kwargs):
         super().__init__(theme, *args, **kwargs)
         
         # create sizer to position controls
@@ -37,9 +35,9 @@ class PreviewPanel(CustomPanel):
         controlChoice = CustomChoice(parent=self, choices=choices, theme=theme)
         self.sizer.Add(controlChoice, pos=(1, 0), flag=wx.EXPAND)
 
-        # # checkbox
-        # controlCheckBox = CustomCheckBox(parent=self, label="Control Test", state=False, theme=theme)
-        # self.sizer.Add(controlCheckBox, pos=(2, 0), flag=wx.ALIGN_CENTER)
+        # checkbox
+        controlCheckBox = CustomCheckBox(parent=self, label="Control Test", value=False, theme=theme)
+        self.sizer.Add(controlCheckBox, pos=(2, 0), flag=wx.ALIGN_CENTER)
 
         # # textctrl
         # controlTextCtrl = CustomTextCtrl(parent=self, value="testingvalues", theme=theme)
@@ -53,6 +51,7 @@ class PreviewPanel(CustomPanel):
         
         self.Bind(wx.EVT_BUTTON, lambda e: print("button event"), controlButton)
         self.Bind(wx.EVT_CHOICE, lambda e: print("choice event"), controlChoice)
+        self.Bind(wx.EVT_CHECKBOX, lambda e: print("checkbox event"), controlCheckBox)
         
 
         # refresh when the panel (and frame) changes size

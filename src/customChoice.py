@@ -208,7 +208,7 @@ class CustomChoice(wx.Control):
                  choices:list=[], pos=wx.DefaultPosition,
                  size=wx.DefaultSize, style=wx.NO_BORDER,
                  validator=wx.DefaultValidator, name="CustomChoice",
-                 theme:str="light", fontSize=8, faceName="Verdana"):
+                 theme:str="lightTheme", fontSize=8, faceName="Verdana"):
         super().__init__(parent, id, pos, size, style, validator, name)
 
         # -------------- ATTRIBUTES --------------
@@ -280,7 +280,7 @@ class CustomChoice(wx.Control):
         self.Draw(dc)
         
 
-    def Draw(self, dc:wx.AutoBufferedPaintDC):
+    def Draw(self, dc:wx.AutoBufferedPaintDC) -> None:
         """ Draw the control. """
         
         rect = self.GetClientRect()
