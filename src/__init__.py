@@ -4,7 +4,8 @@ __all__ = [
     "customCheckBox",
     "customTextCtrl",
     "customPanel",
-    "customStaticText"
+    "customStaticText",
+    "customStaticBox",
 ]
 
 from .customButton import CustomButton
@@ -13,3 +14,4 @@ from .customCheckBox import CustomCheckBox
 from .customTextCtrl import CustomTextCtrl
 from .customPanel import CustomPanel
 from .customStaticText import CustomStaticText
+from .customStaticBox import CustomStaticBox

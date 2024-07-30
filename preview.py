@@ -14,6 +14,7 @@ from src import CustomButton
 from src import CustomChoice
 from src import CustomCheckBox
 from src import CustomStaticText
+from src import CustomStaticBox
 
 if wx.Platform == "__WXMSW__":
     import ctypes
@@ -21,7 +22,7 @@ if wx.Platform == "__WXMSW__":
 
 
 class PreviewPanel(CustomPanel):
-    def __init__(self, theme="blueTheme", *args, **kwargs):
+    def __init__(self, theme="lightTheme", *args, **kwargs):
         super().__init__(theme, *args, **kwargs)
         
         # create sizer to position controls
@@ -46,8 +47,14 @@ class PreviewPanel(CustomPanel):
         # self.sizer.Add(controlTextCtrl, pos=(3, 0), flag=wx.ALIGN_CENTER)
 
         # statictext
-        controlStaticText = CustomStaticText(parent=self, label=r"Control *test* hi now #italic# yes of \* *yes* test.", theme=theme)
-        self.sizer.Add(controlStaticText, pos=(4, 0), flag=wx.ALIGN_CENTER)
+        text = r"""Freedom or jail, clips inserted, a baby's being born same time a man is #murdered#, the *beginning* and end, as far as rap go, it's only *#natural*#, I explain my plateau and also, what *defines* my name"""
+        controlStaticText = CustomStaticText(parent=self, label=text, theme=theme, parentWordWrap=True)
+        self.sizer.Add(controlStaticText, pos=(4, 0), flag=wx.EXPAND)
+
+        # staticboxbox
+        panelStaticText = CustomStaticBox(parent=self, label="test", theme=theme)
+        self.sizer.Add(panelStaticText, pos=(5, 0), flag=wx.EXPAND)
+        
 
         self.sizer.AddGrowableCol(0, 1)
         self.SetSizer(self.sizer)
