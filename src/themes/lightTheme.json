@@ -1,0 +1,21 @@
+{
+    "panelBackground": [240, 240, 240],
+    
+    "textForegroundDefault": [0, 0, 0],
+    "textForegroundPressed": [255, 255, 255],
+    "textForegroundHover": [0, 0, 0],
+    "textForegroundDisabled": [170, 170, 170],
+
+    "textForegroundHighlight": [0, 0, 0],
+    "textBackgroundHighlight": [0, 0, 0],
+
+    "penDefault": [150, 150, 150],
+    "penPressed": [8, 40, 107],
+    "penHover": [65, 26, 222],
+    "penDisabled": [220, 220, 220],
+
+    "brushDefault": [255, 255, 255],
+    "brushPressed": [76, 102, 156],
+    "brushHover": [220, 220, 220],
+    "brushDisabled": [200, 200, 200]
+}

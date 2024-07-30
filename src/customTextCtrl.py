@@ -1,6 +1,6 @@
 import wx
-from .dip import dip
-from .themes import lightTheme, blueTheme
+from .functions.dip import dip
+
 
 
 class CustomTextCtrl(wx.Control):    

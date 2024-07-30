@@ -7,50 +7,43 @@ Self-note: change panel to a scrollable panel to display more controls.
 """
 
 import wx
-from src.dip import dip
-from src.themes import lightTheme, blueTheme
-from src import CustomButton, CustomChoice, CustomCheckBox, CustomTextCtrl
+#from src.dip import dip
+#from src.themes import lightTheme, blueTheme
+#from src import CustomButton, CustomChoice, CustomCheckBox, CustomTextCtrl
+
+from src.functions.dip import dip
+from src import CustomPanel
+from src import CustomButton
+
 if wx.Platform == "__WXMSW__":
     import ctypes
     ctypes.windll.shcore.SetProcessDpiAwareness(1)
 
 
-class PreviewPanel(wx.Panel):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        # available themes: "light", "blue"
-        theme = "blue"
-
-        # background panel color
-        if theme=="light":
-            backgroundColor = lightTheme["background"]
-        elif theme == "blue":
-            backgroundColor = blueTheme["background"]
-        else:
-            backgroundColor = lightTheme["background"]
-        self.SetBackgroundColour(backgroundColor)
+class PreviewPanel(CustomPanel):
+    def __init__(self, theme="lightTheme", *args, **kwargs):
+        super().__init__(theme, *args, **kwargs)
         
         # create sizer to position controls
         self.sizer = wx.GridBagSizer(vgap=dip(10), hgap=dip(10))
 
-        # button
+        # # button
         controlButton = CustomButton(parent=self, label="Control Test", theme=theme)
         self.sizer.Add(controlButton, pos=(0, 0), flag=wx.EXPAND)
 
-        # choice
-        choices = [f"value{counter}" for counter in range(10)]
-        controlChoices = CustomChoice(parent=self, choices=choices, theme=theme)
-        self.sizer.Add(controlChoices, pos=(1, 0), flag=wx.EXPAND)
+        # # choice
+        # choices = [f"value{counter}" for counter in range(10)]
+        # controlChoices = CustomChoice(parent=self, choices=choices, theme=theme)
+        # self.sizer.Add(controlChoices, pos=(1, 0), flag=wx.EXPAND)
 
-        # checkbox
-        controlCheckBox = CustomCheckBox(parent=self, label="Control Test", state=False, theme=theme)
-        self.sizer.Add(controlCheckBox, pos=(2, 0), flag=wx.ALIGN_CENTER)
+        # # checkbox
+        # controlCheckBox = CustomCheckBox(parent=self, label="Control Test", state=False, theme=theme)
+        # self.sizer.Add(controlCheckBox, pos=(2, 0), flag=wx.ALIGN_CENTER)
 
-        # textctrl
-        controlTextCtrl = CustomTextCtrl(parent=self, value="testingvalues", theme=theme)
-        #controlTextCtrl.Disable()
-        self.sizer.Add(controlTextCtrl, pos=(3, 0), flag=wx.ALIGN_CENTER)
+        # # textctrl
+        # controlTextCtrl = CustomTextCtrl(parent=self, value="testingvalues", theme=theme)
+        # #controlTextCtrl.Disable()
+        # self.sizer.Add(controlTextCtrl, pos=(3, 0), flag=wx.ALIGN_CENTER)
 
         self.sizer.AddGrowableCol(0, 1)
         self.SetSizer(self.sizer)

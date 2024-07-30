@@ -1,10 +1,5 @@
 import wx
-if __name__ == "__main__":
-    from dip import dip
-    from themes import lightTheme, blueTheme
-else:
-    from .dip import dip
-    from .themes import lightTheme, blueTheme
+from .functions.dip import dip
 
 
 class ChoicesPanel(wx.Panel):

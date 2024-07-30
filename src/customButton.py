@@ -1,40 +1,41 @@
 import wx
-if __name__ == "__main__":
-    from dip import dip
-    from themes import lightTheme, blueTheme
-else:
-    from .dip import dip
-    from .themes import lightTheme, blueTheme
+from .functions.rgb import rgb
+from .functions.getThemeDict import getThemeDict
+from .functions.dip import dip
 
 
 class CustomButton(wx.Control):    
     """ Defines a custom button that supports themes. """
     
-    def __init__(self, parent, id=wx.ID_ANY, label:str="", pos=wx.DefaultPosition,
-                 size=wx.DefaultSize, style=wx.NO_BORDER, validator=wx.DefaultValidator,
-                 name="CustomButton", theme:str="light", fontSize=8):
+    def __init__(self, parent, id=wx.ID_ANY, label:str="",
+                 pos=wx.DefaultPosition, size=wx.DefaultSize,
+                 style=wx.NO_BORDER, validator=wx.DefaultValidator,
+                 name="CustomButton", theme:str="lightTheme",
+                 fontSize=8, faceName="Verdana"):
         super().__init__(parent, id, pos, size, style, validator, name)
 
-        # control attributes
-        self.label = label
-        self._Theme = theme
-        self._Enabled = True
-        self._fontSize = fontSize
-
-        # state attributes
-        self.pressed = False
-        self.mouseHover = False
-
-        # initialize control properties from theme
-        self.initializeProperties()
-
-        # set up control size
-        self.SetInitialSize(size)
+        # -------------- ATTRIBUTES --------------
         
-        # set up autobufferedpaintdc
+        self._Label = label
+        self._Theme = theme
+        self._ThemeDict = {"a":2}
+        self._FontSize = fontSize
+        self._FaceName = faceName
+
+        self._Enabled = True
+        self._Pressed = False
+        self._MouseHover = False
+
+        # -------------- APPEARANCE --------------
+        
         self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
 
-        # bind control events
+        self.setTheme(self._Theme)
+        
+        self.SetInitialSize(size)
+
+        # -------------- EVENTS --------------
+        
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
         self.Bind(wx.EVT_LEFT_DOWN, self.OnLeftDown)
@@ -44,25 +45,29 @@ class CustomButton(wx.Control):
         self.Bind(wx.EVT_LEAVE_WINDOW, self.OnMouseLeave)
         self.Bind(wx.EVT_ENTER_WINDOW, self.OnMouseEnter)
         
-        
-    def initializeProperties(self):
-        """ Chooses a properties dictionary according to theme. """
 
-        if (self._Theme == "light"):
-            self._themeDict = lightTheme
-        elif (self._Theme == "blue"):
-            self._themeDict = blueTheme
-        else:
-            # invalid theme
-            self._themeDict = lightTheme
+    def setTheme(self, themeString:str) -> None:
+        """Sets the theme. If the theme is not valid, the first
+        available theme will be chosen. Or if we definitely didnt find
+        a theme, the rgb color will automatically display a random
+        color.
+        """
+        
+        # the getThemeDict returns the state of the operation and the
+        # theme dictionary. we do not need the state right now.
+        _, self._ThemeDict = getThemeDict(themeString)
+
+        # refresh with changes
+        self.Refresh()
 
         
-    def SetValue(self, value):
-        self.label = value
+    def SetLabel(self, label:str) -> None:
+        """ Sets the button's label text. """
+        self._Label = label
         self.Refresh()
         
 
-    def OnPaint(self, event):
+    def OnPaint(self, event) -> None:
         """ Handles the paint event. """
         
         dc = wx.AutoBufferedPaintDC(self)
@@ -70,9 +75,10 @@ class CustomButton(wx.Control):
         self.Draw(dc)
         
 
-    def Draw(self, dc: wx.AutoBufferedPaintDC) -> None:
+    def Draw(self, dc:wx.AutoBufferedPaintDC) -> None:
         """ Draws the actual control. """
-        
+
+        # get drawing area
         rect = self.GetClientRect()
 
         # draw background with parent color (for rounded corners)
@@ -86,36 +92,36 @@ class CustomButton(wx.Control):
         # 4. if not hovering, draw with default colors.
 
         if not self._Enabled:
-            dc.SetPen(wx.Pen(self._themeDict["penDisabled"], 1))
-            dc.SetBrush(wx.Brush(self._themeDict["brushDisabled"], wx.BRUSHSTYLE_SOLID))
-            dc.SetTextForeground(self._themeDict["textForegroundDisabled"])
+            dc.SetPen(wx.Pen(rgb(self._ThemeDict["penDisabled"]), 1))
+            dc.SetBrush(wx.Brush(rgb(self._ThemeDict["brushDisabled"]), wx.BRUSHSTYLE_SOLID))
+            dc.SetTextForeground(rgb(self._ThemeDict["textForegroundDisabled"]))
         else:
-            if self.pressed:
-                dc.SetPen(wx.Pen(self._themeDict["penPressed"], 1))
-                dc.SetBrush(wx.Brush(self._themeDict["brushPressed"], wx.BRUSHSTYLE_SOLID))
-                dc.SetTextForeground(self._themeDict["textForegroundPressed"])
-            elif self.mouseHover:
-                dc.SetPen(wx.Pen(self._themeDict["penHover"], 1))
-                dc.SetBrush(wx.Brush(self._themeDict["brushHover"], wx.BRUSHSTYLE_SOLID))
-                dc.SetTextForeground(self._themeDict["textForegroundHover"])
+            if self._Pressed:
+                dc.SetPen(wx.Pen(rgb(self._ThemeDict["penPressed"]), 1))
+                dc.SetBrush(wx.Brush(rgb(self._ThemeDict["brushPressed"]), wx.BRUSHSTYLE_SOLID))
+                dc.SetTextForeground(rgb(self._ThemeDict["textForegroundPressed"]))
+            elif self._MouseHover:
+                dc.SetPen(wx.Pen(rgb(self._ThemeDict["penHover"]), 1))
+                dc.SetBrush(wx.Brush(rgb(self._ThemeDict["brushHover"]), wx.BRUSHSTYLE_SOLID))
+                dc.SetTextForeground(rgb(self._ThemeDict["textForegroundHover"]))
             else:
-                dc.SetPen(wx.Pen(self._themeDict["penDefault"], 1))
-                dc.SetBrush(wx.Brush(self._themeDict["brushDefault"], wx.BRUSHSTYLE_SOLID))
-                dc.SetTextForeground(self._themeDict["textForegroundDefault"])
+                dc.SetPen(wx.Pen(rgb(self._ThemeDict["penDefault"]), 1))
+                dc.SetBrush(wx.Brush(rgb(self._ThemeDict["brushDefault"]), wx.BRUSHSTYLE_SOLID))
+                dc.SetTextForeground(rgb(self._ThemeDict["textForegroundDefault"]))
             
         # draw border    
         dc.DrawRoundedRectangle(rect, dip(6))
 
         # draw text (centered)
-        dc.SetFont(wx.Font(self._fontSize,
+        dc.SetFont(wx.Font(self._FontSize,
                            wx.FONTFAMILY_DEFAULT,
                            wx.FONTSTYLE_NORMAL,
                            wx.FONTWEIGHT_NORMAL,
-                           faceName=self._themeDict["fontFaceName"]))
-        textWidth, textHeight = dc.GetTextExtent(self.label)
+                           faceName=self._FaceName))
+        textWidth, textHeight = dc.GetTextExtent(self._Label)
         textX = rect.GetX() + (rect.GetWidth() // 2) - (textWidth // 2)
         textY = rect.GetY() + (rect.GetHeight() // 2) - (textHeight // 2)
-        dc.DrawText(self.label, textX, textY)
+        dc.DrawText(self._Label, textX, textY)
         
 
     def OnEraseBackground(self, event) -> None:
@@ -124,22 +130,21 @@ class CustomButton(wx.Control):
 
 
     def DoGetBestClientSize(self) -> wx.Size:
-
         """ Determines the best size for the control. """
 
         # create font
-        font = wx.Font(self._fontSize,
+        font = wx.Font(self._FontSize,
                        wx.FONTFAMILY_DEFAULT,
                        wx.FONTSTYLE_NORMAL,
                        wx.FONTWEIGHT_NORMAL,
-                       faceName=self._themeDict["fontFaceName"])
+                       faceName=self._FaceName)
 
         # create device context and set font to determine text dimensions
         dc = wx.ClientDC(self)
         dc.SetFont(font)
 
         # get label dimensions
-        textWidth, textHeight = dc.GetTextExtent(self.label)
+        textWidth, textHeight = dc.GetTextExtent(self._Label)
 
         # margins for sides
         leftRightMargins = dip(20)
@@ -148,34 +153,34 @@ class CustomButton(wx.Control):
         # final control dimensions
         width = leftRightMargins*2 + textWidth
         height = topBottomMargins*2 + textHeight
-        
+
+        # return best size
         return wx.Size(width, height)
     
 
-    def OnLeftDown(self, event) -> None:
-        self.pressed = True
+    def OnLeftDown(self, event:wx.MouseEvent) -> None:
+        self._Pressed = True
         self.Refresh()
         event.Skip()
 
 
-    def OnLeftUp(self, event) -> None:
-        if self.pressed:
-            self.pressed = False
+    def OnLeftUp(self, event:wx.MouseEvent) -> None:
+        if self._Pressed:
+            self._Pressed = False
             self.Refresh()
             wx.PostEvent(self, wx.PyCommandEvent(wx.EVT_BUTTON.typeId, self.GetId()))
         event.Skip()
         
 
-    def OnMouseLeave(self, event) -> None:
-        self.mouseHover = False
-        if self.pressed:
-            self.pressed = False
+    def OnMouseLeave(self, event:wx.MouseEvent) -> None:
+        self._MouseHover = False
+        self._Pressed = False
         self.Refresh()
         event.Skip()
         
 
-    def OnMouseEnter(self, event) -> None:
-        self.mouseHover = True
+    def OnMouseEnter(self, event:wx.MouseEvent) -> None:
+        self._MouseHover = True
         self.Refresh()
         event.Skip()
 
@@ -184,7 +189,7 @@ class CustomButton(wx.Control):
         return False
         
 
-    def Enable(self, enable=True) -> None:
+    def Enable(self, enable:bool=True) -> None:
         """Uses _Enabled to define if the widget is enabled or not
         instead of using default behavior (problems redrawing after
         modal dialogs).
@@ -197,36 +202,3 @@ class CustomButton(wx.Control):
     def Disable(self) -> None:
         self.Enable(False)
 
-        
-# testing
-if __name__ == "__main__":
-
-    if (wx.Platform == "__WXMSW__"):
-        import ctypes
-        ctypes.windll.shcore.SetProcessDpiAwareness(1)
-    
-    class MyFrame(wx.Frame):
-        
-        def __init__(self):
-            super().__init__(None, title="control test")
-            panel = wx.Panel(self)
-            panel.SetBackgroundColour(lightTheme["background"])
-
-            # custom control
-            #self.button = CustomButton(panel, label="Click Me", pos=wx.Point(50, 50), size=wx.Size(300, 40), theme="blue")
-            self.button = CustomButton(panel, label="Click Me", pos=wx.Point(50, 50), theme="light")
-            # native control
-            #wx.Button(panel, label="Click Me", pos=(50, 100), size=(300, 40))
-            wx.Button(panel, label="Click Me", pos=(50, 100)) 
-
-            #self.Bind(wx.EVT_BUTTON, self.OnButtonClicked, self.button)
-            self.Show()
-            
-
-        def OnButtonClicked(self, event) -> None:
-            wx.MessageBox("Button clicked!", parent=self)
-            
-
-    app = wx.App(False)
-    frame = MyFrame()
-    app.MainLoop()
