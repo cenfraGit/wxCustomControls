@@ -2,7 +2,7 @@ import wx
 from .functions.rgb import rgb
 from .functions.getThemeDict import getThemeDict
 from .functions.dip import dip
-import copy
+
 
 class CustomStaticBox(wx.Panel):
 

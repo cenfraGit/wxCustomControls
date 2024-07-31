@@ -15,3 +15,4 @@ from .customTextCtrl import CustomTextCtrl
 from .customPanel import CustomPanel
 from .customStaticText import CustomStaticText
 from .customStaticBox import CustomStaticBox
+from .customRadioBox import CustomRadioButton, CustomRadioBox

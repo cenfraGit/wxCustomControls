@@ -15,13 +15,15 @@ from src import CustomChoice
 from src import CustomCheckBox
 from src import CustomStaticText
 from src import CustomStaticBox
+from src import CustomRadioBox, CustomRadioButton
+
 
 if wx.Platform == "__WXMSW__":
     import ctypes
     ctypes.windll.shcore.SetProcessDpiAwareness(1)
 
-#theme = "lightTheme"
-theme = "blueTheme"
+theme = "lightTheme"
+#theme = "blueTheme"
 
 class PreviewPanel(CustomPanel):
     def __init__(self, theme=theme, *args, **kwargs):
@@ -57,6 +59,13 @@ class PreviewPanel(CustomPanel):
         panelStaticText = CustomStaticBox(parent=self, label="Control Test", theme=theme, size=dip(-1, 50))
         self.sizer.Add(panelStaticText, pos=(5, 0), flag=wx.EXPAND)
         #self.sizer.AddGrowableRow(5, 1)
+
+        
+        controlRadio = CustomRadioButton(parent=self, label="Control test", theme=theme)
+        self.sizer.Add(controlRadio, pos=(6, 0), flag=wx.ALIGN_CENTER)
+
+        controlRadioBox = CustomRadioBox(parent=self, labels=["value1", "value2", "value3"], value="value2")
+        self.sizer.Add(controlRadioBox, pos=(7, 0), flag=wx.ALIGN_CENTER)
         
         
         self.sizer.AddGrowableCol(0, 1)
