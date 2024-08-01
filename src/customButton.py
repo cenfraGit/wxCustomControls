@@ -69,59 +69,66 @@ class CustomButton(wx.Control):
 
     def OnPaint(self, event) -> None:
         """ Handles the paint event. """
-        
+
+        # create device context
         dc = wx.AutoBufferedPaintDC(self)
         dc.Clear()
-        self.Draw(dc)
+
+        # create graphics context
+        gc = wx.GraphicsContext.Create(dc)
+        self.Draw(gc)
         
 
-    def Draw(self, dc:wx.AutoBufferedPaintDC) -> None:
+    def Draw(self, gc:wx.GraphicsContext) -> None:
         """ Draws the actual control. """
 
         # get drawing area
         rect = self.GetClientRect()
 
         # draw background with parent color (for rounded corners)
-        dc.SetPen(wx.TRANSPARENT_PEN)
-        dc.SetBrush(wx.Brush(self.GetParent().GetBackgroundColour(), wx.BRUSHSTYLE_SOLID))
-        dc.DrawRectangle(rect)
+        gc.SetPen(wx.TRANSPARENT_PEN)
+        gc.SetBrush(wx.Brush(self.GetParent().GetBackgroundColour(), wx.BRUSHSTYLE_SOLID))
+        gc.DrawRectangle(rect.GetX(), rect.GetY(), rect.GetWidth(), rect.GetHeight())
 
         # 1. check if the button is enabled
         # 2. if it is, check if the button is pressed
         # 3. if its not pressed, check if cursor is hovering
         # 4. if not hovering, draw with default colors.
 
+        textForeground = wx.BLACK
+
         if not self._Enabled:
-            dc.SetPen(wx.Pen(rgb(self._ThemeDict["penDisabled"]), 1))
-            dc.SetBrush(wx.Brush(rgb(self._ThemeDict["brushDisabled"]), wx.BRUSHSTYLE_SOLID))
-            dc.SetTextForeground(rgb(self._ThemeDict["textForegroundDisabled"]))
+            gc.SetPen(wx.Pen(rgb(self._ThemeDict["penDisabled"]), 1))
+            gc.SetBrush(wx.Brush(rgb(self._ThemeDict["brushDisabled"]), wx.BRUSHSTYLE_SOLID))
+            textForeground = rgb(self._ThemeDict["textForegroundDisabled"])
         else:
             if self._Pressed:
-                dc.SetPen(wx.Pen(rgb(self._ThemeDict["penPressed"]), 1))
-                dc.SetBrush(wx.Brush(rgb(self._ThemeDict["brushPressed"]), wx.BRUSHSTYLE_SOLID))
-                dc.SetTextForeground(rgb(self._ThemeDict["textForegroundPressed"]))
+                gc.SetPen(wx.Pen(rgb(self._ThemeDict["penPressed"]), 1))
+                gc.SetBrush(wx.Brush(rgb(self._ThemeDict["brushPressed"]), wx.BRUSHSTYLE_SOLID))
+                textForeground = rgb(self._ThemeDict["textForegroundPressed"])
             elif self._MouseHover:
-                dc.SetPen(wx.Pen(rgb(self._ThemeDict["penHover"]), 1))
-                dc.SetBrush(wx.Brush(rgb(self._ThemeDict["brushHover"]), wx.BRUSHSTYLE_SOLID))
-                dc.SetTextForeground(rgb(self._ThemeDict["textForegroundHover"]))
+                gc.SetPen(wx.Pen(rgb(self._ThemeDict["penHover"]), 1))
+                gc.SetBrush(wx.Brush(rgb(self._ThemeDict["brushHover"]), wx.BRUSHSTYLE_SOLID))
+                textForeground = rgb(self._ThemeDict["textForegroundHover"])
             else:
-                dc.SetPen(wx.Pen(rgb(self._ThemeDict["penDefault"]), 1))
-                dc.SetBrush(wx.Brush(rgb(self._ThemeDict["brushDefault"]), wx.BRUSHSTYLE_SOLID))
-                dc.SetTextForeground(rgb(self._ThemeDict["textForegroundDefault"]))
+                gc.SetPen(wx.Pen(rgb(self._ThemeDict["penDefault"]), 1))
+                gc.SetBrush(wx.Brush(rgb(self._ThemeDict["brushDefault"]), wx.BRUSHSTYLE_SOLID))
+                textForeground = rgb(self._ThemeDict["textForegroundDefault"])
             
         # draw border    
-        dc.DrawRoundedRectangle(rect, dip(6))
+        gc.DrawRoundedRectangle(rect.GetX(), rect.GetY(), rect.GetWidth(), rect.GetHeight(), dip(6))
 
         # draw text (centered)
-        dc.SetFont(wx.Font(self._FontSize,
+        gc.SetFont(wx.Font(self._FontSize,
                            wx.FONTFAMILY_DEFAULT,
                            wx.FONTSTYLE_NORMAL,
                            wx.FONTWEIGHT_NORMAL,
-                           faceName=self._FaceName))
-        textWidth, textHeight = dc.GetTextExtent(self._Label)
+                           faceName=self._FaceName), textForeground)
+        
+        textWidth, textHeight, _, _= gc.GetFullTextExtent(self._Label)
         textX = rect.GetX() + (rect.GetWidth() // 2) - (textWidth // 2)
         textY = rect.GetY() + (rect.GetHeight() // 2) - (textHeight // 2)
-        dc.DrawText(self._Label, textX, textY)
+        gc.DrawText(self._Label, textX, textY)
         
 
     def OnEraseBackground(self, event) -> None:

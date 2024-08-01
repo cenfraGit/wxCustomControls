@@ -1,4 +1,5 @@
 __all__ = [
+    "roundedPanel",
     "customButton",
     "customChoice",
     "customCheckBox",
@@ -8,6 +9,7 @@ __all__ = [
     "customStaticBox",
 ]
 
+from .roundedPanel import RoundedPanel
 from .customButton import CustomButton
 from .customChoice import CustomChoice
 from .customCheckBox import CustomCheckBox

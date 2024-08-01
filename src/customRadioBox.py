@@ -205,10 +205,7 @@ class CustomRadioButton(wx.Control):
             self._Value = not self._Value
             # post event
             wx.PostEvent(self, wx.PyCommandEvent(wx.EVT_RADIOBUTTON.typeId, self.GetId()))
-            
-            # wx.PostEvent(self._ReferenceBox,
-            #              wx.PyCommandEvent(wx.EVT_RADIOBOX.typeId,
-            #                                self._ReferenceBox.GetId()))
+
         # redraw with changes
         self.Refresh()
         event.Skip()
