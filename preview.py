@@ -61,10 +61,10 @@ class PreviewPanel(CustomPanel):
         #self.sizer.AddGrowableRow(5, 1)
 
         
-        controlRadio = CustomRadioButton(parent=self, label="Control test", theme=theme)
-        self.sizer.Add(controlRadio, pos=(6, 0), flag=wx.ALIGN_CENTER)
+        #controlRadio = CustomRadioButton(parent=self, label="Control test", theme=theme)
+        #self.sizer.Add(controlRadio, pos=(6, 0), flag=wx.ALIGN_CENTER)
 
-        controlRadioBox = CustomRadioBox(parent=self, labels=["value1", "value2", "value3"], value="value2")
+        controlRadioBox = CustomRadioBox(parent=self, labels=["value1", "value2", "value3", "testingbatman"], value="value2", orientation="horizontal")
         self.sizer.Add(controlRadioBox, pos=(7, 0), flag=wx.ALIGN_CENTER)
         
         
