@@ -24,25 +24,48 @@ if wx.Platform == "__WXMSW__":
     import ctypes
     ctypes.windll.shcore.SetProcessDpiAwareness(1)
 
-theme = "lightTheme"
-#theme = "blueTheme"
 
 class PreviewPanel(wx.Panel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        self.SetBackgroundColour(wx.Colour(235, 235, 235))
         
         # create sizer to position controls
         self.sizer = wx.BoxSizer(orient=wx.VERTICAL)
 
-        # buttons panel
-        buttonsPanel = RoundedPanel(parent=self, backgroundColour=wx.Colour(140, 140, 140), radius=10)
+        # ---------------- buttons panel ---------------- #
+        
+        buttonsPanel = RoundedPanel(parent=self,
+                                    backgroundColour=wx.Colour(255, 255, 255),
+                                    borderColour=wx.Colour(200, 200, 200),
+                                    radius=10,
+                                    borderWidth=1)
         buttonsPanelSizer = wx.GridBagSizer(hgap=dip(5))
         button1 = CustomButton(buttonsPanel, label="Custom Button 1")
-        button2 = CustomButton(buttonsPanel, label="Custom Button 2")
-        button3 = CustomButton(buttonsPanel, label="Custom Button 3")
-        buttonsPanelSizer.Add(button1, pos=(0, 0), flag=wx.TOP|wx.BOTTOM|wx.LEFT|wx.EXPAND, border=dip(10))
-        buttonsPanelSizer.Add(button2, pos=(0, 1), flag=wx.TOP|wx.BOTTOM|wx.EXPAND, border=dip(10))
-        buttonsPanelSizer.Add(button3, pos=(0, 2), flag=wx.TOP|wx.BOTTOM|wx.RIGHT|wx.EXPAND, border=dip(10))
+        button2 = CustomButton(buttonsPanel, label="Custom Button 2", cornerRadius=5)
+        button3 = CustomButton(buttonsPanel, label="Custom Button 3",
+                               backgroundLinearGradient=(100, 20, 300, 20, wx.Colour(233, 82, 241), wx.Colour(252, 0, 143)))
+        button4 = CustomButton(buttonsPanel, label="Custom Button 4",
+                               behindBackgroundLinearGradient=(100, 20, 300, 20, wx.BLUE, wx.CYAN),
+                               borderWidth=4)
+        button5 = CustomButton(buttonsPanel,
+                               label="Custom Button 5",
+                               borderWidth=0,
+                               hoverBorderColour=wx.BLACK,
+                               backgroundColour=wx.WHITE,
+                               hoverBackgroundColour=wx.WHITE)
+        button6 = CustomButton(buttonsPanel,
+                               label="Custom Button 6",
+                               cornerRadius=10,
+                               backgroundLinearGradient=(100, 20, 300, 20, wx.Colour(48, 122, 232), wx.Colour(13, 81, 184)),
+                                                         textForegroundColour=wx.Colour(13, 47, 97), faceName="Arial")
+        buttonsPanelSizer.Add(button1, pos=(0, 0), flag=wx.TOP|wx.LEFT|wx.EXPAND, border=dip(10))
+        buttonsPanelSizer.Add(button2, pos=(0, 1), flag=wx.TOP|wx.EXPAND, border=dip(10))
+        buttonsPanelSizer.Add(button3, pos=(0, 2), flag=wx.TOP|wx.RIGHT|wx.EXPAND, border=dip(10))
+        buttonsPanelSizer.Add(button4, pos=(1, 0), flag=wx.TOP|wx.BOTTOM|wx.LEFT|wx.EXPAND, border=dip(10))
+        buttonsPanelSizer.Add(button5, pos=(1, 1), flag=wx.TOP|wx.BOTTOM|wx.EXPAND, border=dip(10))
+        buttonsPanelSizer.Add(button6, pos=(1, 2), flag=wx.TOP|wx.BOTTOM|wx.RIGHT|wx.EXPAND, border=dip(10))
         buttonsPanelSizer.AddGrowableCol(0, 1)
         buttonsPanelSizer.AddGrowableCol(1, 1)
         buttonsPanelSizer.AddGrowableCol(2, 1)

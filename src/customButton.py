@@ -1,27 +1,86 @@
 import wx
-from .functions.rgb import rgb
-from .functions.getThemeDict import getThemeDict
 from .functions.dip import dip
 
 
-class CustomButton(wx.Control):    
-    """ Defines a custom button that supports themes. """
+class CustomButton(wx.Control):
+    """ Defines a custom button. """
     
-    def __init__(self, parent, id=wx.ID_ANY, label:str="",
-                 pos=wx.DefaultPosition, size=wx.DefaultSize,
-                 style=wx.NO_BORDER, validator=wx.DefaultValidator,
-                 name="CustomButton", theme:str="lightTheme",
-                 fontSize=8, faceName="Verdana"):
-        super().__init__(parent, id, pos, size, style, validator, name)
+    def __init__(self, parent, id=wx.ID_ANY,
+                 label:str="",
+                 pos=wx.DefaultPosition,
+                 size=wx.DefaultSize,
+                 validator=wx.DefaultValidator,
+                 fontSize=8,
+                 faceName="Verdana",
+                 cornerRadius=0,
+                 # normal colors
+                 backgroundColour=wx.Colour(240, 240, 240),
+                 borderColour=wx.Colour(200, 200, 200),
+                 backgroundLinearGradient=None,
+                 textForegroundColour=wx.Colour(20, 20, 20),
+                 borderWidth:int=1, 
+                 # mouse hover colors
+                 hoverBackgroundColour=wx.Colour(240, 240, 240),
+                 hoverBorderColour=wx.Colour(160, 160, 160),
+                 hoverBackgroundLinearGradient=None,
+                 hoverTextForegroundColour=wx.BLACK,
+                 hoverBorderWidth:int=2,
+                 # button pressed colors
+                 pressedBackgroundColour=wx.Colour(180, 180, 180),
+                 pressedBorderColour=wx.Colour(80, 80, 80),
+                 pressedTextForegroundColour=wx.BLACK,
+                 pressedBackgroundLinearGradient=None,
+                 pressedBorderWidth:int=2,
+                 # button disabled colors
+                 disabledBackgroundColour=wx.BLACK,
+                 disabledBorderColour=wx.BLACK,
+                 disabledTextForegroundColour=wx.WHITE,
+                 disabledBackgroundLinearGradient=None,
+                 disabledBorderWidth:int=0,
+                 # behind background (for gradients)
+                 behindBackgroundLinearGradient=None,
+                 ):
+        
+        super().__init__(parent, id, pos, size, wx.NO_BORDER, validator, "CustomButton")
 
         # -------------- ATTRIBUTES --------------
         
         self._Label = label
-        self._Theme = theme
-        self._ThemeDict = {}
         self._FontSize = fontSize
         self._FaceName = faceName
+        self._CornerRadius = dip(cornerRadius)
 
+        # -------------------- colors -------------------- #
+
+        # default
+        self._BackgroundColour = backgroundColour
+        self._BorderColour = borderColour
+        self._BackgroundLinearGradient = backgroundLinearGradient
+        self._TextForegroundColour = textForegroundColour
+        self._BorderWidth = borderWidth
+        # mouse hover
+        self._HoverBackgroundColour = hoverBackgroundColour
+        self._HoverBorderColour = hoverBorderColour
+        self._HoverBackgroundLinearGradient = hoverBackgroundLinearGradient
+        self._HoverTextForegroundColour = hoverTextForegroundColour
+        self._HoverBorderWidth = hoverBorderWidth
+        # button pressed
+        self._PressedBackgroundColour = pressedBackgroundColour
+        self._PressedBorderColour = pressedBorderColour
+        self._PressedBackgroundLinearGradient = pressedBackgroundLinearGradient
+        self._PressedTextForegroundColour = pressedTextForegroundColour
+        self._PressedBorderWidth = pressedBorderWidth
+        # disabled
+        self._DisabledBackgroundColour = disabledBackgroundColour
+        self._DisabledBorderColour = disabledBorderColour
+        self._DisabledBackgroundLinearGradient = disabledBackgroundLinearGradient
+        self._DisabledTextForegroundColour = disabledTextForegroundColour
+        self._DisabledBorderWidth = disabledBorderWidth
+
+        # behind background
+        self._BehindBackgroundLinearGradient = behindBackgroundLinearGradient
+        
+        # control states
         self._Enabled = True
         self._Pressed = False
         self._MouseHover = False
@@ -30,9 +89,10 @@ class CustomButton(wx.Control):
         # -------------- APPEARANCE --------------
         
         self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
-        self.setTheme(self._Theme)
         self.SetInitialSize(size)
-        
+
+        #self._MarginAllSides = dip(1) #dip(self._BorderWidth) if (self._BorderWidth != 0) else dip(1)
+        self._MarginAllSides = self._BorderWidth if (self._BehindBackgroundLinearGradient) else dip(1)
 
         # -------------- EVENTS --------------
         
@@ -44,21 +104,46 @@ class CustomButton(wx.Control):
         self.Bind(wx.EVT_LEFT_UP, self.OnLeftUp)
         self.Bind(wx.EVT_LEAVE_WINDOW, self.OnMouseLeave)
         self.Bind(wx.EVT_ENTER_WINDOW, self.OnMouseEnter)
-        
 
-    def setTheme(self, themeString:str) -> None:
-        """Sets the theme. If the theme is not valid, the first
-        available theme will be chosen. Or if we definitely didnt find
-        a theme, the rgb color will automatically display a random
-        color.
-        """
-        
-        # the getThemeDict returns the state of the operation and the
-        # theme dictionary. we do not need the state right now.
-        _, self._ThemeDict = getThemeDict(themeString)
 
-        # refresh with changes
+    def SetBackgroundColour(self, colour):
+        self._BackgroundColour = colour
         self.Refresh()
+
+
+    def SetBorderColour(self, colour):
+        self._BorderColour = colour
+        self.Refresh() 
+
+
+    def SetBorderWidth(self, width):
+        self._BorderWidth = width
+        self.Refresh() 
+
+
+    def SetCornerRadius(self, radius):
+        self._CornerRadius = radius
+        self.Refresh() 
+
+
+    def GetBackgroundColour(self):
+        return self._BackgroundColour
+
+
+    def GetBorderColour(self):
+        return self._BorderColour
+
+
+    def GetBorderWidth(self):
+        return self._BorderWidth
+
+
+    def GetBorderLinearGradient(self):
+        return self._BackgroundLinearGradient
+
+
+    def GetLabel(self):
+        return self._Label
 
         
     def SetLabel(self, label:str) -> None:
@@ -70,64 +155,187 @@ class CustomButton(wx.Control):
     def OnPaint(self, event) -> None:
         """ Handles the paint event. """
 
+        # -------------- creating contexts -------------- #
+        
         # create device context
         dc = wx.AutoBufferedPaintDC(self)
         dc.Clear()
 
-        # create graphics context
+        # create graphics context (to use gdi+)
         gc = wx.GraphicsContext.Create(dc)
-        self.Draw(gc)
-        
 
-    def Draw(self, gc:wx.GraphicsContext) -> None:
-        """ Draws the actual control. """
+        # ---------------- initial setup ---------------- #
+    
+        # we get our drawing area as a rectangle
+        controlRect = self.GetClientRect()
 
-        # get drawing area
-        rect = self.GetClientRect()
+        # ------------- background rectangle ------------- #
 
-        # draw background with parent color (for rounded corners)
+        # when drawing a rounded button, the corners will allow us to
+        # see the color that's 'behind' the button. we want this
+        # background color to be the same as the parent's background
+        # to give the illusion that there's no separation between this
+        # background and the parent's.
+
+        # if the user specified a value for the
+        # "behindBackgroundLinearGradient", we will use this gradient
+        # as a brush to draw this background rectangle.
+
+        # we are not interested in the borders, so we use a
+        # transparent pen.
         gc.SetPen(wx.TRANSPARENT_PEN)
-        gc.SetBrush(wx.Brush(self.GetParent().GetBackgroundColour(), wx.BRUSHSTYLE_SOLID))
-        gc.DrawRectangle(rect.GetX(), rect.GetY(), rect.GetWidth(), rect.GetHeight())
 
-        # 1. check if the button is enabled
+        # also, if the user is using a background gradient (which
+        # represent a gradient border), we will also have to use this
+        # background rectangle to substitute for the borders of the
+        # button.
+
+        # then we set the background brush
+        if self._BehindBackgroundLinearGradient:
+            if self._Pressed:
+                gc.SetBrush(wx.Brush(self._PressedBorderColour))
+            elif self._MouseHover:
+                gc.SetBrush(wx.Brush(self._HoverBorderColour))
+            else:
+                gc.SetBrush(gc.CreateLinearGradientBrush(*self._BehindBackgroundLinearGradient))
+        else:
+            gc.SetBrush(wx.Brush(self.GetParent().GetBackgroundColour(), wx.BRUSHSTYLE_SOLID))
+            
+        #gc.SetBrush(wx.GREEN_BRUSH)
+
+        # finally, we draw the background rectangle
+        gc.DrawRectangle(controlRect.GetX(),
+                         controlRect.GetY(),
+                         controlRect.GetWidth(),
+                         controlRect.GetHeight())
+
+        # -------------- drawing the button -------------- #
+
+        # we will first create a rectangle that will represent the
+        # button. it will be slightly smaller thatn the client's
+        # rectangle because if it were to occupy the same size, some
+        # of the borders may not appear correctly.
+
+        buttonRectangle = controlRect.Deflate(self._MarginAllSides,
+                                              self._MarginAllSides)
+
+        # we will now draw the button depending on the current states
+        # of the control.
+
+        # 1. we check if the button is enabled
         # 2. if it is, check if the button is pressed
         # 3. if its not pressed, check if cursor is hovering
         # 4. if not hovering, draw with default colors.
 
-        textForeground = wx.BLACK
+        # --------------- pens and brushes --------------- #
 
         if not self._Enabled:
-            gc.SetPen(wx.Pen(rgb(self._ThemeDict["penDisabled"]), 1))
-            gc.SetBrush(wx.Brush(rgb(self._ThemeDict["brushDisabled"]), wx.BRUSHSTYLE_SOLID))
-            textForeground = rgb(self._ThemeDict["textForegroundDisabled"])
+            
+            # set a transparent pen if the width is 0
+            if (not self._DisabledBorderWidth) or (self._BehindBackgroundLinearGradient):
+                pen = wx.TRANSPARENT_PEN
+            else:
+                pen = wx.Pen(self._DisabledBorderColour, self._DisabledBorderWidth)
+
+            # create a gradient if specified
+            if self._DisabledBackgroundLinearGradient:
+                brush = gc.CreateLinearGradientBrush(*self._DisabledBackgroundLinearGradient)
+            else:
+                brush = wx.Brush(self._DisabledBackgroundColour)
+
+            # set foreground color
+            textForeground = self._DisabledTextForegroundColour
+            
         else:
             if self._Pressed:
-                gc.SetPen(wx.Pen(rgb(self._ThemeDict["penPressed"]), 1))
-                gc.SetBrush(wx.Brush(rgb(self._ThemeDict["brushPressed"]), wx.BRUSHSTYLE_SOLID))
-                textForeground = rgb(self._ThemeDict["textForegroundPressed"])
-            elif self._MouseHover:
-                gc.SetPen(wx.Pen(rgb(self._ThemeDict["penHover"]), 1))
-                gc.SetBrush(wx.Brush(rgb(self._ThemeDict["brushHover"]), wx.BRUSHSTYLE_SOLID))
-                textForeground = rgb(self._ThemeDict["textForegroundHover"])
-            else:
-                gc.SetPen(wx.Pen(rgb(self._ThemeDict["penDefault"]), 1))
-                gc.SetBrush(wx.Brush(rgb(self._ThemeDict["brushDefault"]), wx.BRUSHSTYLE_SOLID))
-                textForeground = rgb(self._ThemeDict["textForegroundDefault"])
-            
-        # draw border    
-        gc.DrawRoundedRectangle(rect.GetX(), rect.GetY(), rect.GetWidth(), rect.GetHeight(), dip(6))
+                
+                # set a transparent pen if the width is 0
+                if (not self._PressedBorderWidth) or (self._BehindBackgroundLinearGradient):
+                    pen = wx.TRANSPARENT_PEN
+                else:
+                    pen = wx.Pen(self._PressedBorderColour, self._PressedBorderWidth)
 
-        # draw text (centered)
+                # create a gradient if specified
+                if self._PressedBackgroundLinearGradient:
+                    brush = gc.CreateLinearGradientBrush(*self._PressedBackgroundLinearGradient)
+                else:
+                    brush = wx.Brush(self._PressedBackgroundColour)
+
+                # set foreground color
+                textForeground = self._PressedTextForegroundColour
+                
+            elif self._MouseHover:
+
+                # set a transparent pen if the width is 0
+                if (not self._HoverBorderWidth) or (self._BehindBackgroundLinearGradient):
+                    pen = wx.TRANSPARENT_PEN
+                else:
+                    pen = wx.Pen(self._HoverBorderColour, self._HoverBorderWidth)
+
+                # create a gradient if specified
+                if self._HoverBackgroundLinearGradient:
+                    brush = gc.CreateLinearGradientBrush(*self._HoverBackgroundLinearGradient)
+                else:
+                    brush = wx.Brush(self._HoverBackgroundColour)
+                    
+                # set foreground color
+                textForeground = self._HoverTextForegroundColour
+                
+            else:
+
+                # set a transparent pen if the width is 0
+                if (not self._BorderWidth) or (self._BehindBackgroundLinearGradient):
+                    pen = wx.TRANSPARENT_PEN
+                else:
+                    pen = wx.Pen(self._BorderColour, self._BorderWidth)
+                    
+                # create a gradient if specified
+                if self._BackgroundLinearGradient:
+                    brush = gc.CreateLinearGradientBrush(*self._BackgroundLinearGradient)
+                else:
+                    brush = wx.Brush(self._BackgroundColour)
+
+                # set foreground color
+                textForeground = self._TextForegroundColour
+                
+
+        # we then set the pen and brush and draw the rectangle.
+        gc.SetPen(pen)
+        gc.SetBrush(brush)
+
+        # if a corner radius value was specified, we will draw a
+        # rounded rectangle. if not, we will draw a normal rectangle.
+
+        if self._CornerRadius:
+            gc.DrawRoundedRectangle(buttonRectangle.GetX(),
+                                    buttonRectangle.GetY(),
+                                    buttonRectangle.GetWidth(),
+                                    buttonRectangle.GetHeight(),
+                                    radius=self._CornerRadius)
+        else:
+            gc.DrawRectangle(buttonRectangle.GetX(),
+                             buttonRectangle.GetY(),
+                             buttonRectangle.GetWidth(),
+                             buttonRectangle.GetHeight())
+        
+
+        # -------------- drawing the label -------------- #
+
+        # we first se the font to get the text extent of the label
+        # text (to draw centered)
         gc.SetFont(wx.Font(self._FontSize,
                            wx.FONTFAMILY_DEFAULT,
                            wx.FONTSTYLE_NORMAL,
                            wx.FONTWEIGHT_NORMAL,
                            faceName=self._FaceName), textForeground)
-        
-        textWidth, textHeight, _, _= gc.GetFullTextExtent(self._Label)
-        textX = rect.GetX() + (rect.GetWidth() // 2) - (textWidth // 2)
-        textY = rect.GetY() + (rect.GetHeight() // 2) - (textHeight // 2)
+
+        textWidth, textHeight, _, _ = gc.GetFullTextExtent(self._Label)
+
+        # we now use these values to calculate the x and y coordinates
+        # that would correspond to a centered label
+        textX = buttonRectangle.GetX() + (buttonRectangle.GetWidth() // 2) - (textWidth // 2)
+        textY = buttonRectangle.GetY() + (buttonRectangle.GetHeight() // 2) - (textHeight // 2)
+        # finally, we draw the label.
         gc.DrawText(self._Label, textX, textY)
         
 

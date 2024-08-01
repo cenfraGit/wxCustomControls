@@ -7,7 +7,7 @@ class RoundedPanel(wx.Panel):
 
     def __init__(self, radius:int=5,
                  backgroundColour:wx.Colour=wx.WHITE,
-                 borderColour:wx.Colour=wx.WHITE, borderWidth:int=1,
+                 borderColour:wx.Colour=wx.WHITE, borderWidth:int=0,
                  *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -18,7 +18,7 @@ class RoundedPanel(wx.Panel):
         self._BorderColour = borderColour
         self._BorderWidth = borderWidth
         
-        self._MarginAllSides = self._BorderWidth
+        self._MarginAllSides = dip(self._BorderWidth)
 
         self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
 
