@@ -18,7 +18,7 @@ class CustomButton(wx.Control):
         # --------------- check for config --------------- #
         # if the user does not specify a config object, create
         # one and update with kwargs
-        self.config:ControlConfig = copy(config) if config else ControlConfig()
+        self.config:ControlConfig = copy(config) if config else self.__GetDefaultConfig()
         if kwargs:
             self.config.update(**kwargs)
 
@@ -54,8 +54,28 @@ class CustomButton(wx.Control):
         self.Bind(wx.EVT_ENTER_WINDOW, self.__OnMouseEnter)
 
 
+    def __GetDefaultConfig(self) -> ControlConfig:
+        return ControlConfig(
+            # default colors
+            bg_colour=(240, 240, 240),
+            border_colour=(200, 200, 200),
+            border_width=1,
+            text_foreground_colour=(20, 20, 20),
+            # pressed
+            bg_colour_pressed=(180, 180, 180),
+            fg_colour_pressed=(70, 70, 70),
+            border_colour_pressed=(0, 0, 0),
+            border_width_pressed=0,
+            # hover
+            bg_colour_hover=(200, 200, 200),
+            fg_colour_hover=(100, 100, 100),
+            border_colour_hover=(0, 0, 0),
+            border_width_hover=0,
+        )
+
+
     def SetBackgroundColour(self, colour:wx.Colour):
-        self.config.bg_colour = colour
+        self.config.bg_colour = (colour.GetRed(), colour.GetGreen(), colour.GetBlue())
         self.Refresh()
 
 
