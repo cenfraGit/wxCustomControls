@@ -1,27 +1,33 @@
 import wx
-
 from .controlConfig import ControlConfig
 from .functions.getPenBrush import getPen, getBrush
 from .functions.dip import dip
 from copy import copy
 
+
 class CustomButton(wx.Control):
         
     def __init__(self, parent, id=wx.ID_ANY, pos=wx.DefaultPosition,
-                 size=wx.DefaultSize, style=wx.NO_BORDER, validator=wx.DefaultValidator, label=wx.EmptyString,
+                 size=wx.DefaultSize, style=wx.NO_BORDER,#|wx.TRANSPARENT_WINDOW,
+                 validator=wx.DefaultValidator, label=wx.EmptyString,
                  name=wx.ControlNameStr, config=None, **kwargs):
 
+        
         # initialize control
-        super().__init__(parent=parent, id=id, pos=pos, style=style, validator=validator, name=name)
-
+        super().__init__(parent=parent, id=id, pos=pos, style=style,
+                         validator=validator, name=name)
+        
 
         # --------------- check for config --------------- #
-        # if the user does not specify a config object, create
-        # one and update with kwargs
-        self.config:ControlConfig = copy(config) if config else self.__GetDefaultConfig()
+
+        if config:
+            self.config:ControlConfig = copy(config)
+        else:
+            self.config:ControlConfig = self.__GetDefaultConfig()
+
         if kwargs:
             self.config.update(**kwargs)
-
+            
             
         # -------------- control attributes -------------- #
 
@@ -31,10 +37,9 @@ class CustomButton(wx.Control):
         self._Pressed = False
         self._MouseHover = False
 
-        self._MarginAllSides = dip(1)
         self._PaddingHorizontal = dip(10)
         self._PaddingVertical = dip(5)
-
+        
         
         # -------------------- setup -------------------- #
 
@@ -55,6 +60,7 @@ class CustomButton(wx.Control):
 
 
     def __GetDefaultConfig(self) -> ControlConfig:
+        """ Returns the default configuration for this control. """
         return ControlConfig(
             # default colors
             bg_colour=(240, 240, 240),
@@ -70,13 +76,7 @@ class CustomButton(wx.Control):
             bg_colour_hover=(200, 200, 200),
             fg_colour_hover=(100, 100, 100),
             border_colour_hover=(0, 0, 0),
-            border_width_hover=0,
-        )
-
-
-    def SetBackgroundColour(self, colour:wx.Colour):
-        self.config.bg_colour = (colour.GetRed(), colour.GetGreen(), colour.GetBlue())
-        self.Refresh()
+            border_width_hover=0)
 
 
     def UpdateConfig(self, **kwargs):
@@ -84,8 +84,23 @@ class CustomButton(wx.Control):
         self.Refresh()
 
 
+    def GetConfig(self):
+        return self.config
+
+
+    def SetBackgroundColour(self, colour:wx.Colour):
+        self.config.bg_colour = (colour.GetRed(),
+                                 colour.GetGreen(),
+                                 colour.GetBlue())
+        self.Refresh()
+
+
+    def GetBackgroundColour(self):
+        return wx.Colour(*self.config.bg_colour)
+
+
     def SetLabel(self, label:str):
-        self._Label = label
+        self._Label = label        
         self.Refresh()
 
 
@@ -93,32 +108,30 @@ class CustomButton(wx.Control):
         return self._Label
 
 
-    def GetConfig(self):
-        return self.config
-
-
     def __OnPaint(self, event):
 
         # --------------- create contexts --------------- #
         
         dc = wx.AutoBufferedPaintDC(self)
+        #dc = wx.PaintDC(self)
+        #dc.SetBackground(wx.TRANSPARENT_BRUSH)
         dc.Clear()
+        gc:wx.GraphicsContext = wx.GraphicsContext.Create(dc)
 
-        gc: wx.GraphicsContext = wx.GraphicsContext.Create(dc)
-
-        # ---------------- initial setup ---------------- #
-
+        
+        # -------------- drawing rectangle -------------- #
+        
         controlRect = self.GetClientRect()
 
+        
         # ------------- background rectangle ------------- #
 
         gc.SetPen(wx.TRANSPARENT_PEN)
         gc.SetBrush(wx.Brush(self.GetParent().GetBackgroundColour()))
 
-        gc.DrawRectangle(controlRect.GetX(),
-                         controlRect.GetY(),
-                         controlRect.GetWidth(),
-                         controlRect.GetHeight())
+        gc.DrawRectangle(controlRect.GetX(), controlRect.GetY(),
+                         controlRect.GetWidth(), controlRect.GetHeight())
+        
 
         # ------------ draw button rectangle ------------ #
 
@@ -127,84 +140,121 @@ class CustomButton(wx.Control):
             brush = getBrush("disabled", self.config, gc)
             cr = self.config.corner_radius_disabled
             textForeground = self.config.text_foreground_colour_disabled
+            image = self.config.image_disabled
+            image_channels = self.config.image_disabled_channels
+            image_size = self.config.image_disabled_size
         else:
             if self._Pressed:
                 pen = getPen("pressed", self.config)
                 brush = getBrush("pressed", self.config, gc)
                 cr = self.config.corner_radius_pressed
                 textForeground = self.config.text_foreground_colour_pressed
+                image = self.config.image_pressed
+                image_channels = self.config.image_pressed_channels
+                image_size = self.config.image_pressed_size
             elif self._MouseHover:
                 pen = getPen("hover", self.config)
                 brush = getBrush("hover", self.config, gc)
                 cr = self.config.corner_radius_hover
                 textForeground = self.config.text_foreground_colour_hover
+                image = self.config.image_hover
+                image_channels = self.config.image_hover_channels
+                image_size = self.config.image_hover_size
             else:
                 pen = getPen("default", self.config)
                 brush = getBrush("default", self.config, gc)
                 cr = self.config.corner_radius
                 textForeground = self.config.text_foreground_colour
+                image = self.config.image_default
+                image_channels = self.config.image_default_channels
+                image_size = self.config.image_default_size
+                
 
         # set brush and rectangle
         gc.SetPen(pen)
         gc.SetBrush(brush)
-
-        paddingAllSides = pen.GetWidth()
-        buttonRectangle = controlRect.Deflate(paddingAllSides,
-                                              paddingAllSides)
+        
+        # deflate so that borders are drawn correctly
+        buttonRectangle = controlRect.Deflate(pen.GetWidth(),
+                                              pen.GetWidth())
 
         # draw button rectangle
-        if cr:
-            gc.DrawRoundedRectangle(buttonRectangle.GetX(),
-                                    buttonRectangle.GetY(),
-                                    buttonRectangle.GetWidth(),
-                                    buttonRectangle.GetHeight(),
-                                    radius=cr)
-        else:
-            gc.DrawRectangle(buttonRectangle.GetX(),
-                             buttonRectangle.GetY(),
-                             buttonRectangle.GetWidth(),
-                             buttonRectangle.GetHeight())
+        gc.DrawRoundedRectangle(buttonRectangle.GetX(),
+                                buttonRectangle.GetY(),
+                                buttonRectangle.GetWidth(),
+                                buttonRectangle.GetHeight(),
+                                radius=cr)
+
+
+        # ------------- get text dimensions ------------- #
+        # used in both image and label drawing process
+
+        textWidth, textHeight = 0, 0
+        if (self._Label != wx.EmptyString):
+            # create and set the font
+            gc.SetFont(wx.Font(self.config.font_size,
+                               wx.FONTFAMILY_DEFAULT,
+                               wx.FONTSTYLE_NORMAL,
+                               wx.FONTWEIGHT_NORMAL,
+                               faceName=self.config.font_face_name), textForeground)
+
+            # get text dimensions
+            textWidth, textHeight, _, _ = gc.GetFullTextExtent(self._Label)
+
+
+        # ------------------ draw image ------------------ #
+
+        if image:
+            image:wx.Image = image.AdjustChannels(*image_channels)
+            bitmap = gc.CreateBitmapFromImage(image)
+
+            # calculate image coordinates
+            
+            if (self._Label == wx.EmptyString):
+                # draw image in center if no text
+                imageX = (controlRect.GetWidth() // 2) - (image_size[0] // 2)
+                imageY = (controlRect.GetHeight() // 2) - (image_size[1] // 2)
+            else:
+                text_separation = self.config.image_text_separation if self.config.image_text_separation else dip(6)
+                if (self.config.text_side == "right"):
+                    imageX = (controlRect.GetWidth() // 2) - ((image_size[0] + textWidth + text_separation) // 2) 
+                    imageY = (controlRect.GetHeight() // 2) - (image_size[1] // 2)
+                    textX = imageX + image_size[0] + text_separation
+                    textY = (controlRect.GetHeight() // 2) - (textHeight // 2)
+                elif (self.config.text_side == "left"):
+                    textX = (controlRect.GetWidth() // 2) - ((image_size[0] + textWidth + text_separation) // 2) 
+                    textY = (controlRect.GetHeight() // 2) - (textHeight // 2)
+                    imageX = textX + textWidth + text_separation
+                    imageY = (controlRect.GetHeight() // 2) - (image_size[1] // 2)
+                elif (self.config.text_side == "up"):
+                    textX = (controlRect.GetWidth() // 2) - (textWidth // 2)
+                    textY = (controlRect.GetHeight() // 2) - ((image_size[1] + textHeight + text_separation) // 2)
+                    imageX = (controlRect.GetWidth() // 2) - (image_size[0] // 2)
+                    imageY = textY + textHeight + text_separation
+                elif (self.config.text_side == "down"):
+                    imageX = (controlRect.GetWidth() // 2) - (image_size[0] // 2)
+                    imageY = (controlRect.GetHeight() // 2) - ((image_size[1] + textHeight + text_separation) // 2)
+                    textX = (controlRect.GetWidth() // 2) - (textWidth // 2)
+                    textY = imageY + image_size[1]
+                else:
+                    raise ValueError("text_side must be \"right\", \"left\", \"up\" or \"down\".")
+            
+            gc.DrawBitmap(bitmap, imageX, imageY, image_size[0], image_size[1])
+            if (self._Label != wx.EmptyString):
+                gc.DrawText(self._Label, textX, textY)
+            return # return since text was already drawn (if image)
+            
 
         # -------------- drawing the label -------------- #
+        # reaches this point if no image was drawn
 
-        if self._Label == wx.EmptyString or self._Label.strip() == "":
-            return
-
-        # create and set the font
-        gc.SetFont(wx.Font(self.config.font_size,
-                           wx.FONTFAMILY_DEFAULT,
-                           wx.FONTSTYLE_NORMAL,
-                           wx.FONTWEIGHT_NORMAL,
-                           faceName=self.config.font_face_name), textForeground)
-
-        # get text dimensions
-        textWidth, textHeight, _, _ = gc.GetFullTextExtent(self._Label)
-        # calculate center
-        textX = buttonRectangle.GetX() + (buttonRectangle.GetWidth() // 2) - (textWidth // 2)
-        textY = buttonRectangle.GetY() + (buttonRectangle.GetHeight() // 2) - (textHeight // 2)
-        # draw label
-        gc.DrawText(self._Label, textX, textY)
-
-
-    def DoGetBestClientSize(self) -> wx.Size:
-        """ Helps the sizers determine the best control size. """
+        if (self._Label != wx.EmptyString):            
+            # calculate center
+            textX = buttonRectangle.GetX() + (buttonRectangle.GetWidth() // 2) - (textWidth // 2)
+            textY = buttonRectangle.GetY() + (buttonRectangle.GetHeight() // 2) - (textHeight // 2)
+            # draw label
+            gc.DrawText(self._Label, textX, textY)
         
-        # create font
-        font = wx.Font(self.config.font_size,
-                       wx.FONTFAMILY_DEFAULT,
-                       wx.FONTSTYLE_NORMAL,
-                       wx.FONTWEIGHT_NORMAL, faceName=self.config.font_face_name)
-        # crete device and graphic contexts and set font
-        dc = wx.ClientDC(self)
-        gc: wx.GraphicsContext = wx.GraphicsContext.Create(dc)
-        gc.SetFont(font, wx.BLACK)
-        # get label dimensions
-        textWidth, textHeight, _, _ = gc.GetFullTextExtent(self._Label)
-        # add padding
-        width = self._PaddingHorizontal * 2 + textWidth
-        height = self._PaddingVertical * 2 + textHeight
-        return wx.Size(int(width), int(height))
-    
 
     def __OnEraseBackground(self, event):
         # to prevent flickering
@@ -212,7 +262,6 @@ class CustomButton(wx.Control):
 
     
     def __OnLeftDown(self, event):
-
         self._Pressed = True
         self.Refresh()
         event.Skip()
@@ -239,7 +288,55 @@ class CustomButton(wx.Control):
         event.Skip()
 
 
+    def DoGetBestClientSize(self) -> wx.Size:
+        """ Helps the sizers determine the best control size. """
+        
+        # create font
+        font = wx.Font(self.config.font_size,
+                       wx.FONTFAMILY_DEFAULT,
+                       wx.FONTSTYLE_NORMAL,
+                       wx.FONTWEIGHT_NORMAL, faceName=self.config.font_face_name)
+        # crete device and graphic contexts and set font
+        dc = wx.ClientDC(self)
+        gc: wx.GraphicsContext = wx.GraphicsContext.Create(dc)
+        gc.SetFont(font, wx.BLACK)
+        # get label dimensions
+        textWidth, textHeight, _, _ = gc.GetFullTextExtent(self._Label)
+
+        # get image
+        image = self.config.image_default or self.config.image_pressed or self.config.image_hover or self.config.image_disabled
+        image_width = max(self.config.image_default_size[0],
+                          self.config.image_pressed_size[0],
+                          self.config.image_hover_size[0],
+                          self.config.image_disabled_size[0])
+        image_height = max(self.config.image_default_size[1],
+                           self.config.image_pressed_size[1],
+                           self.config.image_hover_size[1],
+                           self.config.image_disabled_size[1])
+
+        text_separation = self.config.image_text_separation if self.config.image_text_separation else dip(6)
+
+        if image:
+            if (self.config.text_side == "left") or (self.config.text_side == "right"):
+                width = image_width + text_separation + textWidth + (2 * self._PaddingHorizontal)
+                height = max(image_height, textHeight) + (2 * self._PaddingVertical)
+            elif (self.config.text_side == "up") or (self.config.text_side == "down"):
+                width = max(image_width, textWidth) + (2 * self._PaddingHorizontal)
+                height = image_height + text_separation + textHeight + (2 * self._PaddingVertical)
+            else:
+                raise ValueError("text_side must be \"right\", \"left\", \"up\" or \"down\".")
+        else:
+            width = self._PaddingHorizontal * 2 + textWidth
+            height = self._PaddingVertical * 2 + textHeight
+        
+        return wx.Size(int(width), int(height))
+
+
     def AcceptsFocusFromKeyboard(self):
+        return False
+
+    
+    def AcceptsFocus(self):
         return False
 
 

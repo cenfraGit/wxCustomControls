@@ -20,6 +20,8 @@ class ControlConfig:
         self.text_foreground_colour_hover = kwargs.get("text_foreground_colour_hover", (0, 0, 0))
         self.text_foreground_colour_pressed = kwargs.get("text_foreground_colour_pressed", (0, 0, 0))
         self.text_foreground_colour_disabled = kwargs.get("text_foreground_colour_disabled", (0, 0, 0))
+
+        self.text_side = kwargs.get("text_side", "right")
         
         # background colours
         self.bg_colour = kwargs.get("bg_colour", (150, 150, 150))
@@ -64,7 +66,7 @@ class ControlConfig:
         self.checkbox_text_separation = kwargs.get("checkbox_text_separation", None)
 
         # scrollbar
-        self.scrollbar_type = kwargs.get("scrollbar_type", "rounded")
+        self.scrollbar_type = kwargs.get("scrollbar_type", "rectangular")
         self.scrollbar_width = kwargs.get("scrollbar_width", None)
         self.scrollbar_padding = kwargs.get("scrollbar_padding", None)
 
@@ -77,6 +79,25 @@ class ControlConfig:
         self.scrollY = kwargs.get("scrollY", True)
         self.scrollUnitsX = kwargs.get("scrollUnitsX", 15)
         self.scrollUnitsY = kwargs.get("scrollUnitsY", 15)
+
+        # images
+        self.image_default = kwargs.get("image_default", None)
+        self.image_hover = kwargs.get("image_hover", None)
+        self.image_pressed = kwargs.get("image_pressed", None)
+        self.image_disabled = kwargs.get("image_disabled", None)
+
+        self.image_default_channels = kwargs.get("image_default_channels", (1.0, 1.0, 1.0, 1.0))
+        self.image_hover_channels = kwargs.get("image_hover_channels", (1.0, 1.0, 1.0, 1.0))
+        self.image_pressed_channels = kwargs.get("image_pressed_channels", (1.0, 1.0, 1.0, 1.0))
+        self.image_disabled_channels = kwargs.get("image_disabled_channels", (1.0, 1.0, 1.0, 1.0))
+
+        self.image_default_size = kwargs.get("image_default_size", (0, 0))
+        self.image_pressed_size = kwargs.get("image_default_size", (0, 0))
+        self.image_hover_size = kwargs.get("image_default_size", (0, 0))
+        self.image_disabled_size = kwargs.get("image_default_size", (0, 0))
+
+        self.image_text_separation = kwargs.get("image_text_separation", None)
+        
         
         
         

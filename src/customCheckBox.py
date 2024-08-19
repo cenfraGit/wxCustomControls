@@ -17,9 +17,12 @@ class CustomCheckBox(wx.Control):
         super().__init__(parent=parent, id=id, pos=pos, style=style, validator=validator, name=name)
 
         # --------------- check for config --------------- #
-        # if the user does not specify a config object, create
-        # one and update with kwargs
-        self.config:ControlConfig = copy(config) if config else ControlConfig()
+
+        if config:
+            self.config:ControlConfig = copy(config)
+        else:
+            self.config:ControlConfig = self.__GetDefaultConfig()
+
         if kwargs:
             self.config.update(**kwargs)
 
@@ -56,6 +59,26 @@ class CustomCheckBox(wx.Control):
             self.Bind(wx.EVT_LEFT_DCLICK, self.__OnLeftDown)
         self.Bind(wx.EVT_LEAVE_WINDOW, self.__OnMouseLeave)
         self.Bind(wx.EVT_ENTER_WINDOW, self.__OnMouseEnter)
+
+
+    def __GetDefaultConfig(self) -> ControlConfig:
+        """ Returns the default configuration for this control. """
+        return ControlConfig(
+            # default colors
+            bg_colour=(240, 240, 240),
+            border_colour=(200, 200, 200),
+            border_width=1,
+            text_foreground_colour=(20, 20, 20),
+            # pressed
+            bg_colour_pressed=(180, 180, 180),
+            border_colour_pressed=(0, 0, 0),
+            border_width_pressed=0,
+            # hover
+            bg_colour_hover=(240, 240, 240),
+            border_colour_hover=(0, 0, 0),
+            border_width_hover=1)
+    
+        
 
     def SetBackgroundColour(self, colour:wx.Colour):
         self.config.bg_colour = colour

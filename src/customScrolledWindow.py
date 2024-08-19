@@ -116,7 +116,7 @@ class CustomScrolledWindow(wx.Window):
             fg_colour_hover=(100, 100, 100),
             border_colour_hover=(0, 0, 0),
             border_width_hover=0,
-            scrollbar_type="rounded"
+            scrollbar_type="rectangular"
         )
 
     
@@ -417,7 +417,7 @@ class CustomScrolledWindow(wx.Window):
                                                    self._ScrollbarWidth,
                                                    int(barHeight))
 
-        if (self.config.scrollbar_type == "rectangle"):
+        if (self.config.scrollbar_type == "rectangular"):
             gc.DrawRectangle(self._VerticalScrollbarRectangle.GetX()+self._ScrollbarPadding,
                              self._VerticalScrollbarRectangle.GetY(),
                              self._VerticalScrollbarRectangle.GetWidth()-(2*self._ScrollbarPadding),
@@ -528,18 +528,20 @@ class CustomScrolledWindow(wx.Window):
         # save the rectangle data to check if the user clicks on it
         self._HorizontalScrollbarRectangle = wx.Rect(int(topOfBarY), 0, int(barHeight), self._ScrollbarWidth)
 
-        if (self.config.scrollbar_type == "rectangle"):
+        if (self.config.scrollbar_type == "rectangular"):
             gc.DrawRectangle(self._HorizontalScrollbarRectangle.GetX()+self._ScrollbarPadding,
                              self._HorizontalScrollbarRectangle.GetY(),
                              self._HorizontalScrollbarRectangle.GetWidth()-(2*self._ScrollbarPadding),
                              self._HorizontalScrollbarRectangle.GetHeight())
-        else:
+        elif (self.config.scrollbar_type == "rounded"):
             cornerRadius = (self._ScrollbarWidth-2*self._ScrollbarPadding)//2
             gc.DrawRoundedRectangle(self._HorizontalScrollbarRectangle.GetX(),
                                     self._HorizontalScrollbarRectangle.GetY()+self._ScrollbarPadding,
                                     self._HorizontalScrollbarRectangle.GetWidth(),
                                     self._HorizontalScrollbarRectangle.GetHeight()-(2*self._ScrollbarPadding),
                                     cornerRadius)
+        else:
+            raise ValueError("Scrollbar Type: Only \"rectangular\" and \"rounded\" values are allowed.")
 
 
     def GetPanel(self):

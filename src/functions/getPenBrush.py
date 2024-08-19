@@ -50,6 +50,6 @@ def getBrush(state:str, config:ControlConfig, gc:wx.GraphicsContext) -> wx.Brush
             x1, y1, x2, y2, _, _ = gradient
             brush = gc.CreateLinearGradientBrush(x1, y1, x2, y2, c1, c2)
         else:
-            brush = wx.Brush(bg_colour)
+            brush = wx.Brush(wx.Colour(*bg_colour))
             
         return brush
