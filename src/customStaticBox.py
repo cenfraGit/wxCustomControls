@@ -15,14 +15,17 @@ class CustomStaticBox(wx.Panel):
                          style=style, name=name)
 
         # --------------- check for config --------------- #
-        # if the user does not specify a config object, create
-        # one and update with kwargs
-        self.config:ControlConfig = copy(config) if config else self.__GetDefaultConfig()
+
+        if config:
+            self.config:ControlConfig = copy(config)
+        else:
+            self.config:ControlConfig = self.__GetDefaultConfig()
+
         if kwargs:
             self.config.update(**kwargs)
         
 
-        # -------------- ATTRIBUTES --------------
+        # ------------------ attributes ------------------ #
 
         self._Label = label
 
@@ -33,9 +36,10 @@ class CustomStaticBox(wx.Panel):
                            wx.FONTSTYLE_NORMAL,
                            wx.FONTWEIGHT_NORMAL,
                            faceName=self.config.font_face_name))
-        _, textHeight = dc.GetTextExtent(self._Label)
+        _, self.textHeight = dc.GetTextExtent(self._Label)
         
-        # -------------- APPEARANCE --------------
+        
+        # ------------------ appearance ------------------ #
 
         self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
         self.SetInitialSize(size)
@@ -43,17 +47,17 @@ class CustomStaticBox(wx.Panel):
 
         # ---------------- panel inside  ---------------- #
 
+        padding_sides = self.config.padding_all_sides if self.config.padding_all_sides else dip(8)
+
         self._Panel = wx.Panel(parent=self)
-        #self._Panel.SetBackgroundColour(wx.RED)
         self._Panel.SetBackgroundColour(self.GetParent().GetBackgroundColour())
 
-        # we create a sizer to ourselves and then add the panel
+        # we create a sizer to ourselves and then add the panel with the inner padding
         self._Sizer = wx.BoxSizer(wx.VERTICAL)
-
-        self._Sizer.AddSpacer(textHeight)
-        self._Sizer.Add(self._Panel, proportion=1, flag=wx.EXPAND|wx.LEFT|wx.RIGHT|wx.BOTTOM, border=dip(10))
+        self._Sizer.AddSpacer(self.textHeight)
+        self._Sizer.Add(self._Panel, proportion=1, flag=wx.EXPAND|wx.LEFT|wx.RIGHT|wx.BOTTOM, border=padding_sides)
         self.SetSizer(self._Sizer)
-        
+
 
         # -------------- EVENTS --------------
 
@@ -64,11 +68,11 @@ class CustomStaticBox(wx.Panel):
         return ControlConfig(
             border_colour=(0, 0, 0),
             border_width=1,
-            corner_radius=1
-        )
+            corner_radius=0)
     
 
     def SetBackgroundColour(self, colour:wx.Colour):
+        self.BackgroundColour = colour
         self.config.bg_colour = (colour.GetRed(), colour.GetGreen(), colour.GetBlue())
         self.Refresh()
 
@@ -94,47 +98,47 @@ class CustomStaticBox(wx.Panel):
         
     def OnPaint(self, event) -> None:
 
-        # create dc
+        # --------------- create contexts  --------------- #
+        
         dc = wx.AutoBufferedPaintDC(self)
         dc.Clear()
 
-        gc = wx.GraphicsContext.Create(dc)
+        gc:wx.GraphicsContext = wx.GraphicsContext.Create(dc)
 
-        # get panel area
+        # -------------- drawing rectangle -------------- #
+
         rect = self.GetClientRect()
 
-        brushBackground = wx.Brush(self.GetParent().GetBackgroundColour())
+        
+        # ------------- background rectangle ------------- #
 
-        # set background pen
-        gc.SetBrush(brushBackground)
-
-        # draw background
         gc.SetPen(wx.TRANSPARENT_PEN)
-        gc.DrawRectangle(rect.GetX(), rect.GetY(),
-                         rect.GetWidth(), rect.GetHeight())
-        # draw rounded border
-        penBorder = wx.Pen(wx.Colour(*self.config.border_colour), width=self.config.border_width)
-        gc.SetPen(penBorder)
+        gc.SetBrush(wx.Brush(self.GetParent().GetBackgroundColour()))
+        gc.DrawRectangle(rect.GetX(),
+                         rect.GetY(),
+                         rect.GetWidth(),
+                         rect.GetHeight())
 
-        paddingSides = penBorder.GetWidth()
-        paddingTop = 10
+        
+        # ------------------ pen border ------------------ #
+        
+        gc.SetPen(wx.Pen(wx.Colour(*self.config.border_colour), width=self.config.border_width))
 
-        if self.config.corner_radius:
-            gc.DrawRoundedRectangle(rect.GetX()+paddingSides,
-                                    rect.GetY()+paddingTop,
-                                    rect.GetWidth()-(2*paddingSides),
-                                    rect.GetHeight()-paddingTop-paddingSides,
-                                    dip(5))
-        else:
-            gc.DrawRectangle(rect.GetX()+paddingSides,
-                             rect.GetY()+paddingTop,
-                             rect.GetWidth()-(2*paddingSides),
-                             rect.GetHeight()-paddingTop-paddingSides)
-                             
+        paddingSides = self.config.border_width
+        paddingTop = self.textHeight//2
 
-        # draw label
+
+        gc.DrawRoundedRectangle(rect.GetX()+paddingSides,
+                                rect.GetY()+paddingTop,
+                                rect.GetWidth()-(2*paddingSides),
+                                rect.GetHeight()-paddingTop-paddingSides,
+                                self.config.corner_radius)
+            
+
+        # ------------------ draw label ------------------ #
+        
         gc.SetPen(wx.TRANSPARENT_PEN)
-        gc.SetBrush(brushBackground)
+        gc.SetBrush(wx.Brush(self.GetParent().GetBackgroundColour()))
         gc.SetFont(wx.Font(self.config.font_size,
                            wx.FONTFAMILY_DEFAULT,
                            wx.FONTSTYLE_NORMAL,

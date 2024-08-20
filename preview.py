@@ -17,6 +17,7 @@ class PreviewFrame(wx.Frame):
         super().__init__(*args, **kwargs)
 
         self.SetTitle("Custom Controls Preview")
+        self.SetInitialSize(dip(700, 500))
 
 
         # ------------------- configs ------------------- #
@@ -46,7 +47,7 @@ class PreviewFrame(wx.Frame):
         p1_sizer = wx.GridBagSizer(hgap=dip(4), vgap=dip(4))
         p1.SetSizer(p1_sizer)
         
-        b1 = CustomButton(parent=p1, label=buttonsText)
+        b1 = CustomButton(parent=p1, label=buttonsText, cursor_hover=wx.CURSOR_HAND)
         b2 = CustomButton(parent=p1, label=buttonsText, corner_radius=dip(10))
         b3 = CustomButton(parent=p1, label=buttonsText,
                           bg_colour=(255, 255, 255), border_width=2,
@@ -89,7 +90,7 @@ class PreviewFrame(wx.Frame):
         p2 = CustomPanel(panel, config=panelConfig)
         p2_sizer = wx.GridBagSizer(hgap=dip(4), vgap=dip(4))
         p2.SetSizer(p2_sizer)
-        staticbox = CustomStaticBox(p2, label="placeholder")
+        staticbox = CustomStaticBox(p2, label="placeholder", corner_radius=dip(4))
         staticboxPanel = staticbox.GetPanel()
         CustomButton(staticboxPanel, label='test')
         
@@ -105,7 +106,8 @@ class PreviewFrame(wx.Frame):
         p3 = CustomPanel(panel, config=panelConfig)
         p3_sizer = wx.GridBagSizer(hgap=dip(4), vgap=dip(4))
         p3.SetSizer(p3_sizer)
-        p3_sizer.Add(CustomCheckBox(p3, label="Placeholder"), pos=(0, 0), flag=wx.ALL|wx.EXPAND, border=dip(15))
+        st = CustomCheckBox(p3, label="Placeholder",  switch_appearance=True, switch_radius=20, switch_height=40, switch_width=60, corner_radius=20, switch_selector_border_width=0, switch_rounded=True, text_side="left", checkbox_text_separation=300)
+        p3_sizer.Add(st, pos=(0, 0), flag=wx.ALL, border=dip(15))
         p3_sizer.AddGrowableCol(0, 1)
         p3_sizer.Layout()
         

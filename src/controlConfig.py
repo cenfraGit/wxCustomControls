@@ -58,7 +58,19 @@ class ControlConfig:
         self.corner_radius_disabled = kwargs.get("corner_radius_disabled", 0)
 
         # active colors (for checkbox selection)
-        self.bg_active = kwargs.get("bg_active", (0, 100, 255))
+        self.bg_active = kwargs.get("bg_active", (0, 0, 255))
+        self.bg_active_pressed = kwargs.get("bg_active_pressed", (0, 0, 255))
+        self.bg_active_hover = kwargs.get("bg_active_hover", (0, 0, 255))
+        self.bg_active_disabled = kwargs.get("bg_active_disabled", (0, 0, 255))
+
+        self.switch_appearance = kwargs.get("switch_appearance", False)
+        self.switch_width = kwargs.get("switch_width", None)
+        self.switch_height = kwargs.get("switch_height", None)
+        self.switch_radius = kwargs.get("switch_radius", 0)
+        self.switch_selector_padding = kwargs.get("switch_selector_padding", 0)
+        self.switch_selector_border_colour = kwargs.get("switch_selector_border_colour", (150, 150, 150))
+        self.switch_selector_border_width = kwargs.get("switch_selector_border_width", 0)
+        self.switch_rounded = kwargs.get("switch_rounded", False)
 
         self.checkbox_width = kwargs.get("checkbox_width", None)
         self.checkbox_height = kwargs.get("checkbox_height", None)
@@ -71,9 +83,10 @@ class ControlConfig:
         self.scrollbar_padding = kwargs.get("scrollbar_padding", None)
 
         # foreground colour (scrollbar)
-        self.fg_colour = kwargs.get("fg_colour", (0, 0, 0))
-        self.fg_colour_hover = kwargs.get("fg_colour_hover", (0, 0, 0))
-        self.fg_colour_pressed = kwargs.get("fg_colour_pressed", (0, 0, 0))
+        self.fg_colour = kwargs.get("fg_colour", (255, 255, 255))
+        self.fg_colour_hover = kwargs.get("fg_colour_hover", (255, 255, 255))
+        self.fg_colour_pressed = kwargs.get("fg_colour_pressed", (255, 255, 255))
+        self.fg_colour_disabled = kwargs.get("fg_colour_disabled", (255, 255, 255))
 
         self.scrollX = kwargs.get("scrollX", True)
         self.scrollY = kwargs.get("scrollY", True)
@@ -97,6 +110,23 @@ class ControlConfig:
         self.image_disabled_size = kwargs.get("image_default_size", (0, 0))
 
         self.image_text_separation = kwargs.get("image_text_separation", None)
+
+        
+        # self.top_padding = kwargs.get("top_padding", 0)
+        # self.bottom_padding = kwargs.get("bottom_padding", 0)
+        # self.left_padding = kwargs.get("left_padding", 0)
+        # self.right_padding = kwargs.get("right_padding", 0)
+
+        self.padding_all_sides = kwargs.get("padding_all_sides", None)
+
+
+        # cursors
+        self.cursor_pressed = kwargs.get("cursor_pressed", None)
+        self.cursor_hover = kwargs.get("cursor_hover", None)
+        self.cursor_disabled = kwargs.get("cursor_disabled", None)
+
+        
+        
         
         
         

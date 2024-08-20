@@ -25,10 +25,12 @@ class CustomPanel(wx.Panel):
 
         if kwargs:
             self.config.update(**kwargs)
+            
 
-        # ------------------ attributes ------------------ #
+        # ------------------ appearance ------------------ #
 
         self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
+        
 
         # -------------------- events -------------------- #
 
@@ -53,6 +55,7 @@ class CustomPanel(wx.Panel):
 
 
     def SetBackgroundColour(self, colour:wx.Colour):
+        self.BackgroundColour = colour
         self.config.bg_colour = (colour.GetRed(),
                                  colour.GetGreen(),
                                  colour.GetBlue())
@@ -82,7 +85,7 @@ class CustomPanel(wx.Panel):
         dc = wx.AutoBufferedPaintDC(self)
         dc.Clear()
 
-        gc: wx.GraphicsContext = wx.GraphicsContext.Create(dc)
+        gc:wx.GraphicsContext = wx.GraphicsContext.Create(dc)
 
         
         # -------------- drawing rectangle -------------- #

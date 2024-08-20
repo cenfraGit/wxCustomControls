@@ -108,7 +108,7 @@ class CustomButton(wx.Control):
         return self._Label
 
 
-    def __OnPaint(self, event):
+    def __OnPaint(self, event):        
 
         # --------------- create contexts --------------- #
         
@@ -143,6 +143,7 @@ class CustomButton(wx.Control):
             image = self.config.image_disabled
             image_channels = self.config.image_disabled_channels
             image_size = self.config.image_disabled_size
+            cursor = wx.Cursor(self.config.cursor_disabled) if self.config.cursor_disabled else wx.Cursor(wx.CURSOR_ARROW)
         else:
             if self._Pressed:
                 pen = getPen("pressed", self.config)
@@ -152,6 +153,7 @@ class CustomButton(wx.Control):
                 image = self.config.image_pressed
                 image_channels = self.config.image_pressed_channels
                 image_size = self.config.image_pressed_size
+                cursor = wx.Cursor(self.config.cursor_pressed) if self.config.cursor_pressed else wx.Cursor(wx.CURSOR_ARROW)
             elif self._MouseHover:
                 pen = getPen("hover", self.config)
                 brush = getBrush("hover", self.config, gc)
@@ -160,6 +162,7 @@ class CustomButton(wx.Control):
                 image = self.config.image_hover
                 image_channels = self.config.image_hover_channels
                 image_size = self.config.image_hover_size
+                cursor = wx.Cursor(self.config.cursor_hover) if self.config.cursor_hover else wx.Cursor(wx.CURSOR_ARROW)
             else:
                 pen = getPen("default", self.config)
                 brush = getBrush("default", self.config, gc)
@@ -168,6 +171,10 @@ class CustomButton(wx.Control):
                 image = self.config.image_default
                 image_channels = self.config.image_default_channels
                 image_size = self.config.image_default_size
+                cursor = wx.Cursor(wx.CURSOR_ARROW)
+
+        # set cursor
+        self.SetCursor(cursor)
                 
 
         # set brush and rectangle
