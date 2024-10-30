@@ -9,6 +9,7 @@ from ._CustomControl import CustomControl
 from .utils.dip import dip
 from .functions.getConfig import getConfig
 from .functions.getStateDrawingProperties import getStateDrawingProperties
+from .functions.getImageTextCoordinates import getImageTextCoordinates
 
 
 class CustomButton(CustomControl):
@@ -93,12 +94,35 @@ class CustomButton(CustomControl):
                                faceName=drawing_properties["text_font_facename"]), wx.BLACK)
             textWidth, textHeight = gcdc.GetTextExtent(self.__Label)
 
-        # ----------------------- image ----------------------- #
+        # ----------------- image dimensions ----------------- #
 
+        imageWidth, imageHeight = 0, 0
+        bitmap = None
+        if drawing_properties["image"]:
+            imageWidth, imageHeight = drawing_properties["image_size"]
+            # convert image to bitmap
+            image:wx.Image = drawing_properties["image"].AdjustChannels(*drawing_properties["image_channels"])
+            bitmap:wx.Bitmap = image.ConvertToBitmap()
+            imageWidth, imageHeight = drawing_properties["image_size"]
+            bitmap.SetSize(wx.Size(imageWidth, imageHeight))
 
-        # -------------------- text label -------------------- #
+        # ----------------------- draw ----------------------- #
+
+        imageX, imageY, textX, textY = getImageTextCoordinates(buttonRectangle,
+                                                               self.__Label, self._config,
+                                                               imageWidth, imageHeight,
+                                                               textWidth, textHeight)
+
+        if (self.__Label != wx.EmptyString):
+            gcdc.DrawText(self.__Label, textX, textY)
+
+        if drawing_properties["image"]:
+            gcdc.DrawBitmap(bitmap, imageX, imageY)
+
         
-        
+
+    def DoGetBestClientSize(self):
+        pass
 
 
     def __OnLeftDown(self, event):
@@ -108,6 +132,4 @@ class CustomButton(CustomControl):
     def __OnLeftUp(self, event):
         pass
 
-
-
-
+    
