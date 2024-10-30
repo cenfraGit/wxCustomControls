@@ -8,7 +8,7 @@ import wx
 from .utils.dip import dip
 from .functions.getConfig import getConfig
 from .CustomConfig import CustomConfig
-from .functions.getPenBrush import getPen, getBrush
+from .functions.getStateDrawingProperties import getStateDrawingProperties
 
 
 class CustomPanel(wx.Panel):
@@ -32,7 +32,8 @@ class CustomPanel(wx.Panel):
         # ---------------------- events ---------------------- #
 
         self.Bind(wx.EVT_PAINT, self.__OnPaint)
-
+        self.Bind(wx.EVT_SIZE, self.__OnSize)
+        
 
     def SetConfig(self, config:CustomConfig):
         self._config = config
@@ -71,11 +72,7 @@ class CustomPanel(wx.Panel):
     def GetBackgroundColour(self):
         return wx.Colour(*self._config.background_colour_default)
 
-
-    def DoGetBestClientSize(self):
-        pass
-
-
+    
     def __OnPaint(self, event):
 
         # --------------------- contexts --------------------- #
@@ -94,24 +91,18 @@ class CustomPanel(wx.Panel):
         gcdc.SetBrush(wx.Brush(self.GetParent().GetBackgroundColour()))
         gcdc.DrawRectangle(controlRect)
         
-        # ------------------------ pen ------------------------ #
+        # ------------------- pen and brush ------------------- #
 
-        # if self._config.border_width_default:
-        #     pen = getPen("default", self._config)
-        # else:
-        #     pen = wx.TRANSPARENT_PEN
+        # since its a panel, it will not have a control state
+        # behavior. it has only a "default" state.
+        drawing_properties = getStateDrawingProperties("default", self._config, gc)
 
-        pen = getPen("default", self._config)
-        gcdc.SetPen(pen)
-        
-        # ----------------------- brush ----------------------- #
-        
-        # use gc in case its a gradient brush
-        gc.SetBrush(getBrush("default", self._config, gc))
+        pen = drawing_properties["pen"]
+        gcdc.SetPen(pen)        
+        gc.SetBrush(drawing_properties["brush"])
         
         # ----------- drawing the panel's rectangle ----------- #
 
-        # deflate for correct border drawing
         panelRect = controlRect.Deflate(pen.GetWidth(),
                                         pen.GetWidth())
         

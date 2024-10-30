@@ -5,6 +5,7 @@
 
 import wx
 
+from src import CustomConfig
 from src import CustomPanel
 from src import CustomButton
 
@@ -21,13 +22,11 @@ class PreviewFrame(wx.Frame):
         
         super().__init__(*args, **kwargs)
         
-
         # -------------------- frame setup -------------------- #
 
         self.SetTitle("Custom Controls Preview")
         self.SetInitialSize(dip(700, 500))
         
-
         # ------------------------ gui ------------------------ #
 
         self.initialize_ui()
@@ -35,21 +34,36 @@ class PreviewFrame(wx.Frame):
 
     def initialize_ui(self):
 
+        # ------------------ set up configs ------------------ #
+
+        config_panel = CustomConfig(border_width_default=1,
+                                    corner_radius_default=dip(5),
+                                    background_colour_default=(255, 255, 255),
+                                    border_colour_default=(150, 150, 150))
+
+        # -------------------- main panel -------------------- #
+
         P_main = wx.Panel(self)
         S_main = wx.BoxSizer(wx.VERTICAL)
         P_main.SetSizer(S_main)
-
         P_main.SetBackgroundColour(wx.GREEN)
 
-        CustomPanel(P_main, size=wx.Size(100, 100), pos=wx.Point(50, 50),
-                    border_width_default=1,
-                    corner_radius_default=10)
+        # ---------------------- buttons ---------------------- #
 
-        CustomButton(P_main, size=(50, 20), pos=(50, 150), label="test")
-    
+        P_buttons = CustomPanel(P_main, config=config_panel)
+
+        wx.Button(P_buttons, label="test")
+
+        CustomButton(P_buttons, label="test", size=(100, 30), pos=(250, 250))
+
+
+        # ------------- add panels to main sizer ------------- #
+
+        S_main.Add(P_buttons, 0, wx.EXPAND)
+        S_main.Layout()
         
 
-        
+                
 if __name__ == "__main__":
     app = wx.App()
     preview_frame = PreviewFrame(None)

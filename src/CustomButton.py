@@ -8,7 +8,7 @@ import wx
 from ._CustomControl import CustomControl
 from .utils.dip import dip
 from .functions.getConfig import getConfig
-from .functions.getPenBrush import getPen, getBrush
+from .functions.getStateDrawingProperties import getStateDrawingProperties
 
 
 class CustomButton(CustomControl):
@@ -54,11 +54,12 @@ class CustomButton(CustomControl):
         # ---------------- drawing properties ---------------- #
         # get drawing properties depending on state
 
-        state_properties = None
+        drawing_properties = getStateDrawingProperties(self.GetStateAsString(),
+                                                       self._config, gc)
 
         # ---------------------- cursor ---------------------- #
 
-        # self.SetCursor()
+        self.SetCursor(drawing_properties["cursor"])
 
         # ------------ drawing area and background ------------ #
 
@@ -71,9 +72,26 @@ class CustomButton(CustomControl):
 
         # ----------------- button rectangle ----------------- #
 
+        buttonRectangle = controlRect.Deflate(drawing_properties["pen"].GetWidth(),
+                                              drawing_properties["pen"].GetWidth())
+
+        gcdc.SetPen(drawing_properties["pen"])
+        # we set the brush to the gc because the gcdc api does not
+        # support gradient brushes.
+        gc.SetBrush(drawing_properties["brush"])
+
+        gcdc.DrawRoundedRectangle(buttonRectangle, drawing_properties["corner_radius"])
 
         # ------------------ text dimensions ------------------ #
 
+        textWidth, textHeight = 0, 0
+        if (self.__Label != wx.EmptyString):
+            gc.SetFont(wx.Font(drawing_properties["text_font_size"],
+                               wx.FONTFAMILY_DEFAULT,
+                               wx.FONTSTYLE_NORMAL,
+                               wx.FONTWEIGHT_NORMAL,
+                               faceName=drawing_properties["text_font_facename"]), wx.BLACK)
+            textWidth, textHeight = gcdc.GetTextExtent(self.__Label)
 
         # ----------------------- image ----------------------- #
 
