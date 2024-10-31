@@ -4,6 +4,7 @@
 # ---------------------- modules ---------------------- #
 
 import wx
+import os
 
 from src import CustomConfig
 from src import CustomPanel
@@ -54,8 +55,19 @@ class PreviewFrame(wx.Frame):
 
         wx.Button(P_buttons, label="test")
 
-        b = CustomButton(P_buttons, label="test", size=(100, 30), pos=(250, 250))
 
+        image = wx.Image(os.path.join("images", "t.png"))
+        image_size = dip(50, 50)
+
+
+        b = CustomButton(P_buttons,
+                         label="test",
+                         image_default=image,
+                         image_size_default=image_size,
+                         corner_radius_default=dip(10),
+                         text_side="up",
+                         pos=(250, 250))
+        
 
         # ------------- add panels to main sizer ------------- #
 

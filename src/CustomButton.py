@@ -120,9 +120,53 @@ class CustomButton(CustomControl):
             gcdc.DrawBitmap(bitmap, imageX, imageY)
 
         
-
     def DoGetBestClientSize(self):
-        pass
+        # helps sizer determine correct size of control.
+
+        # contexts
+        dc = wx.ClientDC(self)
+        gcdc:wx.GCDC = wx.GCDC(dc)
+
+        # set font to get dimensions
+        gcdc.SetFont(wx.Font(self._config.text_font_size_default,
+                             wx.FONTFAMILY_DEFAULT,
+                             wx.FONTSTYLE_NORMAL,
+                             wx.FONTWEIGHT_NORMAL,
+                             faceName=self._config.text_font_facename_default))
+        textWidth, textHeight = gcdc.GetTextExtent(self.__Label)
+
+        # get dimensions from largest image
+
+        image = self._config.image_default or self._config.image_pressed or self._config.image_hover or self._config.image_disabled
+        image_width = max(self._config.image_size_default[0],
+                          self._config.image_size_pressed[0],
+                          self._config.image_size_hover[0],
+                          self._config.image_size_disabled[0])
+        image_height = max(self._config.image_size_default[1],
+                           self._config.image_size_pressed[1],
+                           self._config.image_size_hover[1],
+                           self._config.image_size_disabled[1])
+        
+        # separation between image and text
+        text_separation = self._config.image_text_separation if self._config.image_text_separation else dip(6)
+
+        padding_horizontal = dip(10)
+        padding_vertical = dip(5)
+
+        if image:
+            if (self._config.text_side == "left") or (self._config.text_side == "right"):
+                width = image_width + text_separation + textWidth + (2 * padding_horizontal)
+                height = max(image_height, textHeight) + (2 * padding_vertical)
+            elif (self._config.text_side == "up") or (self._config.text_side == "down"):
+                width = max(image_width, textWidth) + (2 * padding_horizontal)
+                height = image_height + text_separation + textHeight + (2 * padding_vertical)
+            else:
+                raise ValueError("text_side must be left, right, up or down.")
+        else:
+            width = padding_horizontal * 2 + textWidth
+            height = padding_vertical * 2 + textHeight
+
+        return wx.Size(int(width), int(height))
 
 
     def __OnLeftDown(self, event):
@@ -140,11 +184,3 @@ class CustomButton(CustomControl):
             self.Refresh()
         event.Skip()
 
-
-    # def __OnMouseCaptureLost(self, event):
-    #     if self._Pressed:
-    #         self._Pressed = False
-    #         print("Mouse capture lost")
-    #     event.Skip()
-
-    
