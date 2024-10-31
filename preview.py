@@ -54,7 +54,7 @@ class PreviewFrame(wx.Frame):
 
         wx.Button(P_buttons, label="test")
 
-        CustomButton(P_buttons, label="test", size=(100, 30), pos=(250, 250))
+        b = CustomButton(P_buttons, label="test", size=(100, 30), pos=(250, 250))
 
 
         # ------------- add panels to main sizer ------------- #

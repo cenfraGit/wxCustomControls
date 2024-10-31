@@ -91,7 +91,7 @@ class CustomButton(CustomControl):
                                wx.FONTFAMILY_DEFAULT,
                                wx.FONTSTYLE_NORMAL,
                                wx.FONTWEIGHT_NORMAL,
-                               faceName=drawing_properties["text_font_facename"]), wx.BLACK)
+                               faceName=drawing_properties["text_font_facename"]), drawing_properties["text_foreground_colour"])
             textWidth, textHeight = gcdc.GetTextExtent(self.__Label)
 
         # ----------------- image dimensions ----------------- #
@@ -126,10 +126,25 @@ class CustomButton(CustomControl):
 
 
     def __OnLeftDown(self, event):
-        pass
+        if not self._Pressed:
+            self.CaptureMouse()
+            self._Pressed = True
+            self.Refresh()
+        event.Skip()
 
 
     def __OnLeftUp(self, event):
-        pass
+        if self._Pressed:
+            self.ReleaseMouse()
+            self._Pressed = False
+            self.Refresh()
+        event.Skip()
+
+
+    # def __OnMouseCaptureLost(self, event):
+    #     if self._Pressed:
+    #         self._Pressed = False
+    #         print("Mouse capture lost")
+    #     event.Skip()
 
     
