@@ -182,5 +182,6 @@ class CustomButton(CustomControl):
             self.ReleaseMouse()
             self._Pressed = False
             self.Refresh()
+            wx.PostEvent(self, wx.PyCommandEvent(wx.EVT_BUTTON.typeId, self.GetId()))
         event.Skip()
 

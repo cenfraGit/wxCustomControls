@@ -38,8 +38,30 @@ def getDefaultConfig(control_type:str) -> CustomConfig:
             "text_foreground_colour_hover": (20, 20, 20),
             "text_foreground_colour_pressed": (20, 20, 20),
             "text_foreground_colour_disabled": (133, 133, 133),
-            
-            }
+            },
+        "CustomCheckBox": {
+            "image_text_separation": dip(6), # default colors
+            "background_colour_default": (240, 240, 240),
+            "border_colour_default": (200, 200, 200),
+            "border_width_default": dip(1),
+            "text_foreground_colour_default": (20, 20, 20),
+            # pressed
+            "background_colour_pressed": (180, 180, 180),
+            "border_colour_pressed": (0, 0, 0),
+            "border_width_pressed": 0,
+            # hover
+            "background_colour_hover": (240, 240, 240),
+            "border_colour_hover": (0, 0, 0),
+            "border_width_hover": dip(1),
+            "corner_radius_default": dip(3),
+            "background_active": (57, 117, 186),
+            # default switch options
+            "switch_radius": dip(3),
+            "switch_selector_padding": dip(3),
+            "switch_selector_width": dip(2),
+            "switch_rounded": False,
+            "padding_all_sides": dip(3)
+        }
     }
 
     if control_type not in configurations.keys():

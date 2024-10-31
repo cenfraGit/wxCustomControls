@@ -1,5 +1,7 @@
 # preview.py
 # wxCustomControls
+# Frame with a preview of the available controls.
+
 
 # ---------------------- modules ---------------------- #
 
@@ -9,6 +11,7 @@ import os
 from src import CustomConfig
 from src import CustomPanel
 from src import CustomButton
+from src import CustomCheckBox
 
 # necessary for high dpi displays (windows)
 from src import dip
@@ -67,6 +70,12 @@ class PreviewFrame(wx.Frame):
                          corner_radius_default=dip(10),
                          text_side="up",
                          pos=(250, 250))
+
+        c = CustomCheckBox(P_buttons,
+                           label="test",
+                           size=(80, 30),
+                           pos=(500, 250),
+                           switch_appearance=True),
         
 
         # ------------- add panels to main sizer ------------- #

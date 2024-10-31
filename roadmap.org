@@ -3,11 +3,11 @@
 
 * TODO CustomCheckBox
 
-* TODO CustomComboBox
-
 * TODO CustomRadioButton
 
 * TODO CustomRadioBox
+
+* TODO CustomComboBox
 
 * TODO CustomScrolledWindow
 

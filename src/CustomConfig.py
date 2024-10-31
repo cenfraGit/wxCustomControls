@@ -87,8 +87,30 @@ class CustomConfig:
         self.image_size_disabled = kwargs.get("image_size_disabled", (0, 0))
 
         self.image_text_separation = kwargs.get("image_text_separation", None)
-                
 
+        # ---------------- checkbox and switch ---------------- #
+
+        self.checkbox_width = kwargs.get("checkbox_width", 20)
+        self.checkbox_height = kwargs.get("checkbox_height", 20)
+        self.checkbox_active_deflate = kwargs.get("checkbox_active_deflate", 5)
+        self.checkbox_text_separation = kwargs.get("checkbox_text_separation", 5)
+
+        self.background_colour_active_default  = kwargs.get("background_colour_active_default",  (0, 0, 255))
+        self.background_colour_active_pressed  = kwargs.get("background_colour_active_pressed",  (0, 0, 255))
+        self.background_colour_active_hover    = kwargs.get("background_colour_active_hover",    (0, 0, 255))
+        self.background_colour_active_disabled = kwargs.get("background_colour_active_disabled", (0, 0, 255))
+
+        self.switch_appearance = kwargs.get("switch_appearance", False)
+        self.switch_rounded    = kwargs.get("switch_rounded",    False)
+        self.switch_width      = kwargs.get("switch_width",      50)
+        self.switch_height     = kwargs.get("switch_height",     20)
+        self.switch_radius     = kwargs.get("switch_radius",     0)
+        
+        self.switch_selector_padding       = kwargs.get("switch_selector_padding",       0)
+        self.switch_selector_border_colour = kwargs.get("switch_selector_border_colour", (150, 150, 150))
+        self.switch_selector_border_width  = kwargs.get("switch_selector_border_width",  0)
+
+        
     def Update(self, **kwargs):
         """Updates existing attributes (or creates them if
         non-existent)."""
