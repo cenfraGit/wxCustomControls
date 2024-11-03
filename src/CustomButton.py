@@ -7,9 +7,6 @@
 import wx
 from ._CustomControl import CustomControl
 from .utils.dip import dip
-from .functions.getConfig import getConfig
-from .functions.getStateDrawingProperties import getStateDrawingProperties
-from .functions.getImageTextCoordinates import getImageTextCoordinates
 
 
 class CustomButton(CustomControl):
@@ -20,7 +17,7 @@ class CustomButton(CustomControl):
 
         # ---------------- control attributes ---------------- #
 
-        self.__Label = label
+        kwargs["label"] = label
 
         # ------------------- init control ------------------- #
 
@@ -34,28 +31,16 @@ class CustomButton(CustomControl):
         self.Bind(wx.EVT_LEFT_UP, self.__OnLeftUp)
 
 
-    def SetLabel(self, label:str):
-        self.__Label = label
-        self.Refresh()
-
-
-    def GetLabel(self):
-        return self.__Label
-
-
     def __OnPaint(self, event):
 
         # --------------------- contexts --------------------- #
 
-        dc = wx.BufferedPaintDC(self)
-        gcdc = wx.GCDC(dc)
-        gc:wx.GraphicsContext = gcdc.GetGraphicsContext()
-        gcdc.Clear()
+        gcdc, gc = self._getDrawingContexts()
 
         # ---------------- drawing properties ---------------- #
         # get drawing properties depending on state
 
-        drawing_properties = getStateDrawingProperties(self.GetStateAsString(),
+        drawing_properties = self._getStateDrawingProperties(self.GetStateAsString(),
                                                        self._config, gc)
 
         # ---------------------- cursor ---------------------- #
@@ -86,13 +71,13 @@ class CustomButton(CustomControl):
         # ------------------ text dimensions ------------------ #
 
         textWidth, textHeight = 0, 0
-        if (self.__Label != wx.EmptyString):
+        if (self._Label != wx.EmptyString):
             gc.SetFont(wx.Font(drawing_properties["text_font_size"],
                                wx.FONTFAMILY_DEFAULT,
                                wx.FONTSTYLE_NORMAL,
                                wx.FONTWEIGHT_NORMAL,
                                faceName=drawing_properties["text_font_facename"]), drawing_properties["text_foreground_colour"])
-            textWidth, textHeight = gcdc.GetTextExtent(self.__Label)
+            textWidth, textHeight = gcdc.GetTextExtent(self._Label)
 
         # ----------------- image dimensions ----------------- #
 
@@ -108,13 +93,13 @@ class CustomButton(CustomControl):
 
         # ----------------------- draw ----------------------- #
 
-        imageX, imageY, textX, textY = getImageTextCoordinates(buttonRectangle,
-                                                               self.__Label, self._config,
+        imageX, imageY, textX, textY = self._getImageTextCoordinates(buttonRectangle,
+                                                               self._Label, self._config,
                                                                imageWidth, imageHeight,
                                                                textWidth, textHeight)
 
-        if (self.__Label != wx.EmptyString):
-            gcdc.DrawText(self.__Label, textX, textY)
+        if (self._Label != wx.EmptyString):
+            gcdc.DrawText(self._Label, textX, textY)
 
         if drawing_properties["image"]:
             gcdc.DrawBitmap(bitmap, imageX, imageY)
@@ -133,7 +118,7 @@ class CustomButton(CustomControl):
                              wx.FONTSTYLE_NORMAL,
                              wx.FONTWEIGHT_NORMAL,
                              faceName=self._config.text_font_facename_default))
-        textWidth, textHeight = gcdc.GetTextExtent(self.__Label)
+        textWidth, textHeight = gcdc.GetTextExtent(self._Label)
 
         # get dimensions from largest image
 

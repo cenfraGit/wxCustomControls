@@ -1,4 +1,4 @@
-# _customControl.py
+# _CustomControl.py
 # wxCustomControls
 # This class holds the basic attributes and functionality of all
 # custom controls. The other control classes will inherit from this
@@ -7,23 +7,24 @@
 
 
 import wx
-from .functions.getConfig import getConfig
+#from .functions.getConfig import getConfig
 from .CustomConfig import CustomConfig
+from ._CustomObject import CustomObject
 
 
-class CustomControl(wx.Control):
+class CustomControl(wx.Control, CustomObject):
     def __init__(self, parent, id=wx.ID_ANY, pos=wx.DefaultPosition,
                  size=wx.DefaultSize, style=wx.NO_BORDER,
                  validator=wx.DefaultValidator,
                  name=wx.ControlNameStr, config=None, **kwargs):
 
         super().__init__(parent, id, pos, size, style, validator, name)
+        CustomObject.__init__(self, config, **kwargs)
 
-        # ----------------- check for config ----------------- #
+        # ---------------- control attributes ---------------- #
 
-        self._config = getConfig(config, self.__class__.__name__)
-        self._config.Update(**kwargs)
-
+        self._Label = kwargs.get("label", None) # not always present
+        self._Value = kwargs.get("value", None) # not always present
             
         # -------------- control state booleans -------------- #
 
@@ -31,12 +32,10 @@ class CustomControl(wx.Control):
         self._Pressed = False
         self._Hover = False
 
-
         # ----------------------- setup ----------------------- #
 
         self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
         self.SetInitialSize(size)
-
         
         # ---------------------- events ---------------------- #
 
@@ -48,21 +47,24 @@ class CustomControl(wx.Control):
         # self.Bind(wx.EVT_LEFT_DCLICK, self.__OnLeftDown)
         # self.Bind(wx.EVT_LEFT_DOWN, self.__OnLeftDown)
         # self.Bind(wx.EVT_LEFT_UP, self.__OnLeftUp)
-        
-        
-    def SetConfig(self, config:CustomConfig):
-        self._config = config
+
+
+    def SetLabel(self, label:str):
+        self._Label = label
         self.Refresh()
 
+
+    def GetLabel(self):
+        return self._Label
+
+
+    def SetValue(self, state:bool):
+        self._Value = state
+
+
+    def GetValue(self):
+        return self._Value
         
-    def GetConfig(self):
-        return self._config
-
-
-    def UpdateConfig(self, **kwargs):
-        self._config.Update(**kwargs)
-        self.Refresh()
-
 
     def GetStateAsString(self):
         """Returns the state as a string."""
@@ -75,10 +77,6 @@ class CustomControl(wx.Control):
                 return "hover"
             else:
                 return "default"
-
-
-    def GetBackgroundColour(self):
-        return wx.Colour(*self._config.background_colour_default)
 
 
     def DoGetBestClientSize(self):

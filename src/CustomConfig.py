@@ -90,8 +90,8 @@ class CustomConfig:
 
         # ---------------- checkbox and switch ---------------- #
 
-        self.checkbox_width = kwargs.get("checkbox_width", 20)
-        self.checkbox_height = kwargs.get("checkbox_height", 20)
+        self.checkbox_width = kwargs.get("checkbox_width", None)
+        self.checkbox_height = kwargs.get("checkbox_height", None)
         self.checkbox_active_deflate = kwargs.get("checkbox_active_deflate", 5)
         self.checkbox_text_separation = kwargs.get("checkbox_text_separation", 5)
 
@@ -109,6 +109,16 @@ class CustomConfig:
         self.switch_selector_padding       = kwargs.get("switch_selector_padding",       0)
         self.switch_selector_border_colour = kwargs.get("switch_selector_border_colour", (150, 150, 150))
         self.switch_selector_border_width  = kwargs.get("switch_selector_border_width",  0)
+
+        self.__CheckWrongArguments(kwargs)
+
+
+    def __CheckWrongArguments(self, kwargs:dict):
+        # checks if the user entered a wrong argument
+        attributes = self.__dict__.keys()
+        for key in kwargs.keys():
+            if key not in attributes:
+                print(f"CustomConfig::Key \"{key}\" not in attributes.")
 
         
     def Update(self, **kwargs):

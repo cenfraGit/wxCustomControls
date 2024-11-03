@@ -8,7 +8,7 @@ from ..utils.dip import dip
 from ..CustomConfig import CustomConfig
 
 
-def getDefaultConfig(control_type:str) -> CustomConfig:
+def getDefaultConfig(object_type:str) -> CustomConfig:
     """Returns the default configuration for the specified control."""
     
     configurations = {
@@ -40,6 +40,8 @@ def getDefaultConfig(control_type:str) -> CustomConfig:
             "text_foreground_colour_disabled": (133, 133, 133),
             },
         "CustomCheckBox": {
+            "checkbox_width": dip(20),
+            "checkbox_height": dip(20),
             "image_text_separation": dip(6), # default colors
             "background_colour_default": (240, 240, 240),
             "border_colour_default": (200, 200, 200),
@@ -64,11 +66,12 @@ def getDefaultConfig(control_type:str) -> CustomConfig:
         }
     }
 
-    if control_type not in configurations.keys():
-        raise ValueError("GetDefaultConfig::Incorrect control type.")
+    if object_type not in configurations.keys():
+        print("GetDefaultConfig::Incorrect control type. Returning base config.")
+        return CustomConfig()
 
     # unpack dictionary to create config
-    return CustomConfig(**configurations[control_type])
+    return CustomConfig(**configurations[object_type])
 
     
 

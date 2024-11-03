@@ -8,9 +8,6 @@ import wx
 from copy import copy
 from ._CustomControl import CustomControl
 from .utils.dip import dip
-from .functions.getConfig import getConfig
-from .functions.getStateDrawingProperties import getStateDrawingProperties
-from .functions.getImageTextCoordinates import getImageTextCoordinates
 
 
 class CustomCheckBox(CustomControl):
@@ -22,8 +19,8 @@ class CustomCheckBox(CustomControl):
 
         # ---------------- control attributes ---------------- #
 
-        self.__Label = label
-        self.__Value = value
+        kwargs["label"] = label
+        kwargs["value"] = value
 
         # ------------------- init control ------------------- #
 
@@ -37,40 +34,19 @@ class CustomCheckBox(CustomControl):
         self.Bind(wx.EVT_LEFT_UP, self.__OnLeftUp)
 
 
-    def SetLabel(self, label:str):
-        self.__Label = label
-        self.Refresh()
-
-
-    def GetLabel(self):
-        return self.__Label
-
-
-    def SetValue(self, state:bool):
-        self.__Value = state
-
-
-    def GetValue(self):
-        return self.__Value
-
-
     def __OnPaint(self, event):
 
         # --------------------- contexts --------------------- #
-
-        dc = wx.BufferedPaintDC(self)
-        gcdc = wx.GCDC(dc)
-        gc:wx.GraphicsContext = gcdc.GetGraphicsContext()
-        gcdc.Clear()
+        gcdc, gc = self._getDrawingContexts()
 
         # ---------------- drawing properties ---------------- #
         # get drawing properties depending on state
-
-        drawing_properties = getStateDrawingProperties(self.GetStateAsString(),
-                                                       self._config, gc)
+        #drawing_properties = getStateDrawingProperties(self.GetStateAsString(),
+        #                                               self._config, gc)
+        drawing_properties = self._getStateDrawingProperties(self.GetStateAsString(),
+                                                             self._config, gc)
 
         # ---------------------- cursor ---------------------- #
-
         self.SetCursor(drawing_properties["cursor"])
 
         # ------------ drawing area and background ------------ #
@@ -89,45 +65,46 @@ class CustomCheckBox(CustomControl):
                           self._config.border_width_pressed,
                           self._config.border_width_disabled)
         
-        # if checkbox appearance
+        # -------------- if checkbox appearance -------------- #
         if not self._config.switch_appearance:
 
-            # calculate checkbox position based on textside
+            # --- calculate checkbox position based on textside --- #
             boxX = sidePadding if (self._config.text_side == "right") else (controlRect.GetWidth() - sidePadding - self._config.checkbox_width)
             boxY = (controlRect.GetHeight() // 2) - (self._config.checkbox_height // 2)
-            # create the rectangle representing the checkbox
+            # -- create the rectangle representing the checkbox -- #
             boxRectangle = wx.Rect(boxX, boxY, self._config.checkbox_width, self._config.checkbox_height)
 
-            gcdc.SetPen(drawing_properties["pen"])
-            gc.SetBrush(drawing_properties["brush"])
+            # -------------- if checkbox is selected -------------- #
+            if self._Value:
 
-            if self.__Value:
-
-                # draw selected background (same rectangle as boxRectangle)
+                # -------------- draw selected rectangle -------------- #
                 gcdc.SetPen(wx.TRANSPARENT_PEN) 
                 gc.SetBrush(wx.Brush(wx.Colour(self._config.background_colour_active_default)))
                 gcdc.DrawRoundedRectangle(boxRectangle, radius=drawing_properties["corner_radius"])
 
-                # check mark rectangle delimiter
+                # ------ checkmark rectangle delimiter (smaller) ------ #
                 checkRect:wx.Rect = copy(boxRectangle).Deflate(int(self._config.checkbox_active_deflate*1.2),
-                                                   int(self._config.checkbox_active_deflate*1.3))
-                
-                # draw check mark
+                                                               int(self._config.checkbox_active_deflate*1.3))
+
+                # ------------- check mark pen and brush ------------- #
                 gcdc.SetPen(wx.Pen(wx.WHITE, width=2))
                 gcdc.SetBrush(wx.TRANSPARENT_BRUSH)
-
+                
+                # --------------- draw check with path --------------- #
                 path:wx.GraphicsPath = gc.CreatePath()
                 path.MoveToPoint(checkRect.GetX(), checkRect.GetY() + (checkRect.GetHeight() // 1.5))
                 path.AddLineToPoint(checkRect.GetX() + (checkRect.GetWidth() //2 ), checkRect.GetY() + checkRect.GetHeight())
                 path.AddLineToPoint(*checkRect.GetTopRight())
                 gc.StrokePath(path)
                 
-                # reset pen
+            # --------------- draw normal checkbox --------------- #
+            else:
                 gcdc.SetPen(drawing_properties["pen"])
+                gc.SetBrush(drawing_properties["brush"])
+                gcdc.DrawRoundedRectangle(boxRectangle, radius=drawing_properties["corner_radius"])
+                
 
-            # draw checkbox
-            gcdc.DrawRoundedRectangle(boxRectangle, radius=drawing_properties["corner_radius"])
-
+        # --------------- if switch appearance --------------- #
         else: # if switch appearance
 
             # calculate switch position based on textside
@@ -176,13 +153,13 @@ class CustomCheckBox(CustomControl):
         # -------------------- text dimensions ---------------------- #
 
         textWidth, textHeight = 0, 0
-        if (self.__Label != wx.EmptyString):
+        if (self._Label != wx.EmptyString):
             gc.SetFont(wx.Font(drawing_properties["text_font_size"],
                                wx.FONTFAMILY_DEFAULT,
                                wx.FONTSTYLE_NORMAL,
                                wx.FONTWEIGHT_NORMAL,
                                faceName=drawing_properties["text_font_facename"]), drawing_properties["text_foreground_colour"])
-            textWidth, textHeight = gcdc.GetTextExtent(self.__Label)
+            textWidth, textHeight = gcdc.GetTextExtent(self._Label)
 
         # ---------------------- image ------------------------ #
 
@@ -214,7 +191,7 @@ class CustomCheckBox(CustomControl):
         # -------------- drawing the text label -------------- #
         # calculate text position based on textside and text separation
 
-        if self.__Label != wx.EmptyString:
+        if self._Label != wx.EmptyString:
             
             # calculate text position
             if self._config.text_side == "right":
@@ -226,7 +203,7 @@ class CustomCheckBox(CustomControl):
             
             textY = (controlRect.GetHeight() // 2) - (textHeight // 2)
             # draw text
-            gcdc.DrawText(self.__Label, textX, textY)
+            gcdc.DrawText(self._Label, textX, textY)
 
         
     def DoGetBestClientSize(self):
@@ -291,7 +268,7 @@ class CustomCheckBox(CustomControl):
         if self._Pressed:
             self.ReleaseMouse()
             self._Pressed = False
-            self.__Value = not self.__Value
+            self._Value = not self._Value
             self.Refresh()
             wx.PostEvent(self, wx.PyCommandEvent(wx.EVT_CHECKBOX.typeId, self.GetId()))
         event.Skip()

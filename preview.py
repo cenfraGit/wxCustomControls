@@ -75,7 +75,7 @@ class PreviewFrame(wx.Frame):
                            label="test",
                            size=(80, 30),
                            pos=(500, 250),
-                           switch_appearance=True),
+                           switch_appearance=False),
         
 
         # ------------- add panels to main sizer ------------- #
