@@ -68,13 +68,19 @@ class PreviewFrame(wx.Frame):
                          image_default=image,
                          image_size_default=image_size,
                          corner_radius_default=dip(10),
-                         text_side="up",
+                         image_text_side="up",
                          pos=(250, 250))
+
+        b.Bind(wx.EVT_BUTTON, lambda e: print("test"))
 
         c = CustomCheckBox(P_buttons,
                            label="test",
-                           size=(80, 30),
+                           size=(200, 200),
                            pos=(500, 250),
+                           image_default=image,
+                           image_size_default=image_size,
+                           image_text_side="left",
+                           checkbox_text_side="left",
                            switch_appearance=False),
         
 

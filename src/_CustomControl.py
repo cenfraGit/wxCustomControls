@@ -7,7 +7,6 @@
 
 
 import wx
-#from .functions.getConfig import getConfig
 from .CustomConfig import CustomConfig
 from ._CustomObject import CustomObject
 
@@ -79,8 +78,8 @@ class CustomControl(wx.Control, CustomObject):
                 return "default"
 
 
-    def DoGetBestClientSize(self):
-        pass
+    def DoGetBestClientSize(self) -> wx.Size:
+        wx.Size(20, 20)
 
 
     def __OnPaint(self, event):

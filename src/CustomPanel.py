@@ -69,7 +69,7 @@ class CustomPanel(wx.Panel, CustomObject):
 
         # since its a panel, it will not have a control state
         # behavior. it has only a "default" state.
-        drawing_properties = self._getStateDrawingProperties("default", self._config, gc)
+        drawing_properties = self._getStateDrawingProperties("default", gc)
 
         pen = drawing_properties["pen"]
         gcdc.SetPen(pen)        

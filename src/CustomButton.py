@@ -16,7 +16,7 @@ class CustomButton(CustomControl):
                  config=None, **kwargs):
 
         # ---------------- control attributes ---------------- #
-
+        
         kwargs["label"] = label
 
         # ------------------- init control ------------------- #
@@ -38,10 +38,8 @@ class CustomButton(CustomControl):
         gcdc, gc = self._getDrawingContexts()
 
         # ---------------- drawing properties ---------------- #
-        # get drawing properties depending on state
 
-        drawing_properties = self._getStateDrawingProperties(self.GetStateAsString(),
-                                                       self._config, gc)
+        drawing_properties = self._getStateDrawingProperties(self.GetStateAsString(), gc)
 
         # ---------------------- cursor ---------------------- #
 
@@ -62,94 +60,46 @@ class CustomButton(CustomControl):
                                               drawing_properties["pen"].GetWidth())
 
         gcdc.SetPen(drawing_properties["pen"])
-        # we set the brush to the gc because the gcdc api does not
-        # support gradient brushes.
         gc.SetBrush(drawing_properties["brush"])
-
         gcdc.DrawRoundedRectangle(buttonRectangle, drawing_properties["corner_radius"])
 
         # ------------------ text dimensions ------------------ #
-
-        textWidth, textHeight = 0, 0
-        if (self._Label != wx.EmptyString):
-            gc.SetFont(wx.Font(drawing_properties["text_font_size"],
-                               wx.FONTFAMILY_DEFAULT,
-                               wx.FONTSTYLE_NORMAL,
-                               wx.FONTWEIGHT_NORMAL,
-                               faceName=drawing_properties["text_font_facename"]), drawing_properties["text_foreground_colour"])
-            textWidth, textHeight = gcdc.GetTextExtent(self._Label)
+        
+        textWidth, textHeight = self._getTextDimensions(self._Label, gcdc, drawing_properties)
 
         # ----------------- image dimensions ----------------- #
-
-        imageWidth, imageHeight = 0, 0
-        bitmap = None
-        if drawing_properties["image"]:
-            imageWidth, imageHeight = drawing_properties["image_size"]
-            # convert image to bitmap
-            image:wx.Image = drawing_properties["image"].AdjustChannels(*drawing_properties["image_channels"])
-            bitmap:wx.Bitmap = image.ConvertToBitmap()
-            imageWidth, imageHeight = drawing_properties["image_size"]
-            bitmap.SetSize(wx.Size(imageWidth, imageHeight))
+        
+        imageWidth, imageHeight, bitmap = self._getBitmapAndDimensions(drawing_properties)
 
         # ----------------------- draw ----------------------- #
 
-        imageX, imageY, textX, textY = self._getImageTextCoordinates(buttonRectangle,
-                                                               self._Label, self._config,
-                                                               imageWidth, imageHeight,
-                                                               textWidth, textHeight)
+        self._drawImageTextRectangle(buttonRectangle,
+                                     self._Label,
+                                     textWidth, textHeight,
+                                     bitmap, imageWidth, imageHeight,
+                                     gcdc)
 
-        if (self._Label != wx.EmptyString):
-            gcdc.DrawText(self._Label, textX, textY)
 
-        if drawing_properties["image"]:
-            gcdc.DrawBitmap(bitmap, imageX, imageY)
 
         
-    def DoGetBestClientSize(self):
-        # helps sizer determine correct size of control.
-
-        # contexts
+    def DoGetBestClientSize(self) -> wx.Size:
+        
         dc = wx.ClientDC(self)
         gcdc:wx.GCDC = wx.GCDC(dc)
 
-        # set font to get dimensions
-        gcdc.SetFont(wx.Font(self._config.text_font_size_default,
-                             wx.FONTFAMILY_DEFAULT,
-                             wx.FONTSTYLE_NORMAL,
-                             wx.FONTWEIGHT_NORMAL,
-                             faceName=self._config.text_font_facename_default))
-        textWidth, textHeight = gcdc.GetTextExtent(self._Label)
-
-        # get dimensions from largest image
-
-        image = self._config.image_default or self._config.image_pressed or self._config.image_hover or self._config.image_disabled
-        image_width = max(self._config.image_size_default[0],
-                          self._config.image_size_pressed[0],
-                          self._config.image_size_hover[0],
-                          self._config.image_size_disabled[0])
-        image_height = max(self._config.image_size_default[1],
-                           self._config.image_size_pressed[1],
-                           self._config.image_size_hover[1],
-                           self._config.image_size_disabled[1])
-        
-        # separation between image and text
+        image = self._getIfImage()
+        textWidth, textHeight = self._getDefaultTextExtent(gcdc, self._Label)
+        imageWidth, imageHeight = self._getMaxDimensions("image")
         text_separation = self._config.image_text_separation if self._config.image_text_separation else dip(6)
-
         padding_horizontal = dip(10)
         padding_vertical = dip(5)
 
-        if image:
-            if (self._config.text_side == "left") or (self._config.text_side == "right"):
-                width = image_width + text_separation + textWidth + (2 * padding_horizontal)
-                height = max(image_height, textHeight) + (2 * padding_vertical)
-            elif (self._config.text_side == "up") or (self._config.text_side == "down"):
-                width = max(image_width, textWidth) + (2 * padding_horizontal)
-                height = image_height + text_separation + textHeight + (2 * padding_vertical)
-            else:
-                raise ValueError("text_side must be left, right, up or down.")
-        else:
-            width = padding_horizontal * 2 + textWidth
-            height = padding_vertical * 2 + textHeight
+        width, height = self._getTextSideDimensions(text_separation,
+                                                    self._config.image_text_side,
+                                                    textWidth, textHeight,
+                                                    imageWidth, imageHeight)
+        width += 2 * padding_horizontal
+        height += 2 * padding_vertical
 
         return wx.Size(int(width), int(height))
 
@@ -167,6 +117,7 @@ class CustomButton(CustomControl):
             self.ReleaseMouse()
             self._Pressed = False
             self.Refresh()
-            wx.PostEvent(self, wx.PyCommandEvent(wx.EVT_BUTTON.typeId, self.GetId()))
+            if self._Hover:
+                wx.PostEvent(self, wx.PyCommandEvent(wx.EVT_BUTTON.typeId, self.GetId()))
         event.Skip()
 

@@ -52,21 +52,21 @@ class CustomObject:
         return gcdc, gc
 
     
-    def _getPen(self, state:str, config:CustomConfig) -> wx.Pen:
+    def _getPen(self, state:str) -> wx.Pen:
         """Returns a transparent pen if the border width is 0."""
         borderWidth, borderColour = 0, wx.BLACK
         if (state == "disabled"):
-            borderWidth = config.border_width_disabled
-            borderColour = config.border_colour_disabled
+            borderWidth = self._config.border_width_disabled
+            borderColour = self._config.border_colour_disabled
         elif (state == "pressed"):
-            borderWidth = config.border_width_pressed
-            borderColour = config.border_colour_pressed
+            borderWidth = self._config.border_width_pressed
+            borderColour = self._config.border_colour_pressed
         elif (state == "hover"):
-            borderWidth = config.border_width_hover
-            borderColour = config.border_colour_hover
+            borderWidth = self._config.border_width_hover
+            borderColour = self._config.border_colour_hover
         elif (state == "default"):
-            borderWidth = config.border_width_default
-            borderColour = config.border_colour_default
+            borderWidth = self._config.border_width_default
+            borderColour = self._config.border_colour_default
         # -------------------- return pen -------------------- #
         if borderWidth:
             return wx.Pen(borderColour, borderWidth)
@@ -74,20 +74,20 @@ class CustomObject:
             return wx.TRANSPARENT_PEN
         
 
-    def _getBrush(self, state:str, config:CustomConfig, gc:wx.GraphicsContext) -> wx.Brush:
+    def _getBrush(self, state:str, gc:wx.GraphicsContext) -> wx.Brush:
         gradient, background_colour = None, (255, 255, 255)
         if (state == "disabled"):
-            gradient = config.background_linear_gradient_disabled
-            background_colour = config.background_colour_disabled
+            gradient = self._config.background_linear_gradient_disabled
+            background_colour = self._config.background_colour_disabled
         elif (state == "pressed"):
-            gradient = config.background_linear_gradient_pressed
-            background_colour = config.background_colour_pressed
+            gradient = self._config.background_linear_gradient_pressed
+            background_colour = self._config.background_colour_pressed
         elif (state == "hover"):
-            gradient = config.background_linear_gradient_hover
-            background_colour = config.background_colour_hover
+            gradient = self._config.background_linear_gradient_hover
+            background_colour = self._config.background_colour_hover
         elif (state == "default"):
-            gradient = config.background_linear_gradient_default
-            background_colour = config.background_colour_default
+            gradient = self._config.background_linear_gradient_default
+            background_colour = self._config.background_colour_default
 
         if gradient:
             c1 = wx.Colour(*gradient[4])
@@ -100,50 +100,50 @@ class CustomObject:
         return brush
 
 
-    def _getStateDrawingProperties(self, control_state:str, config:CustomConfig, gc):
+    def _getStateDrawingProperties(self, control_state:str, gc:wx.GraphicsContext):
 
         if control_state not in ["default", "pressed", "hover", "disabled"]:
             raise ValueError("getStateProperties::Invalid control_state.")
 
-        pen = self._getPen(control_state, config) # takes care of borders
-        brush = self._getBrush(control_state, config, gc) # takes care of background
+        pen = self._getPen(control_state) # takes care of borders
+        brush = self._getBrush(control_state, gc) # takes care of background
 
         if (control_state == "default"):
             cursor = wx.Cursor(wx.CURSOR_ARROW)
-            text_font_size = config.text_font_size_default
-            text_font_facename = config.text_font_facename_default
-            text_foreground_colour = config.text_foreground_colour_default
-            corner_radius = config.corner_radius_default
-            image = config.image_default
-            image_channels = config.image_channels_default
-            image_size = config.image_size_default
+            text_font_size = self._config.text_font_size_default
+            text_font_facename = self._config.text_font_facename_default
+            text_foreground_colour = self._config.text_foreground_colour_default
+            corner_radius = self._config.corner_radius_default
+            image = self._config.image_default
+            image_channels = self._config.image_channels_default
+            image_size = self._config.image_size_default
         elif (control_state == "pressed"):
-            cursor = wx.Cursor(config.cursor_stockcursor_pressed)
-            text_font_size = config.text_font_size_pressed
-            text_font_facename = config.text_font_facename_pressed
-            text_foreground_colour = config.text_foreground_colour_pressed
-            corner_radius = config.corner_radius_pressed
-            image = config.image_pressed
-            image_channels = config.image_channels_pressed
-            image_size = config.image_size_pressed
+            cursor = wx.Cursor(self._config.cursor_stockcursor_pressed)
+            text_font_size = self._config.text_font_size_pressed
+            text_font_facename = self._config.text_font_facename_pressed
+            text_foreground_colour = self._config.text_foreground_colour_pressed
+            corner_radius = self._config.corner_radius_pressed
+            image = self._config.image_pressed
+            image_channels = self._config.image_channels_pressed
+            image_size = self._config.image_size_pressed
         elif (control_state == "hover"):
-            cursor = wx.Cursor(config.cursor_stockcursor_hover)
-            text_font_size = config.text_font_size_hover
-            text_font_facename = config.text_font_facename_hover
-            text_foreground_colour = config.text_foreground_colour_hover
-            corner_radius = config.corner_radius_hover
-            image = config.image_hover
-            image_channels = config.image_channels_hover
-            image_size = config.image_size_hover
+            cursor = wx.Cursor(self._config.cursor_stockcursor_hover)
+            text_font_size = self._config.text_font_size_hover
+            text_font_facename = self._config.text_font_facename_hover
+            text_foreground_colour = self._config.text_foreground_colour_hover
+            corner_radius = self._config.corner_radius_hover
+            image = self._config.image_hover
+            image_channels = self._config.image_channels_hover
+            image_size = self._config.image_size_hover
         else: # disabled
-            cursor = wx.Cursor(config.cursor_stockcursor_disabled)
-            text_font_size = config.text_font_size_disabled
-            text_font_facename = config.text_font_facename_disabled
-            text_foreground_colour = config.text_foreground_colour_disabled
-            corner_radius = config.corner_radius_disabled
-            image = config.image_disabled
-            image_channels = config.image_channels_disabled
-            image_size = config.image_size_disabled
+            cursor = wx.Cursor(self._config.cursor_stockcursor_disabled)
+            text_font_size = self._config.text_font_size_disabled
+            text_font_facename = self._config.text_font_facename_disabled
+            text_foreground_colour = self._config.text_foreground_colour_disabled
+            corner_radius = self._config.corner_radius_disabled
+            image = self._config.image_disabled
+            image_channels = self._config.image_channels_disabled
+            image_size = self._config.image_size_disabled
 
         return {
             "pen": pen,
@@ -159,54 +159,267 @@ class CustomObject:
         }
 
 
-    def _getImageTextCoordinates(self, rectangle:wx.Rect,
-                                text, config:CustomConfig,
-                                imageWidth:int, imageHeight:int,
-                                textWidth:int, textHeight:int):
+    def _getTextSideDimensions(self, text_separation:int, text_side,
+                               textWidth:int, textHeight:int,
+                               objectWidth:int, objectHeight:int):
+        """Returns the dimensions of a rectangle depending on the
+        arrangement of an object and its text_side (used in images and
+        checkboxes)."""
+        rectangleWidth, rectangleHeight = 0, 0
+        if (text_side == "right" or text_side == "left"):
+            rectangleWidth = objectWidth + text_separation + textWidth
+            rectangleHeight = max(objectHeight, textHeight)
+        elif (text_side == "up" or text_side == "down"):
+            rectangleWidth = max(objectWidth, textWidth)
+            rectangleHeight = objectHeight + text_separation + textHeight
+        else:
+            raise ValueError("text_side must be left, right, up or down.")
+        return rectangleWidth, rectangleHeight
+
+
+    def _performTextSideCalculation(self, drawing_rectangle:wx.Rect,
+                                    text, text_separation:int, text_side,
+                                    textWidth:int, textHeight:int,
+                                    objectWidth:int, objectHeight:int):
+        """Returns the coordinates for text and images/checkbox square
+        depending on the text separation (the distance from the text
+        to the the image or checkbox) and the side where the text
+        should be displayed. The drawing rectangle is the rectangle
+        area where the object and the text will be drawn.
+        """
 
         textX, textY = 0, 0
-        imageX, imageY = 0, 0
+        objectX, objectY = 0, 0
 
+        r = drawing_rectangle # shorter alias for drawing rectangle
+        
         # -------------------- if no text -------------------- #
 
         if (text == wx.EmptyString):
-            # image in center if no text
-            imageX = (rectangle.GetWidth() // 2) - (imageWidth // 2)
-            imageY = (rectangle.GetHeight() // 2) - (imageHeight // 2)
+            # object in center if no text
+            objectX = (r.GetWidth() // 2) - (objectWidth // 2)
+            objectY = (r.GetHeight() // 2) - (objectHeight // 2)
 
-        # ------------- if no image (dimensions) ------------- #
+        # ---------------- if dimensions are 0 ---------------- #
 
-        elif (imageWidth == 0 or imageHeight == 0):
-            # calculate center
-            textX = rectangle.GetX() + (rectangle.GetWidth() // 2) - (textWidth // 2)
-            textY = rectangle.GetY() + (rectangle.GetHeight() // 2) - (textHeight // 2)
+        elif (objectWidth == 0 or objectHeight == 0):
+            # text in center if no object
+            textX = r.GetX() + (r.GetWidth() // 2) - (textWidth // 2)
+            textY = r.GetY() + (r.GetHeight() // 2) - (textHeight // 2)
 
-        # -------------- if both image and text -------------- #
+        # -------------- if both text and object -------------- #
 
         else:
-            text_separation = config.image_text_separation if config.image_text_separation else dip(6)
-            if (config.text_side == "right"):
-                imageX = (rectangle.GetWidth() // 2) - ((imageWidth + textWidth + text_separation) // 2) 
-                imageY = (rectangle.GetHeight() // 2) - (imageHeight // 2)
-                textX = imageX + imageWidth + text_separation
-                textY = (rectangle.GetHeight() // 2) - (textHeight // 2)
-            elif (config.text_side == "left"):
-                textX = (rectangle.GetWidth() // 2) - ((imageWidth + textWidth + text_separation) // 2) 
-                textY = (rectangle.GetHeight() // 2) - (textHeight // 2)
-                imageX = textX + textWidth + text_separation
-                imageY = (rectangle.GetHeight() // 2) - (imageHeight // 2)
-            elif (config.text_side == "up"):
-                textX = (rectangle.GetWidth() // 2) - (textWidth // 2)
-                textY = (rectangle.GetHeight() // 2) - ((imageHeight + textHeight + text_separation) // 2)
-                imageX = (rectangle.GetWidth() // 2) - (imageWidth // 2)
-                imageY = textY + textHeight + text_separation
-            elif (config.text_side == "down"):
-                imageX = (rectangle.GetWidth() // 2) - (imageWidth // 2)
-                imageY = (rectangle.GetHeight() // 2) - ((imageHeight + textHeight + text_separation) // 2)
-                textX = (rectangle.GetWidth() // 2) - (textWidth // 2)
-                textY = imageY + imageHeight
+
+            text_separation = text_separation if text_separation else dip(6)
+            
+            if (text_side == "right"):
+                objectX = (r.GetWidth() // 2) - ((objectWidth + textWidth + text_separation) // 2) 
+                objectY = (r.GetHeight() // 2) - (objectHeight // 2)
+                textX = objectX + objectWidth + text_separation
+                textY = (r.GetHeight() // 2) - (textHeight // 2)
+            elif (text_side == "left"):
+                textX = (r.GetWidth() // 2) - ((objectWidth + textWidth + text_separation) // 2) 
+                textY = (r.GetHeight() // 2) - (textHeight // 2)
+                objectX = textX + textWidth + text_separation
+                objectY = (r.GetHeight() // 2) - (objectHeight // 2)
+            elif (text_side == "up"):
+                textX = (r.GetWidth() // 2) - (textWidth // 2)
+                textY = (r.GetHeight() // 2) - ((objectHeight + textHeight + text_separation) // 2)
+                objectX = (r.GetWidth() // 2) - (objectWidth // 2)
+                objectY = textY + textHeight + text_separation
+            elif (text_side == "down"):
+                objectX = (r.GetWidth() // 2) - (objectWidth // 2)
+                objectY = (r.GetHeight() // 2) - ((objectHeight + textHeight + text_separation) // 2)
+                textX = (r.GetWidth() // 2) - (textWidth // 2)
+                textY = objectY + objectHeight
             else:
                 raise ValueError("text_side must be left, right, up or down.")
 
-        return imageX, imageY, textX, textY
+        return textX, textY, objectX, objectY
+
+
+    def _performObjectSideCalculation(self, rectangle:wx.Rect, object1Width, object1Height, object2Width, object2Height, separation, object2_side):
+        """Returns the coordinates for two objects depending on the side specified for object2."""
+
+        object1X, object1Y = 0, 0 # init coords for object1 (main object)
+        object2X, object2Y = 0, 0 # init coords for object2
+        r = rectangle # alias
+        theresObject1:bool = (object1Width != 0 and object1Height != 0)
+        theresObject2:bool = (object2Width != 0 and object2Height != 0)
+
+        if not theresObject2:
+            # object1 in center of rectangle
+            object1X = r.GetX() + (r.GetWidth() // 2) - (object1Width // 2)
+            object1Y = r.GetY() + (r.GetHeight() // 2) - (object1Height // 2)
+
+        elif not theresObject1:
+            # object2 in center of rectangle
+            object2X = r.GetX() + (r.GetWidth() // 2) - (object2Width // 2)
+            object2Y = r.GetY() + (r.GetHeight() // 2) - (object2Height // 2)
+
+        else:
+            
+            separation = separation if separation else dip(6)
+            
+            if (object2_side == "right"):
+                object1X = r.GetX() + (r.GetWidth() // 2) - ((object1Width + object1Width + separation) // 2)
+                object1Y = r.GetY() + (r.GetHeight() // 2) - (object1Height // 2)
+                object2X = object1X + object1Width + separation
+                object2Y = r.GetY() + (r.GetHeight() // 2) - (object2Height // 2)
+            elif (object2_side == "left"):
+                object2X = r.GetX() + (r.GetWidth() // 2) - ((object1Width + object2Width + separation) // 2)
+                object2Y = r.GetY() + (r.GetHeight() // 2) - (object2Height // 2)
+                object1X = object2X + object2Width + separation
+                object1Y = r.GetY() + (r.GetHeight() // 2) - (object1Height // 2)
+            elif (object2_side == "up"):
+                object2X = r.GetX() + (r.GetWidth() // 2) - (object2Width // 2)
+                object2Y = r.GetY() + (r.GetHeight() // 2) - ((object1Height + object2Height + separation) // 2)
+                object1X = r.GetX() + (r.GetWidth() // 2) - (object1Width // 2)
+                object1Y = object1Y + object2Height + separation
+            elif (object2_side == "down"):
+                object1X = r.GetX() + (r.GetWidth() // 2) - (object1Width // 2)
+                object1Y = r.GetY() + (r.GetHeight() // 2) - ((object1Height + object2Height + separation) // 2)
+                object2X = r.GetX() + (r.GetWidth() // 2) - (object2Width // 2)
+                object2Y = object1Y + object1Height
+            else:
+                raise ValueError("text_side must be left, right, up or down.")
+            
+        return object1X, object1Y, object2X, object2Y
+
+
+
+    def _drawImageTextRectangle(self, rectangle:wx.Rect, text, textWidth, textHeight, bitmap, imageWidth, imageHeight, gcdc:wx.GCDC):
+        """Draws an image and text (or either) in the specified rectangle. It assumes that the rectangle has enough space."""
+
+        """
+
+        textX, textY = 0, 0   # init 
+        imageX, imageY = 0, 0 # init
+        r = rectangle         # alias
+        theresText:bool = (text != wx.EmptyString and text.strip() != "")
+        theresImage:bool = (imageWidth != 0 and imageHeight != 0)
+
+        if not theresText:
+            # image in center
+            imageX = r.GetX() + (r.GetWidth() // 2) - (imageWidth // 2)
+            imageY = r.GetY() + (r.GetHeight() // 2) - (imageHeight // 2)
+
+        elif not theresImage:
+            # text in center
+            textX = r.GetX() + (r.GetWidth() // 2) - (textWidth // 2)
+            textY = r.GetY() + (r.GetHeight() // 2) - (textHeight // 2)
+
+        else:
+            
+            text_separation = self._config.image_text_separation if self._config.image_text_separation else dip(6)
+            
+            if (self._config.image_text_side == "right"):
+                imageX = r.GetX() + (r.GetWidth() // 2) - ((imageWidth + textWidth + text_separation) // 2)
+                imageY = r.GetY() + (r.GetHeight() // 2) - (imageHeight // 2)
+                textX = imageX + imageWidth + text_separation
+                textY = r.GetY() + (r.GetHeight() // 2) - (textHeight // 2)
+            elif (self._config.image_text_side == "left"):
+                textX = r.GetX() + (r.GetWidth() // 2) - ((imageWidth + textWidth + text_separation) // 2)
+                textY = r.GetY() + (r.GetHeight() // 2) - (textHeight // 2)
+                imageX = textX + textWidth + text_separation
+                imageY = r.GetY() + (r.GetHeight() // 2) - (imageHeight // 2)
+            elif (self._config.image_text_side == "up"):
+                textX = r.GetX() + (r.GetWidth() // 2) - (textWidth // 2)
+                textY = r.GetY() + (r.GetHeight() // 2) - ((imageHeight + textHeight + text_separation) // 2)
+                imageX = r.GetX() + (r.GetWidth() // 2) - (imageWidth // 2)
+                imageY = textY + textHeight + text_separation
+            elif (self._config.image_text_side == "down"):
+                imageX = r.GetX() + (r.GetWidth() // 2) - (imageWidth // 2)
+                imageY = r.GetY() + (r.GetHeight() // 2) - ((imageHeight + textHeight + text_separation) // 2)
+                textX = r.GetX() + (r.GetWidth() // 2) - (textWidth // 2)
+                textY = imageY + imageHeight
+            else:
+                raise ValueError("text_side must be left, right, up or down.")
+        """
+
+        imageX, imageY, textX, textY = self._performObjectSideCalculation(rectangle,
+                                                                          imageWidth, imageHeight,
+                                                                          textWidth, textHeight,
+                                                                          self._config.image_text_separation,
+                                                                          self._config.image_text_side)
+        
+        theresText:bool = (text != wx.EmptyString and text.strip() != "")
+        theresImage:bool = (imageWidth != 0 and imageHeight != 0)
+            
+        # draw
+        if theresText:
+            gcdc.DrawText(text, textX, textY)
+        if theresImage:
+            gcdc.DrawBitmap(bitmap, imageX, imageY)
+
+
+
+    def _getTextDimensions(self, string, gcdc, drawing_properties):        
+        textWidth, textHeight = 0, 0
+        if (string != wx.EmptyString):
+            gcdc.GetGraphicsContext().SetFont(wx.Font(drawing_properties["text_font_size"],
+                               wx.FONTFAMILY_DEFAULT,
+                               wx.FONTSTYLE_NORMAL,
+                               wx.FONTWEIGHT_NORMAL,
+                               faceName=drawing_properties["text_font_facename"]), drawing_properties["text_foreground_colour"])
+            textWidth, textHeight = gcdc.GetTextExtent(string)
+        return textWidth, textHeight
     
+
+    def _getBitmapAndDimensions(self, drawing_properties):
+        imageWidth, imageHeight = 0, 0
+        bitmap = wx.Bitmap(1, 1)
+        if drawing_properties["image"]:
+            imageWidth, imageHeight = drawing_properties["image_size"]
+            # convert image to bitmap
+            image:wx.Image = drawing_properties["image"].AdjustChannels(*drawing_properties["image_channels"])
+            bitmap:wx.Bitmap = image.ConvertToBitmap()
+            imageWidth, imageHeight = drawing_properties["image_size"]
+            bitmap.SetSize(wx.Size(imageWidth, imageHeight))
+        return imageWidth, imageHeight, bitmap
+
+
+    def _getMaxDimensions(self, what:str):
+        """what: image, border_width, """
+
+        if (what == "image"):
+            image_width = max(self._config.image_size_default[0],
+                              self._config.image_size_pressed[0],
+                              self._config.image_size_hover[0],
+                              self._config.image_size_disabled[0])
+            image_height = max(self._config.image_size_default[1],
+                              self._config.image_size_pressed[1],
+                              self._config.image_size_hover[1],
+                              self._config.image_size_disabled[1])
+            return image_width, image_height
+        elif (what == "border_width"):
+            return max(self._config.border_width_default,
+                       self._config.border_width_hover,
+                       self._config.border_width_pressed,
+                       self._config.border_width_disabled)
+
+        else:
+            raise ValueError("_getMaxDimensions::Wrong \"what\" value.")
+
+
+    def _getDefaultTextExtent(self, gcdc:wx.GCDC, text):
+        """Get the text extent using the default font and facename."""
+        gcdc.SetFont(wx.Font(self._config.text_font_size_default,
+                             wx.FONTFAMILY_DEFAULT,
+                             wx.FONTSTYLE_NORMAL,
+                             wx.FONTWEIGHT_NORMAL,
+                             faceName=self._config.text_font_facename_default))
+        return gcdc.GetTextExtent(text)
+
+
+    def _getIfImage(self):
+        """Returns True if an image is set for any control state."""
+        if (self._config.image_default or
+            self._config.image_pressed or
+            self._config.image_hover or
+            self._config.image_disabled):
+            return True
+        else:
+            return False
+

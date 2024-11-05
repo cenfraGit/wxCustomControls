@@ -33,8 +33,6 @@ class CustomConfig:
         self.text_foreground_colour_pressed  = kwargs.get("text_foreground_colour_pressed",  (0, 0, 0))
         self.text_foreground_colour_hover    = kwargs.get("text_foreground_colour_hover",    (0, 0, 0))
         self.text_foreground_colour_disabled = kwargs.get("text_foreground_colour_disabled", (0, 0, 0))
-        
-        self.text_side = kwargs.get("text_side", "right") # when using images
 
         # -------------------- background -------------------- #
 
@@ -87,13 +85,16 @@ class CustomConfig:
         self.image_size_disabled = kwargs.get("image_size_disabled", (0, 0))
 
         self.image_text_separation = kwargs.get("image_text_separation", None)
+        self.image_text_side = kwargs.get("image_text_side", "right") # when using images
 
         # ---------------- checkbox and switch ---------------- #
 
         self.checkbox_width = kwargs.get("checkbox_width", None)
         self.checkbox_height = kwargs.get("checkbox_height", None)
         self.checkbox_active_deflate = kwargs.get("checkbox_active_deflate", 5)
+        
         self.checkbox_text_separation = kwargs.get("checkbox_text_separation", 5)
+        self.checkbox_text_side = kwargs.get("checkbox_text_side", "right")
 
         self.background_colour_active_default  = kwargs.get("background_colour_active_default",  (0, 0, 255))
         self.background_colour_active_pressed  = kwargs.get("background_colour_active_pressed",  (0, 0, 255))
