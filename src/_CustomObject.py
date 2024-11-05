@@ -16,7 +16,6 @@ class CustomObject:
     def __init__(self, config, **kwargs):
 
         # --------- get the config for current object --------- #
-        #self._config = getConfig(config, self.__class__.__name__)
 
         if config:
             self._config:CustomConfig = copy(config)
@@ -74,20 +73,20 @@ class CustomObject:
             return wx.TRANSPARENT_PEN
         
 
-    def _getBrush(self, state:str, gc:wx.GraphicsContext) -> wx.Brush:
-        gradient, background_colour = None, (255, 255, 255)
-        if (state == "disabled"):
-            gradient = self._config.background_linear_gradient_disabled
-            background_colour = self._config.background_colour_disabled
+    def _getBrush(self, state:str, layer:str, gc:wx.GraphicsContext) -> wx.Brush:
+        gradient, colour = None, (255, 255, 255)
+        if (state == "default"):
+            gradient = self._config.background_linear_gradient_default if (layer == "background") else self._config.foreground_linear_gradient_default
+            colour = self._config.background_colour_default if (layer == "background") else self._config.foreground_colour_default
         elif (state == "pressed"):
-            gradient = self._config.background_linear_gradient_pressed
-            background_colour = self._config.background_colour_pressed
+            gradient = self._config.background_linear_gradient_pressed if (layer == "background") else self._config.foreground_linear_gradient_pressed
+            colour = self._config.background_colour_pressed if (layer == "background") else self._config.foreground_colour_pressed
         elif (state == "hover"):
-            gradient = self._config.background_linear_gradient_hover
-            background_colour = self._config.background_colour_hover
-        elif (state == "default"):
-            gradient = self._config.background_linear_gradient_default
-            background_colour = self._config.background_colour_default
+            gradient = self._config.background_linear_gradient_hover if (layer == "background") else self._config.foreground_linear_gradient_hover
+            colour = self._config.background_colour_hover if (layer == "background") else self._config.foreground_colour_hover
+        elif (state == "disabled"):
+            gradient = self._config.background_linear_gradient_disabled if (layer == "background") else self._config.foreground_linear_gradient_disabled
+            colour = self._config.background_colour_disabled if (layer == "background") else self._config.foreground_colour_disabled
 
         if gradient:
             c1 = wx.Colour(*gradient[4])
@@ -95,7 +94,7 @@ class CustomObject:
             x1, y1, x2, y2, _, _ = gradient
             brush = gc.CreateLinearGradientBrush(x1, y1, x2, y2, c1, c2)
         else:
-            brush = wx.Brush(background_colour)
+            brush = wx.Brush(colour)
 
         return brush
 
@@ -106,7 +105,8 @@ class CustomObject:
             raise ValueError("getStateProperties::Invalid control_state.")
 
         pen = self._getPen(control_state) # takes care of borders
-        brush = self._getBrush(control_state, gc) # takes care of background
+        brush_background = self._getBrush(control_state, "background", gc) # takes care of background
+        brush_foreground = self._getBrush(control_state, "foreground", gc)
 
         if (control_state == "default"):
             cursor = wx.Cursor(wx.CURSOR_ARROW)
@@ -118,6 +118,7 @@ class CustomObject:
             image_channels = self._config.image_channels_default
             image_size = self._config.image_size_default
             background_colour_active = self._config.background_colour_active_default
+            foreground_colour_active = self._config.foreground_colour_active_default
         elif (control_state == "pressed"):
             cursor = wx.Cursor(self._config.cursor_stockcursor_pressed)
             text_font_size = self._config.text_font_size_pressed
@@ -128,6 +129,7 @@ class CustomObject:
             image_channels = self._config.image_channels_pressed
             image_size = self._config.image_size_pressed
             background_colour_active = self._config.background_colour_active_pressed
+            foreground_colour_active = self._config.foreground_colour_active_pressed
         elif (control_state == "hover"):
             cursor = wx.Cursor(self._config.cursor_stockcursor_hover)
             text_font_size = self._config.text_font_size_hover
@@ -138,6 +140,7 @@ class CustomObject:
             image_channels = self._config.image_channels_hover
             image_size = self._config.image_size_hover
             background_colour_active = self._config.background_colour_active_hover
+            foreground_colour_active = self._config.foreground_colour_active_hover
         else: # disabled
             cursor = wx.Cursor(self._config.cursor_stockcursor_disabled)
             text_font_size = self._config.text_font_size_disabled
@@ -148,10 +151,12 @@ class CustomObject:
             image_channels = self._config.image_channels_disabled
             image_size = self._config.image_size_disabled
             background_colour_active = self._config.background_colour_active_disabled
+            foreground_colour_active = self._config.foreground_colour_active_disabled
 
         return {
             "pen": pen,
-            "brush": brush,
+            "brush_background": brush_background,
+            "brush_foreground": brush_foreground,
             "cursor": cursor,
             "text_font_size": text_font_size,
             "text_font_facename": text_font_facename,
@@ -160,89 +165,28 @@ class CustomObject:
             "image": image,
             "image_channels": image_channels,
             "image_size": image_size,
-            "background_colour_active": background_colour_active
+            "background_colour_active": background_colour_active,
+            "foreground_colour_active": foreground_colour_active
         }
 
 
-    def _getTextSideDimensions(self,
-                               textWidth:int, textHeight:int,
-                               objectWidth:int, objectHeight:int,
-                               text_separation:int, text_side):
+    def _getObjectSideDimensions(self,
+                                 object1Width:int, object1Height:int,
+                                 object2Width:int, object2Height:int,
+                                 separation, object2_side):
         """Returns the dimensions of a rectangle depending on the
-        arrangement of an object and its text_side (used in images and
+        arrangement of an object and its object2_side (used in images and
         checkboxes)."""
         rectangleWidth, rectangleHeight = 0, 0
-        if (text_side == "right" or text_side == "left"):
-            rectangleWidth = objectWidth + text_separation + textWidth
-            rectangleHeight = max(objectHeight, textHeight)
-        elif (text_side == "up" or text_side == "down"):
-            rectangleWidth = max(objectWidth, textWidth)
-            rectangleHeight = objectHeight + text_separation + textHeight
+        if (object2_side == "right" or object2_side == "left"):
+            rectangleWidth = object1Width + separation + object2Width
+            rectangleHeight = max(object1Height, object2Height)
+        elif (object2_side == "up" or object2_side == "down"):
+            rectangleWidth = max(object1Width, object2Width)
+            rectangleHeight = object1Height + separation + object2Height
         else:
-            raise ValueError("text_side must be left, right, up or down.")
+            raise ValueError("side must be left, right, up or down.")
         return rectangleWidth, rectangleHeight
-
-
-    def _performTextSideCalculation(self, drawing_rectangle:wx.Rect,
-                                    text, text_separation:int, text_side,
-                                    textWidth:int, textHeight:int,
-                                    objectWidth:int, objectHeight:int):
-        """Returns the coordinates for text and images/checkbox square
-        depending on the text separation (the distance from the text
-        to the the image or checkbox) and the side where the text
-        should be displayed. The drawing rectangle is the rectangle
-        area where the object and the text will be drawn.
-        """
-
-        textX, textY = 0, 0
-        objectX, objectY = 0, 0
-
-        r = drawing_rectangle # shorter alias for drawing rectangle
-        
-        # -------------------- if no text -------------------- #
-
-        if (text == wx.EmptyString):
-            # object in center if no text
-            objectX = (r.GetWidth() // 2) - (objectWidth // 2)
-            objectY = (r.GetHeight() // 2) - (objectHeight // 2)
-
-        # ---------------- if dimensions are 0 ---------------- #
-
-        elif (objectWidth == 0 or objectHeight == 0):
-            # text in center if no object
-            textX = r.GetX() + (r.GetWidth() // 2) - (textWidth // 2)
-            textY = r.GetY() + (r.GetHeight() // 2) - (textHeight // 2)
-
-        # -------------- if both text and object -------------- #
-
-        else:
-
-            text_separation = text_separation if text_separation else dip(6)
-            
-            if (text_side == "right"):
-                objectX = (r.GetWidth() // 2) - ((objectWidth + textWidth + text_separation) // 2) 
-                objectY = (r.GetHeight() // 2) - (objectHeight // 2)
-                textX = objectX + objectWidth + text_separation
-                textY = (r.GetHeight() // 2) - (textHeight // 2)
-            elif (text_side == "left"):
-                textX = (r.GetWidth() // 2) - ((objectWidth + textWidth + text_separation) // 2) 
-                textY = (r.GetHeight() // 2) - (textHeight // 2)
-                objectX = textX + textWidth + text_separation
-                objectY = (r.GetHeight() // 2) - (objectHeight // 2)
-            elif (text_side == "up"):
-                textX = (r.GetWidth() // 2) - (textWidth // 2)
-                textY = (r.GetHeight() // 2) - ((objectHeight + textHeight + text_separation) // 2)
-                objectX = (r.GetWidth() // 2) - (objectWidth // 2)
-                objectY = textY + textHeight + text_separation
-            elif (text_side == "down"):
-                objectX = (r.GetWidth() // 2) - (objectWidth // 2)
-                objectY = (r.GetHeight() // 2) - ((objectHeight + textHeight + text_separation) // 2)
-                textX = (r.GetWidth() // 2) - (textWidth // 2)
-                textY = objectY + objectHeight
-            else:
-                raise ValueError("text_side must be left, right, up or down.")
-
-        return textX, textY, objectX, objectY
 
 
     def _performObjectSideCalculation(self, rectangle:wx.Rect, object1Width, object1Height, object2Width, object2Height, separation, object2_side):
@@ -372,7 +316,7 @@ class CustomObject:
         return gcdc.GetTextExtent(text)
 
 
-    def _getIfImage(self):
+    def unused_getIfImage(self):
         """Returns True if an image is set for any control state."""
         if (self._config.image_default or
             self._config.image_pressed or
@@ -381,4 +325,4 @@ class CustomObject:
             return True
         else:
             return False
-
+        

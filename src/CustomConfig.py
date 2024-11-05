@@ -41,12 +41,22 @@ class CustomConfig:
         self.background_colour_hover    = kwargs.get("background_colour_hover",    (255, 255, 255))
         self.background_colour_disabled = kwargs.get("background_colour_disabled", (255, 255, 255))
 
+        self.foreground_colour_default  = kwargs.get("foreground_colour_default",  (255, 255, 255))
+        self.foreground_colour_pressed  = kwargs.get("foreground_colour_pressed",  (255, 255, 255))
+        self.foreground_colour_hover    = kwargs.get("foreground_colour_hover",    (255, 255, 255))
+        self.foreground_colour_disabled = kwargs.get("foreground_colour_disabled", (255, 255, 255))
+
         # --------------------- gradients --------------------- #
 
         self.background_linear_gradient_default  = kwargs.get("background_linear_gradient_default",  None)
         self.background_linear_gradient_pressed  = kwargs.get("background_linear_gradient_pressed",  None)
         self.background_linear_gradient_hover    = kwargs.get("background_linear_gradient_hover",    None)
         self.background_linear_gradient_disabled = kwargs.get("background_linear_gradient_disabled", None)
+
+        self.foreground_linear_gradient_default  = kwargs.get("foreground_linear_gradient_default",  None)
+        self.foreground_linear_gradient_pressed  = kwargs.get("foreground_linear_gradient_pressed",  None)
+        self.foreground_linear_gradient_hover    = kwargs.get("foreground_linear_gradient_hover",    None)
+        self.foreground_linear_gradient_disabled = kwargs.get("foreground_linear_gradient_disabled", None)
 
         # ---------------------- borders ---------------------- #
 
@@ -85,21 +95,27 @@ class CustomConfig:
         self.image_size_disabled = kwargs.get("image_size_disabled", (0, 0))
 
         self.image_text_separation = kwargs.get("image_text_separation", None)
-        self.image_text_side = kwargs.get("image_text_side", "right") # when using images
+        self.image_text_side       = kwargs.get("image_text_side", "right") # when using images
 
         # ---------------- checkbox and switch ---------------- #
 
-        self.checkbox_width = kwargs.get("checkbox_width", None)
+        self.checkbox_width  = kwargs.get("checkbox_width", None)
         self.checkbox_height = kwargs.get("checkbox_height", None)
+
         self.checkbox_active_deflate = kwargs.get("checkbox_active_deflate", 5)
         
         self.checkbox_text_separation = kwargs.get("checkbox_text_separation", 5)
-        self.checkbox_text_side = kwargs.get("checkbox_text_side", "right")
+        self.checkbox_text_side       = kwargs.get("checkbox_text_side", "right")
 
         self.background_colour_active_default  = kwargs.get("background_colour_active_default",  (0, 0, 255))
         self.background_colour_active_pressed  = kwargs.get("background_colour_active_pressed",  (0, 0, 255))
         self.background_colour_active_hover    = kwargs.get("background_colour_active_hover",    (0, 0, 255))
         self.background_colour_active_disabled = kwargs.get("background_colour_active_disabled", (0, 0, 255))
+
+        self.foreground_colour_active_default  = kwargs.get("foreground_colour_active_default",  (0, 0, 255))
+        self.foreground_colour_active_pressed  = kwargs.get("foreground_colour_active_pressed",  (0, 0, 255))
+        self.foreground_colour_active_hover    = kwargs.get("foreground_colour_active_hover",    (0, 0, 255))
+        self.foreground_colour_active_disabled = kwargs.get("foreground_colour_active_disabled", (0, 0, 255))
 
         self.switch_appearance = kwargs.get("switch_appearance", False)
         self.switch_rounded    = kwargs.get("switch_rounded",    False)

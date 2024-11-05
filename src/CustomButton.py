@@ -60,7 +60,7 @@ class CustomButton(CustomControl):
                                               drawing_properties["pen"].GetWidth())
 
         gcdc.SetPen(drawing_properties["pen"])
-        gc.SetBrush(drawing_properties["brush"])
+        gc.SetBrush(drawing_properties["brush_background"])
         gcdc.DrawRoundedRectangle(buttonRectangle, drawing_properties["corner_radius"])
 
         # ------------------ text dimensions ------------------ #
@@ -79,24 +79,21 @@ class CustomButton(CustomControl):
                                      bitmap, imageWidth, imageHeight)
 
 
-
-        
     def DoGetBestClientSize(self) -> wx.Size:
         
         dc = wx.ClientDC(self)
         gcdc:wx.GCDC = wx.GCDC(dc)
 
-        image = self._getIfImage()
+        # image = self._getIfImage()
         textWidth, textHeight = self._getDefaultTextExtent(gcdc, self._Label)
         imageWidth, imageHeight = self._getMaxDimensions("image")
         text_separation = self._config.image_text_separation if self._config.image_text_separation else dip(6)
         padding_horizontal = dip(10)
         padding_vertical = dip(5)
 
-        width, height = self._getTextSideDimensions(textWidth, textHeight,
-                                                    imageWidth, imageHeight,
-                                                    text_separation,
-                                                    self._config.image_text_side)
+        width, height = self._getObjectSideDimensions(imageWidth, imageHeight,
+                                                      textWidth, textHeight,text_separation,
+                                                      self._config.image_text_side)
         width += 2 * padding_horizontal
         height += 2 * padding_vertical
 

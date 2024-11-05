@@ -73,7 +73,7 @@ class CustomPanel(wx.Panel, CustomObject):
 
         pen = drawing_properties["pen"]
         gcdc.SetPen(pen)        
-        gc.SetBrush(drawing_properties["brush"])
+        gc.SetBrush(drawing_properties["brush_background"])
         
         # ----------- drawing the panel's rectangle ----------- #
 

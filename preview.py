@@ -75,12 +75,12 @@ class PreviewFrame(wx.Frame):
 
         c = CustomCheckBox(P_buttons,
                            label="test",
-                           size=(200, 200),
+                           #size=(200, 200),
                            pos=(500, 250),
                            image_default=image,
                            image_size_default=image_size,
-                           image_text_side="down",
-                           checkbox_text_side="down",
+                           image_text_side="up",
+                           checkbox_text_side="up",
                            switch_appearance=True),
         
 
