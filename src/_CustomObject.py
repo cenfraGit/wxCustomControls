@@ -117,6 +117,7 @@ class CustomObject:
             image = self._config.image_default
             image_channels = self._config.image_channels_default
             image_size = self._config.image_size_default
+            background_colour_active = self._config.background_colour_active_default
         elif (control_state == "pressed"):
             cursor = wx.Cursor(self._config.cursor_stockcursor_pressed)
             text_font_size = self._config.text_font_size_pressed
@@ -126,6 +127,7 @@ class CustomObject:
             image = self._config.image_pressed
             image_channels = self._config.image_channels_pressed
             image_size = self._config.image_size_pressed
+            background_colour_active = self._config.background_colour_active_pressed
         elif (control_state == "hover"):
             cursor = wx.Cursor(self._config.cursor_stockcursor_hover)
             text_font_size = self._config.text_font_size_hover
@@ -135,6 +137,7 @@ class CustomObject:
             image = self._config.image_hover
             image_channels = self._config.image_channels_hover
             image_size = self._config.image_size_hover
+            background_colour_active = self._config.background_colour_active_hover
         else: # disabled
             cursor = wx.Cursor(self._config.cursor_stockcursor_disabled)
             text_font_size = self._config.text_font_size_disabled
@@ -144,6 +147,7 @@ class CustomObject:
             image = self._config.image_disabled
             image_channels = self._config.image_channels_disabled
             image_size = self._config.image_size_disabled
+            background_colour_active = self._config.background_colour_active_disabled
 
         return {
             "pen": pen,
@@ -155,13 +159,15 @@ class CustomObject:
             "corner_radius": corner_radius,
             "image": image,
             "image_channels": image_channels,
-            "image_size": image_size
+            "image_size": image_size,
+            "background_colour_active": background_colour_active
         }
 
 
-    def _getTextSideDimensions(self, text_separation:int, text_side,
+    def _getTextSideDimensions(self,
                                textWidth:int, textHeight:int,
-                               objectWidth:int, objectHeight:int):
+                               objectWidth:int, objectHeight:int,
+                               text_separation:int, text_side):
         """Returns the dimensions of a rectangle depending on the
         arrangement of an object and its text_side (used in images and
         checkboxes)."""
@@ -289,54 +295,8 @@ class CustomObject:
 
 
 
-    def _drawImageTextRectangle(self, rectangle:wx.Rect, text, textWidth, textHeight, bitmap, imageWidth, imageHeight, gcdc:wx.GCDC):
+    def _drawImageTextRectangle(self, gcdc:wx.GCDC, rectangle:wx.Rect, text, textWidth, textHeight, bitmap, imageWidth, imageHeight,):
         """Draws an image and text (or either) in the specified rectangle. It assumes that the rectangle has enough space."""
-
-        """
-
-        textX, textY = 0, 0   # init 
-        imageX, imageY = 0, 0 # init
-        r = rectangle         # alias
-        theresText:bool = (text != wx.EmptyString and text.strip() != "")
-        theresImage:bool = (imageWidth != 0 and imageHeight != 0)
-
-        if not theresText:
-            # image in center
-            imageX = r.GetX() + (r.GetWidth() // 2) - (imageWidth // 2)
-            imageY = r.GetY() + (r.GetHeight() // 2) - (imageHeight // 2)
-
-        elif not theresImage:
-            # text in center
-            textX = r.GetX() + (r.GetWidth() // 2) - (textWidth // 2)
-            textY = r.GetY() + (r.GetHeight() // 2) - (textHeight // 2)
-
-        else:
-            
-            text_separation = self._config.image_text_separation if self._config.image_text_separation else dip(6)
-            
-            if (self._config.image_text_side == "right"):
-                imageX = r.GetX() + (r.GetWidth() // 2) - ((imageWidth + textWidth + text_separation) // 2)
-                imageY = r.GetY() + (r.GetHeight() // 2) - (imageHeight // 2)
-                textX = imageX + imageWidth + text_separation
-                textY = r.GetY() + (r.GetHeight() // 2) - (textHeight // 2)
-            elif (self._config.image_text_side == "left"):
-                textX = r.GetX() + (r.GetWidth() // 2) - ((imageWidth + textWidth + text_separation) // 2)
-                textY = r.GetY() + (r.GetHeight() // 2) - (textHeight // 2)
-                imageX = textX + textWidth + text_separation
-                imageY = r.GetY() + (r.GetHeight() // 2) - (imageHeight // 2)
-            elif (self._config.image_text_side == "up"):
-                textX = r.GetX() + (r.GetWidth() // 2) - (textWidth // 2)
-                textY = r.GetY() + (r.GetHeight() // 2) - ((imageHeight + textHeight + text_separation) // 2)
-                imageX = r.GetX() + (r.GetWidth() // 2) - (imageWidth // 2)
-                imageY = textY + textHeight + text_separation
-            elif (self._config.image_text_side == "down"):
-                imageX = r.GetX() + (r.GetWidth() // 2) - (imageWidth // 2)
-                imageY = r.GetY() + (r.GetHeight() // 2) - ((imageHeight + textHeight + text_separation) // 2)
-                textX = r.GetX() + (r.GetWidth() // 2) - (textWidth // 2)
-                textY = imageY + imageHeight
-            else:
-                raise ValueError("text_side must be left, right, up or down.")
-        """
 
         imageX, imageY, textX, textY = self._performObjectSideCalculation(rectangle,
                                                                           imageWidth, imageHeight,
@@ -347,7 +307,6 @@ class CustomObject:
         theresText:bool = (text != wx.EmptyString and text.strip() != "")
         theresImage:bool = (imageWidth != 0 and imageHeight != 0)
             
-        # draw
         if theresText:
             gcdc.DrawText(text, textX, textY)
         if theresImage:
@@ -355,7 +314,7 @@ class CustomObject:
 
 
 
-    def _getTextDimensions(self, string, gcdc, drawing_properties):        
+    def _getTextDimensions(self, gcdc, string, drawing_properties):        
         textWidth, textHeight = 0, 0
         if (string != wx.EmptyString):
             gcdc.GetGraphicsContext().SetFont(wx.Font(drawing_properties["text_font_size"],

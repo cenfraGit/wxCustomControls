@@ -65,7 +65,7 @@ class CustomButton(CustomControl):
 
         # ------------------ text dimensions ------------------ #
         
-        textWidth, textHeight = self._getTextDimensions(self._Label, gcdc, drawing_properties)
+        textWidth, textHeight = self._getTextDimensions(gcdc, self._Label, drawing_properties)
 
         # ----------------- image dimensions ----------------- #
         
@@ -73,11 +73,10 @@ class CustomButton(CustomControl):
 
         # ----------------------- draw ----------------------- #
 
-        self._drawImageTextRectangle(buttonRectangle,
+        self._drawImageTextRectangle(gcdc, buttonRectangle,
                                      self._Label,
                                      textWidth, textHeight,
-                                     bitmap, imageWidth, imageHeight,
-                                     gcdc)
+                                     bitmap, imageWidth, imageHeight)
 
 
 
@@ -94,10 +93,10 @@ class CustomButton(CustomControl):
         padding_horizontal = dip(10)
         padding_vertical = dip(5)
 
-        width, height = self._getTextSideDimensions(text_separation,
-                                                    self._config.image_text_side,
-                                                    textWidth, textHeight,
-                                                    imageWidth, imageHeight)
+        width, height = self._getTextSideDimensions(textWidth, textHeight,
+                                                    imageWidth, imageHeight,
+                                                    text_separation,
+                                                    self._config.image_text_side)
         width += 2 * padding_horizontal
         height += 2 * padding_vertical
 

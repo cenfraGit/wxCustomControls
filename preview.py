@@ -79,9 +79,9 @@ class PreviewFrame(wx.Frame):
                            pos=(500, 250),
                            image_default=image,
                            image_size_default=image_size,
-                           image_text_side="left",
-                           checkbox_text_side="left",
-                           switch_appearance=False),
+                           image_text_side="down",
+                           checkbox_text_side="down",
+                           switch_appearance=True),
         
 
         # ------------- add panels to main sizer ------------- #
