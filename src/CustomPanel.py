@@ -15,13 +15,16 @@ class CustomPanel(wx.Panel, CustomObject):
                  name=wx.PanelNameStr, config=None, **kwargs):
 
         # ---------------- init custom object ---------------- #
+        
         super().__init__(parent, id, pos, size, style, name)
         CustomObject.__init__(self, config, **kwargs)
         
         # ----------------------- setup ----------------------- #
+        
         self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
 
         # ---------------------- events ---------------------- #
+        
         self.Bind(wx.EVT_PAINT, self.__OnPaint)
         self.Bind(wx.EVT_SIZE, self.__OnSize)
 

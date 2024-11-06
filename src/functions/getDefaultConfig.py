@@ -18,6 +18,13 @@ def getDefaultConfig(object_type:str) -> CustomConfig:
             "border_width_default": 0,
             "corner_radius_default": 0
             },
+        "CustomStaticBox": {
+            "background_colour_default": (255, 255, 255),
+            "border_colour_default": (200, 200, 200),
+            "border_width_default": 1,
+            "corner_radius_default": 0,
+            "padding_all_sides": dip(8)
+            },
         "CustomButton": {
             # background
             "background_colour_default": (240, 240, 240),

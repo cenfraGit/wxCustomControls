@@ -10,6 +10,7 @@ import os
 
 from src import CustomConfig
 from src import CustomPanel
+from src import CustomStaticBox
 from src import CustomButton
 from src import CustomCheckBox
 from src import CustomRadioButton
@@ -57,7 +58,7 @@ class PreviewFrame(wx.Frame):
 
         P_buttons = CustomPanel(P_main, config=config_panel)
 
-        wx.Button(P_buttons, label="test")
+        #wx.Button(P_buttons, label="test")
 
 
         image = wx.Image(os.path.join("images", "t.png"))
@@ -94,6 +95,8 @@ class PreviewFrame(wx.Frame):
         r2 = CustomRadioButton(P_buttons,
                               label="testing2",
                               pos=(400, 280))
+
+        t = CustomStaticBox(P_buttons, label="test", size=(100, 100))
         
 
         # ------------- add panels to main sizer ------------- #

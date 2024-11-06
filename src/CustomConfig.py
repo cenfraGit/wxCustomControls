@@ -133,6 +133,10 @@ class CustomConfig:
 
         self.radiobutton_diameter = kwargs.get("radiobutton_diameter", 0)
 
+        # ----------------------- other ----------------------- #
+
+        self.padding_all_sides = kwargs.get("padding_all_sides", None)
+
         # ----------- warn user if wrong arguments ----------- #
 
         self.__CheckWrongArguments(kwargs)
