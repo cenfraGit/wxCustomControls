@@ -14,6 +14,7 @@ from src import CustomStaticBox
 from src import CustomButton
 from src import CustomCheckBox
 from src import CustomRadioButton
+from src import CustomScrolledWindow
 
 # necessary for high dpi displays (windows)
 from src import dip
@@ -31,7 +32,7 @@ class PreviewFrame(wx.Frame):
         # -------------------- frame setup -------------------- #
 
         self.SetTitle("Custom Controls Preview")
-        self.SetInitialSize(dip(700, 500))
+        self.SetInitialSize(dip(700, 800))
         
         # ------------------------ gui ------------------------ #
 
@@ -97,6 +98,15 @@ class PreviewFrame(wx.Frame):
                               pos=(400, 280))
 
         t = CustomStaticBox(P_buttons, label="test", size=(100, 100))
+
+        sw = CustomScrolledWindow(P_main, pos=(0, 500), size=(300, 200))
+        sw_panel = sw.GetPanel()
+        sw_panel.SetBackgroundColour(wx.RED)
+        sw_sizer = wx.GridBagSizer()
+        sw_panel.SetSizer(sw_sizer)
+        for i in range(30):
+            sw_sizer.Add(wx.Button(sw_panel, label="test"), pos=(i, i))
+        sw_sizer.Layout()
         
 
         # ------------- add panels to main sizer ------------- #

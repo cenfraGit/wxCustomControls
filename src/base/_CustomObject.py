@@ -43,8 +43,9 @@ class CustomObject:
         return wx.Colour(*self._config.background_colour_default)
         
 
-    def _getDrawingContexts(self):
-        dc = wx.BufferedPaintDC(self)
+    def _getDrawingContexts(self, window=None):
+        window = window if window else self
+        dc = wx.BufferedPaintDC(window)
         gcdc = wx.GCDC(dc)
         gc:wx.GraphicsContext = gcdc.GetGraphicsContext()
         gcdc.Clear()

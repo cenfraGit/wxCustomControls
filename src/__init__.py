@@ -10,3 +10,4 @@ from .CustomStaticBox import CustomStaticBox
 from .CustomButton import CustomButton
 from .CustomCheckBox import CustomCheckBox
 from .CustomRadioButton import CustomRadioButton
+from .CustomScrolledWindow import CustomScrolledWindow

@@ -133,6 +133,16 @@ class CustomConfig:
 
         self.radiobutton_diameter = kwargs.get("radiobutton_diameter", 0)
 
+        # ---------------------- scrollbar ------------------------ #
+
+        self.scrollX = kwargs.get("scrollX", True)
+        self.scrollY = kwargs.get("scrollY", True)
+        self.scrollUnitsX = kwargs.get("scrollUnitsX", 15)
+        self.scrollUnitsY = kwargs.get("scrollUnitsY", 15)
+        self.scrollbar_type = kwargs.get("scrollbar_type", "rectangular")
+        self.scrollbar_width = kwargs.get("scrollbar_width", None)
+        self.scrollbar_padding = kwargs.get("scrollbar_padding", None)
+
         # ----------------------- other ----------------------- #
 
         self.padding_all_sides = kwargs.get("padding_all_sides", None)

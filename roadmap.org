@@ -7,9 +7,9 @@
 
 * DONE CustomStaticBox
 
-* TODO CustomComboBox
-
 * TODO CustomScrolledWindow
+
+* TODO CustomComboBox
 
 * TODO CustomStaticText
 
