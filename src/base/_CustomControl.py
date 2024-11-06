@@ -7,7 +7,7 @@
 
 
 import wx
-from .CustomConfig import CustomConfig
+from ..CustomConfig import CustomConfig
 from ._CustomObject import CustomObject
 
 

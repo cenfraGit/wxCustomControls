@@ -6,7 +6,7 @@
 
 import wx
 from copy import copy
-from ._CustomControl import CustomControl
+from .base._CustomControl import CustomControl
 from .utils.dip import dip
 
 

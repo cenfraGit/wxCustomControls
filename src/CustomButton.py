@@ -5,7 +5,7 @@
 
 
 import wx
-from ._CustomControl import CustomControl
+from .base._CustomControl import CustomControl
 from .utils.dip import dip
 
 

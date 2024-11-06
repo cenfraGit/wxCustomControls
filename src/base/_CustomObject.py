@@ -7,9 +7,9 @@
 
 import wx
 from copy import copy
-from .utils.dip import dip
-from .CustomConfig import CustomConfig
-from .functions.getDefaultConfig import getDefaultConfig
+from ..utils.dip import dip
+from ..CustomConfig import CustomConfig
+from ..functions.getDefaultConfig import getDefaultConfig
 
 
 class CustomObject:

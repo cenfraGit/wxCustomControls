@@ -48,7 +48,6 @@ def getDefaultConfig(object_type:str) -> CustomConfig:
             "switch_height": dip(20),
             "switch_radius": dip(4),
             "switch_selector_padding": dip(3),
-            "switch_selector_width": dip(2),
             "switch_rounded": False,
             # corner radius
             "corner_radius_default": dip(3),

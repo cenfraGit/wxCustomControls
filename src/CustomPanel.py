@@ -6,7 +6,7 @@
 
 import wx
 from .utils.dip import dip
-from ._CustomObject import CustomObject
+from .base._CustomObject import CustomObject
 
 
 class CustomPanel(wx.Panel, CustomObject):
