@@ -72,9 +72,32 @@ def getDefaultConfig(object_type:str) -> CustomConfig:
             # other
             "image_text_separation": dip(6),
             "text_foreground_colour_default": (20, 20, 20),
-            
-            
-        }
+        },
+        "CustomRadioButton": {
+            # circle diameter
+            "radiobutton_diameter": dip(20),
+            # background colour inactive
+            "background_colour_default": (230, 230, 230),
+            "background_colour_pressed": (210, 210, 210),
+            "background_colour_hover": (220, 220, 220),
+            # background colour active
+            "background_colour_active_default": (57, 117, 186),
+            "background_colour_active_pressed": (44, 91, 143),
+            "background_colour_active_hover": (52, 107, 169),
+            # border colour
+            "border_colour_default": (200, 200, 200),
+            "border_colour_pressed": (180, 180, 180),
+            "border_colour_hover": (190, 190, 190),
+            # border width
+            "border_width_default": dip(1),
+            "border_width_pressed": dip(1),
+            "border_width_hover": dip(1),
+            # other
+            "image_text_separation": dip(6),
+            "text_foreground_colour_default": (20, 20, 20),
+        },
+
+        
     }
 
     if object_type not in configurations.keys():

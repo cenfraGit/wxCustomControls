@@ -13,11 +13,11 @@ from ._CustomObject import CustomObject
 
 class CustomControl(wx.Control, CustomObject):
     def __init__(self, parent, id=wx.ID_ANY, pos=wx.DefaultPosition,
-                 size=wx.DefaultSize, style=wx.NO_BORDER,
+                 size=wx.DefaultSize, style=0,
                  validator=wx.DefaultValidator,
                  name=wx.ControlNameStr, config=None, **kwargs):
 
-        super().__init__(parent, id, pos, size, style, validator, name)
+        super().__init__(parent, id, pos, size, wx.NO_BORDER|style, validator, name)
         CustomObject.__init__(self, config, **kwargs)
 
         # ---------------- control attributes ---------------- #

@@ -129,6 +129,12 @@ class CustomConfig:
         self.switch_selector_border_colour = kwargs.get("switch_selector_border_colour", (150, 150, 150))
         self.switch_selector_border_width  = kwargs.get("switch_selector_border_width",  0)
 
+        # -------------------- radiobutton -------------------- #
+
+        self.radiobutton_diameter = kwargs.get("radiobutton_diameter", 0)
+
+        # ----------- warn user if wrong arguments ----------- #
+
         self.__CheckWrongArguments(kwargs)
 
 

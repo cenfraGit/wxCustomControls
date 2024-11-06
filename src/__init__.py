@@ -8,3 +8,4 @@ from .CustomConfig import CustomConfig
 from .CustomPanel import CustomPanel
 from .CustomButton import CustomButton
 from .CustomCheckBox import CustomCheckBox
+from .CustomRadioButton import CustomRadioButton

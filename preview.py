@@ -12,6 +12,7 @@ from src import CustomConfig
 from src import CustomPanel
 from src import CustomButton
 from src import CustomCheckBox
+from src import CustomRadioButton
 
 # necessary for high dpi displays (windows)
 from src import dip
@@ -81,6 +82,18 @@ class PreviewFrame(wx.Frame):
                            image_text_side="up",
                            checkbox_text_side="up",
                            switch_appearance=True)
+
+
+        r = CustomRadioButton(P_buttons,
+                              label="testing",
+                              pos=(400, 220),
+                              style=wx.RB_GROUP)
+        r1 = CustomRadioButton(P_buttons,
+                              label="testing1",
+                              pos=(400, 250))
+        r2 = CustomRadioButton(P_buttons,
+                              label="testing2",
+                              pos=(400, 280))
         
 
         # ------------- add panels to main sizer ------------- #

@@ -1,20 +1,24 @@
-# CustomCheckBox.py
+# CustomCheckButton.py
 # wxCustomControls
-# A customizable checkbox.
-# 30/oct/2024
+# A customizable radiobutton.
+# 6/nov/2024
 
 
 import wx
 from copy import copy
 from .base._CustomControl import CustomControl
 from .utils.dip import dip
+import builtins
 
 
-class CustomCheckBox(CustomControl):
+class CustomRadioButton(CustomControl):
+
+    groups = {} # keep track of radio button groups
+
     def __init__(self, parent, id=wx.ID_ANY, label=wx.EmptyString,
                  pos=wx.DefaultPosition, size=wx.DefaultSize,
-                 style=wx.NO_BORDER, validator=wx.DefaultValidator,
-                 name=wx.CheckBoxNameStr, value=False, config=None,
+                 style=0, validator=wx.DefaultValidator,
+                 name=wx.RadioButtonNameStr, value=False, config=None,
                  **kwargs):
 
         # ---------------- control attributes ---------------- #
@@ -25,6 +29,16 @@ class CustomCheckBox(CustomControl):
         # ------------------- init control ------------------- #
 
         super().__init__(parent, id, pos, size, style, validator, name, config, **kwargs)
+
+        # ------------ check if starts a new group ------------ #
+
+        if style & wx.RB_GROUP or not CustomRadioButton.groups:
+            self.group_id = builtins.id(self)
+            CustomRadioButton.groups[self.group_id] = []
+        else:
+            self.group_id = list(CustomRadioButton.groups.keys())[-1]
+
+        CustomRadioButton.groups[self.group_id].append(self)
 
         # ---------------------- events ---------------------- #
 
@@ -65,13 +79,10 @@ class CustomCheckBox(CustomControl):
                                                                                 self._config.image_text_separation, 
                                                                                 self._config.image_text_side)
 
-        # get the dimensions of the current type of selector (checkbox or switch)
-        selectorWidth  = self._config.switch_width  if self._config.switch_appearance else self._config.checkbox_width
-        selectorHeight = self._config.switch_height if self._config.switch_appearance else self._config.checkbox_height
-
         # get coordinates of selector and imageTextRect depending on the layout and dimensions
-        selectorX, selectorY, imageTextRectX, imageTextRectY = self._performObjectSideCalculation(controlRect, 
-                                                                                                  selectorWidth, selectorHeight, 
+        radiobuttonX, radiobuttonY, imageTextRectX, imageTextRectY = self._performObjectSideCalculation(controlRect, 
+                                                                                                  self._config.radiobutton_diameter,
+                                                                                                  self._config.radiobutton_diameter,
                                                                                                   imageTextRectWidth, imageTextRectHeight, 
                                                                                                   self._config.checkbox_text_separation, 
                                                                                                   self._config.checkbox_text_side)
@@ -79,7 +90,7 @@ class CustomCheckBox(CustomControl):
         # ----------------- create rectangles ----------------- #
         
         imageTextRect = wx.Rect(imageTextRectX, imageTextRectY, imageTextRectWidth, imageTextRectHeight)
-        selectorRectangle = wx.Rect(selectorX, selectorY, selectorWidth, selectorHeight)
+        radiobuttonRectangle = wx.Rect(radiobuttonX, radiobuttonY, self._config.radiobutton_diameter, self._config.radiobutton_diameter)
 
         # ------------------ draw rectangles ------------------ #
 
@@ -93,53 +104,16 @@ class CustomCheckBox(CustomControl):
         else:
             gcdc.SetPen(drawing_properties["pen"])
             gc.SetBrush(drawing_properties["brush_background"])
-        gcdc.DrawRoundedRectangle(selectorRectangle, radius=drawing_properties["corner_radius"])
 
-        # if checkbox is active
-        if (self._Value and not self._config.switch_appearance):
-            
-            # checkmark rectangle area
-            checkRect:wx.Rect = copy(selectorRectangle).Deflate(int(self._config.checkbox_active_deflate*1.2), 
-                                                                int(self._config.checkbox_active_deflate*1.3))
-            gcdc.SetPen(wx.Pen(wx.WHITE, width=2))
-            gcdc.SetBrush(wx.TRANSPARENT_BRUSH)
-            # draw checkmark
-            path:wx.GraphicsPath = gc.CreatePath()
-            path.MoveToPoint(checkRect.GetX(), checkRect.GetY() + (checkRect.GetHeight() // 1.5))
-            path.AddLineToPoint(checkRect.GetX() + (checkRect.GetWidth() // 2 ), checkRect.GetY() + checkRect.GetHeight())
-            path.AddLineToPoint(*checkRect.GetTopRight())
-            gc.StrokePath(path)
-        
-        if (self._config.switch_appearance):
-            
-            if self._Value: # draw switch indicator on the right side
-                selectionX = selectorRectangle.GetX() + selectorRectangle.GetWidth() - self._config.switch_height
-                selectionY = selectorRectangle.GetY()
-            else: # draw to the left side
-                selectionX = selectorRectangle.GetX()
-                selectionY = selectorRectangle.GetY()
-                
-            # draw switch on/off indicator
-            if self._config.switch_selector_border_width:
-                pen = wx.Pen(wx.Colour(*self._config.switch_selector_border_colour), self._config.switch_selector_border_width)
-            else:
-                pen = wx.TRANSPARENT_PEN
-            
-            gcdc.SetPen(pen)
+        # calculate the center of the radiobutton circle
+        radiobuttonCenterX = radiobuttonRectangle.GetX() + self._config.radiobutton_diameter//2
+        radiobuttonCenterY = radiobuttonRectangle.GetY() + self._config.radiobutton_diameter//2        
+        gcdc.DrawCircle(radiobuttonCenterX, radiobuttonCenterY, self._config.radiobutton_diameter//2)
+
+        if self._Value:
             gc.SetBrush(drawing_properties["brush_foreground"])
+            gcdc.DrawCircle(radiobuttonCenterX, radiobuttonCenterY, self._config.radiobutton_diameter//5)
             
-            if self._config.switch_rounded:
-                gcdc.DrawEllipse(selectionX + self._config.switch_selector_padding,
-                                 selectionY + self._config.switch_selector_padding,
-                                 self._config.switch_height - (2 * self._config.switch_selector_padding),
-                                 self._config.switch_height - (2 * self._config.switch_selector_padding))
-            else:
-                gcdc.DrawRoundedRectangle(selectionX + self._config.switch_selector_padding,
-                                          selectionY + self._config.switch_selector_padding,
-                                          self._config.switch_height - (2 * self._config.switch_selector_padding),
-                                          self._config.switch_height - (2 * self._config.switch_selector_padding),
-                                          self._config.switch_radius)
-
 
     def DoGetBestClientSize(self) -> wx.Size:
 
@@ -154,11 +128,9 @@ class CustomCheckBox(CustomControl):
                                                                         textWidth, textHeight,
                                                                         text_separation,
                                                                         self._config.image_text_side)
-        # get the dimensions of the current type of selector (checkbox or switch)
-        selectorWidth  = self._config.switch_width  if self._config.switch_appearance else self._config.checkbox_width
-        selectorHeight = self._config.switch_height if self._config.switch_appearance else self._config.checkbox_height
         # dimensions for whole control
-        width, height = self._getObjectSideDimensions(selectorWidth, selectorHeight,
+        width, height = self._getObjectSideDimensions(self._config.radiobutton_diameter,
+                                                      self._config.radiobutton_diameter,
                                                       textImageWidth, textImageHeight,
                                                       self._config.checkbox_text_separation, 
                                                       self._config.checkbox_text_side)
@@ -180,8 +152,14 @@ class CustomCheckBox(CustomControl):
             self.ReleaseMouse()
             self._Pressed = False
             if self._Hover:
-                self._Value = not self._Value
-                wx.PostEvent(self, wx.PyCommandEvent(wx.EVT_CHECKBOX.typeId, self.GetId()))                
+                # deselect other radio buttons in group
+                for rb in CustomRadioButton.groups[self.group_id]:
+                    if rb._Value:
+                        rb._Value = False
+                        rb.Refresh()
+                # set the value of this radiobutton to true
+                self._Value = True
+                wx.PostEvent(self, wx.PyCommandEvent(wx.EVT_RADIOBUTTON.typeId, self.GetId()))
             self.Refresh()
         event.Skip()
-    
+
