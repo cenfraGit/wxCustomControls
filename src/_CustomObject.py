@@ -185,7 +185,7 @@ class CustomObject:
             rectangleWidth = max(object1Width, object2Width)
             rectangleHeight = object1Height + separation + object2Height
         else:
-            raise ValueError("side must be left, right, up or down.")
+            raise ValueError("object2_side must be left, right, up or down.")
         return rectangleWidth, rectangleHeight
 
 
@@ -209,34 +209,32 @@ class CustomObject:
             object2Y = r.GetY() + (r.GetHeight() // 2) - (object2Height // 2)
 
         else:
-            
             separation = separation if separation else dip(6)
             
             if (object2_side == "right"):
-                object1X = r.GetX() + (r.GetWidth() // 2) - ((object1Width + object1Width + separation) // 2)
+                object1X = r.GetX() + (r.GetWidth() // 2) - ((object1Width + separation + object2Width) // 2)
                 object1Y = r.GetY() + (r.GetHeight() // 2) - (object1Height // 2)
                 object2X = object1X + object1Width + separation
                 object2Y = r.GetY() + (r.GetHeight() // 2) - (object2Height // 2)
             elif (object2_side == "left"):
-                object2X = r.GetX() + (r.GetWidth() // 2) - ((object1Width + object2Width + separation) // 2)
+                object2X = r.GetX() + (r.GetWidth() // 2) - ((object1Width + separation + object2Width) // 2)
                 object2Y = r.GetY() + (r.GetHeight() // 2) - (object2Height // 2)
                 object1X = object2X + object2Width + separation
                 object1Y = r.GetY() + (r.GetHeight() // 2) - (object1Height // 2)
             elif (object2_side == "up"):
                 object2X = r.GetX() + (r.GetWidth() // 2) - (object2Width // 2)
-                object2Y = r.GetY() + (r.GetHeight() // 2) - ((object1Height + object2Height + separation) // 2)
+                object2Y = r.GetY() + (r.GetHeight() // 2) - ((object1Height + separation + object2Height) // 2)
                 object1X = r.GetX() + (r.GetWidth() // 2) - (object1Width // 2)
-                object1Y = object1Y + object2Height + separation
+                object1Y = object2Y + object2Height + separation
             elif (object2_side == "down"):
                 object1X = r.GetX() + (r.GetWidth() // 2) - (object1Width // 2)
-                object1Y = r.GetY() + (r.GetHeight() // 2) - ((object1Height + object2Height + separation) // 2)
+                object1Y = r.GetY() + (r.GetHeight() // 2) - ((object1Height + separation + object2Height) // 2)
                 object2X = r.GetX() + (r.GetWidth() // 2) - (object2Width // 2)
-                object2Y = object1Y + object1Height
+                object2Y = object1Y + object1Height + separation
             else:
-                raise ValueError("text_side must be left, right, up or down.")
+                raise ValueError("object2_side must be left, right, up or down.")
             
         return object1X, object1Y, object2X, object2Y
-
 
 
     def _drawImageTextRectangle(self, gcdc:wx.GCDC, rectangle:wx.Rect, text, textWidth, textHeight, bitmap, imageWidth, imageHeight,):
@@ -257,7 +255,6 @@ class CustomObject:
             gcdc.DrawBitmap(bitmap, imageX, imageY)
 
 
-
     def _getTextDimensions(self, gcdc, string, drawing_properties):        
         textWidth, textHeight = 0, 0
         if (string != wx.EmptyString):
@@ -271,11 +268,13 @@ class CustomObject:
     
 
     def _getBitmapAndDimensions(self, drawing_properties):
-        imageWidth, imageHeight = 0, 0
+        if self._config.image_use_max_dimensions:
+            imageWidth, imageHeight = self._getMaxDimensions("image")
+        else:
+            imageWidth, imageHeight = 0, 0
         bitmap = wx.Bitmap(1, 1)
         if drawing_properties["image"]:
             imageWidth, imageHeight = drawing_properties["image_size"]
-            # convert image to bitmap
             image:wx.Image = drawing_properties["image"].AdjustChannels(*drawing_properties["image_channels"])
             bitmap:wx.Bitmap = image.ConvertToBitmap()
             imageWidth, imageHeight = drawing_properties["image_size"]

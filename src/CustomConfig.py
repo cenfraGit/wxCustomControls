@@ -95,11 +95,13 @@ class CustomConfig:
         self.image_size_disabled = kwargs.get("image_size_disabled", (0, 0))
 
         self.image_text_separation = kwargs.get("image_text_separation", None)
-        self.image_text_side       = kwargs.get("image_text_side", "right") # when using images
+        self.image_text_side       = kwargs.get("image_text_side", "right")
+
+        self.image_use_max_dimensions = kwargs.get("image_use_max_dimensions", True)
 
         # ---------------- checkbox and switch ---------------- #
 
-        self.checkbox_width  = kwargs.get("checkbox_width", None)
+        self.checkbox_width  = kwargs.get("checkbox_width",  None)
         self.checkbox_height = kwargs.get("checkbox_height", None)
 
         self.checkbox_active_deflate = kwargs.get("checkbox_active_deflate", 5)

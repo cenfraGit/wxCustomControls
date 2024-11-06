@@ -53,46 +53,40 @@ class CustomCheckBox(CustomControl):
         controlRect:wx.Rect = self.GetClientRect() # control area
 
         gcdc.SetPen(wx.TRANSPARENT_PEN)
-        #gcdc.SetBrush(wx.Brush(self.GetParent().GetBackgroundColour()))
-        gcdc.SetBrush(wx.GREEN_BRUSH)
+        gcdc.SetBrush(wx.Brush(self.GetParent().GetBackgroundColour()))
         gcdc.DrawRectangle(controlRect)
 
+        # ------------------ get dimensions ------------------ #
 
-        # sidePadding = self._getMaxDimensions("border_width")
-
-        # get text and image dimensions
         textWidth, textHeight = self._getTextDimensions(gcdc, self._Label,  drawing_properties)
         imageWidth, imageHeight, bitmap = self._getBitmapAndDimensions(drawing_properties)
-
-        # get the dimensions of the rectangle with the image and text
         imageTextRectWidth, imageTextRectHeight = self._getObjectSideDimensions(imageWidth, imageHeight,
                                                                                 textWidth, textHeight, 
                                                                                 self._config.image_text_separation, 
-                                                                                self._config.image_text_side,)
+                                                                                self._config.image_text_side)
 
         # get the dimensions of the current type of selector (checkbox or switch)
         selectorWidth  = self._config.switch_width  if self._config.switch_appearance else self._config.checkbox_width
         selectorHeight = self._config.switch_height if self._config.switch_appearance else self._config.checkbox_height
 
-        # get coordinates of objects depending on the layout and dimensions
+        # get coordinates of selector and imageTextRect depending on the layout and dimensions
         selectorX, selectorY, imageTextRectX, imageTextRectY = self._performObjectSideCalculation(controlRect, 
                                                                                                   selectorWidth, selectorHeight, 
                                                                                                   imageTextRectWidth, imageTextRectHeight, 
                                                                                                   self._config.checkbox_text_separation, 
                                                                                                   self._config.checkbox_text_side)
         
-        # create the rectangle for the text and the image
+        # ----------------- create rectangles ----------------- #
+        
         imageTextRect = wx.Rect(imageTextRectX, imageTextRectY, imageTextRectWidth, imageTextRectHeight)
-
-        # create the rectangle for the selector (either checkbox or switch)
         selectorRectangle = wx.Rect(selectorX, selectorY, selectorWidth, selectorHeight)
 
-        
+        # ------------------ draw rectangles ------------------ #
+
+        # draw text and image
         self._drawImageTextRectangle(gcdc, imageTextRect, self._Label, textWidth, textHeight, bitmap, imageWidth, imageHeight)
 
-
-        # ---------------------- draw background for selector depending on state ------------------------ #
-
+        # draw background for selector depending on state
         if self._Value:
             gcdc.SetPen(wx.TRANSPARENT_PEN)
             gc.SetBrush(wx.Brush(wx.Colour(drawing_properties["background_colour_active"])))
@@ -101,9 +95,10 @@ class CustomCheckBox(CustomControl):
             gc.SetBrush(drawing_properties["brush_background"])
         gcdc.DrawRoundedRectangle(selectorRectangle, radius=drawing_properties["corner_radius"])
 
-
-        if (self._Value and not self._config.switch_appearance): # if checkbox is active
-            # ------ checkmark rectangle delimiter (smaller) ------ #
+        # if checkbox is active
+        if (self._Value and not self._config.switch_appearance):
+            
+            # checkmark rectangle area
             checkRect:wx.Rect = copy(selectorRectangle).Deflate(int(self._config.checkbox_active_deflate*1.2), 
                                                                 int(self._config.checkbox_active_deflate*1.3))
             gcdc.SetPen(wx.Pen(wx.WHITE, width=2))
@@ -116,14 +111,14 @@ class CustomCheckBox(CustomControl):
             gc.StrokePath(path)
         
         if (self._config.switch_appearance):
-
+            
             if self._Value: # draw switch indicator on the right side
                 selectionX = selectorRectangle.GetX() + selectorRectangle.GetWidth() - self._config.switch_height
                 selectionY = selectorRectangle.GetY()
             else: # draw to the left side
                 selectionX = selectorRectangle.GetX()
                 selectionY = selectorRectangle.GetY()
-
+                
             # draw switch on/off indicator
             if self._config.switch_selector_border_width:
                 pen = wx.Pen(wx.Colour(*self._config.switch_selector_border_colour), self._config.switch_selector_border_width)
@@ -135,15 +130,15 @@ class CustomCheckBox(CustomControl):
             
             if self._config.switch_rounded:
                 gcdc.DrawEllipse(selectionX + self._config.switch_selector_padding,
-                            selectionY + self._config.switch_selector_padding,
-                            self._config.switch_height - (2 * self._config.switch_selector_padding),
-                            self._config.switch_height - (2 * self._config.switch_selector_padding))
+                                 selectionY + self._config.switch_selector_padding,
+                                 self._config.switch_height - (2 * self._config.switch_selector_padding),
+                                 self._config.switch_height - (2 * self._config.switch_selector_padding))
             else:
                 gcdc.DrawRoundedRectangle(selectionX + self._config.switch_selector_padding,
-                                        selectionY + self._config.switch_selector_padding,
-                                        self._config.switch_height - (2 * self._config.switch_selector_padding),
-                                        self._config.switch_height - (2 * self._config.switch_selector_padding),
-                                        self._config.switch_radius)
+                                          selectionY + self._config.switch_selector_padding,
+                                          self._config.switch_height - (2 * self._config.switch_selector_padding),
+                                          self._config.switch_height - (2 * self._config.switch_selector_padding),
+                                          self._config.switch_radius)
 
 
     def DoGetBestClientSize(self) -> wx.Size:
@@ -153,23 +148,22 @@ class CustomCheckBox(CustomControl):
 
         textWidth, textHeight = self._getDefaultTextExtent(gcdc, self._Label)
         imageWidth, imageHeight = self._getMaxDimensions("image")
+        sidePadding = self._getMaxDimensions("border_width")
         text_separation = self._config.image_text_separation if self._config.image_text_separation else dip(6)
-
         textImageWidth, textImageHeight = self._getObjectSideDimensions(imageWidth, imageHeight,
                                                                         textWidth, textHeight,
                                                                         text_separation,
                                                                         self._config.image_text_side)
-        
         # get the dimensions of the current type of selector (checkbox or switch)
         selectorWidth  = self._config.switch_width  if self._config.switch_appearance else self._config.checkbox_width
         selectorHeight = self._config.switch_height if self._config.switch_appearance else self._config.checkbox_height
-
-        # for whole checkbox
+        # dimensions for whole control
         width, height = self._getObjectSideDimensions(selectorWidth, selectorHeight,
-                                                        textImageWidth, textImageHeight,
-                                                        self._config.checkbox_text_separation, 
-                                                        self._config.checkbox_text_side)
-        
+                                                      textImageWidth, textImageHeight,
+                                                      self._config.checkbox_text_separation, 
+                                                      self._config.checkbox_text_side)
+        width += 2 * sidePadding
+        height += 2 * sidePadding
         return wx.Size(int(width), int(height))
 
 

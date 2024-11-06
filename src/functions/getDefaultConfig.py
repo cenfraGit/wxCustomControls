@@ -40,29 +40,41 @@ def getDefaultConfig(object_type:str) -> CustomConfig:
             "text_foreground_colour_disabled": (133, 133, 133),
             },
         "CustomCheckBox": {
+            # checkbox options
             "checkbox_width": dip(20),
             "checkbox_height": dip(20),
-            "image_text_separation": dip(6), # default colors
-            "background_colour_default": (240, 240, 240),
-            "border_colour_default": (200, 200, 200),
-            "border_width_default": dip(1),
-            "text_foreground_colour_default": (20, 20, 20),
-            # pressed
-            "background_colour_pressed": (180, 180, 180),
-            "border_colour_pressed": (0, 0, 0),
-            "border_width_pressed": 0,
-            # hover
-            "background_colour_hover": (240, 240, 240),
-            "border_colour_hover": (0, 0, 0),
-            "border_width_hover": dip(1),
-            "corner_radius_default": dip(3),
-            "background_active": (57, 117, 186),
-            # default switch options
-            "switch_radius": dip(3),
+            # switch options
+            "switch_width": dip(50),
+            "switch_height": dip(20),
+            "switch_radius": dip(4),
             "switch_selector_padding": dip(3),
             "switch_selector_width": dip(2),
             "switch_rounded": False,
-            "padding_all_sides": dip(3)
+            # corner radius
+            "corner_radius_default": dip(3),
+            "corner_radius_pressed": dip(3),
+            "corner_radius_hover": dip(3),
+            # background colour inactive
+            "background_colour_default": (230, 230, 230),
+            "background_colour_pressed": (210, 210, 210),
+            "background_colour_hover": (220, 220, 220),
+            # background colour active
+            "background_colour_active_default": (57, 117, 186),
+            "background_colour_active_pressed": (44, 91, 143),
+            "background_colour_active_hover": (52, 107, 169),
+            # border colour
+            "border_colour_default": (200, 200, 200),
+            "border_colour_pressed": (180, 180, 180),
+            "border_colour_hover": (190, 190, 190),
+            # border width
+            "border_width_default": dip(1),
+            "border_width_pressed": dip(1),
+            "border_width_hover": dip(1),
+            # other
+            "image_text_separation": dip(6),
+            "text_foreground_colour_default": (20, 20, 20),
+            
+            
         }
     }
 
