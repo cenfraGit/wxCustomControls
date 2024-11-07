@@ -104,12 +104,12 @@ def getDefaultConfig(object_type:str) -> CustomConfig:
             "text_foreground_colour_default": (20, 20, 20),
         },
         "CustomScrolledWindow": {
-            "background_colour_default": (255, 0, 0),
-            "background_colour_pressed": (255,0, 0),
-            "background_colour_hover": (200,0, 0),
-            "foreground_colour_default": (0, 200, 0),
-            "foreground_colour_pressed": (0, 180, 0),
-            "foreground_colour_hover": (0, 180, 0),
+            "background_colour_default": (230, 230, 230),
+            "background_colour_pressed": (220, 220, 220),
+            "background_colour_hover": (225, 225, 225),
+            "foreground_colour_default": (190, 190, 190),
+            "foreground_colour_pressed": (170, 170, 170),
+            "foreground_colour_hover": (180, 180, 180),
 
             "scrollbar_width": dip(15),
             "scrollbar_padding": dip(2)

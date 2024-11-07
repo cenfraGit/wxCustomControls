@@ -32,11 +32,26 @@ class PreviewFrame(wx.Frame):
         # -------------------- frame setup -------------------- #
 
         self.SetTitle("Custom Controls Preview")
-        self.SetInitialSize(dip(700, 800))
+        #self.SetInitialSize(dip(700, 800))
         
         # ------------------------ gui ------------------------ #
 
         self.initialize_ui()
+
+
+    def test(self, event):
+
+        self.status1 = not self.status1
+        self.status2 = not self.status2
+        
+
+        #self.sw.UpdateConfig(scrollX=not self.status1, scrollY=not self.status2)
+        self.sw._config.scrollX = self.status1
+        self.sw._config.scrollY = self.status2
+        
+        self.sw.UpdateScrollbars()
+
+        print("test", self.status1, self.status2)
         
 
     def initialize_ui(self):
@@ -57,6 +72,8 @@ class PreviewFrame(wx.Frame):
 
         # ---------------------- buttons ---------------------- #
 
+        """
+
         P_buttons = CustomPanel(P_main, config=config_panel)
 
         #wx.Button(P_buttons, label="test")
@@ -74,7 +91,10 @@ class PreviewFrame(wx.Frame):
                          image_text_side="up",
                          pos=(250, 250))
 
-        b.Bind(wx.EVT_BUTTON, lambda e: print("test"))
+        #b.Bind(wx.EVT_BUTTON, lambda e: print("test"))
+        self.status1 = True
+        self.status2 = True
+        b.Bind(wx.EVT_BUTTON, self.test)
 
         c = CustomCheckBox(P_buttons,
                            label="test",
@@ -99,8 +119,8 @@ class PreviewFrame(wx.Frame):
 
         t = CustomStaticBox(P_buttons, label="test", size=(100, 100))
 
-        sw = CustomScrolledWindow(P_main, pos=(0, 500), size=(300, 200))
-        sw_panel = sw.GetPanel()
+        self.sw = CustomScrolledWindow(P_main, pos=(0, 500), size=(300, 200), scrollX=True, scrollY=True)
+        sw_panel = self.sw.GetPanel()
         sw_panel.SetBackgroundColour(wx.RED)
         sw_sizer = wx.GridBagSizer()
         sw_panel.SetSizer(sw_sizer)
@@ -110,8 +130,20 @@ class PreviewFrame(wx.Frame):
         
 
         # ------------- add panels to main sizer ------------- #
+        """
 
-        S_main.Add(P_buttons, 0, wx.EXPAND)
+        self.sw = CustomScrolledWindow(P_main, scrollX=True, scrollY=True)
+        sw_panel = self.sw.GetPanel()
+        sw_panel.SetBackgroundColour(wx.RED)
+        sw_sizer = wx.GridBagSizer()
+        sw_panel.SetSizer(sw_sizer)
+        for i in range(20):
+            sw_sizer.Add(wx.Button(sw_panel, label="test"), pos=(i, i))
+        sw_sizer.Layout()
+
+
+
+        S_main.Add(self.sw, 1, wx.EXPAND)
         S_main.Layout()
         
 

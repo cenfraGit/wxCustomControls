@@ -14,24 +14,6 @@ from wx.lib.scrolledpanel import ScrolledPanel
 class CustomScrolledWindow(wx.Window, CustomObject):
     def __init__(self, parent, id=wx.ID_ANY, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0,name=wx.PanelNameStr, config=None, **kwargs):
 
-        # ---------------- init custom object ---------------- #
-        
-        super().__init__(parent, id, pos, size, style, name)
-        CustomObject.__init__(self, config, **kwargs)
-
-        # for bottom right square
-        self.SetBackgroundColour(self._config.background_colour_default)
-
-        # ------------ create scrolled panel ------------ #
-
-        self._scrolledPanel = ScrolledPanel(self)
-        self._scrolledPanel.SetupScrolling(self._config.scrollX, 
-                                           self._config.scrollY, 
-                                           self._config.scrollUnitsX, 
-                                           self._config.scrollUnitsY)
-        #self._scrolledPanel.ShowScrollbars(wx.SHOW_SB_NEVER, wx.SHOW_SB_NEVER)
-        self._scrolledPanel.SetBackgroundColour(wx.Colour(230, 230, 230))
-
         # ------------------ attributes ------------------ #
         
         self._LeftIsDownVertical = False
@@ -50,6 +32,28 @@ class CustomScrolledWindow(wx.Window, CustomObject):
         self._Pressed = False
         self._Hover = False
 
+        # booleans used to show/hide scrollbar windows
+        # even if false, in the starting state they will be displayed
+        self._VerticalScrollbarShown = True
+        self._HorizontalScrollbarShown = True
+
+        # ---------------- init custom object ---------------- #
+        
+        super().__init__(parent, id, pos, size, style, name)
+        CustomObject.__init__(self, config, **kwargs)
+
+        # for bottom right square
+        self.SetBackgroundColour(self._config.background_colour_default)
+
+        # ------------ create scrolled panel ------------ #
+
+        self._scrolledPanel = ScrolledPanel(self)
+        self._scrolledPanel.SetupScrolling(self._config.scrollX, 
+                                           self._config.scrollY, 
+                                           self._config.scrollUnitsX, 
+                                           self._config.scrollUnitsY)
+        self._scrolledPanel.ShowScrollbars(wx.SHOW_SB_NEVER, wx.SHOW_SB_NEVER)
+        self._scrolledPanel.SetBackgroundColour(wx.Colour(230, 230, 230))
 
         # ---------------- default values ---------------- #
         
@@ -74,6 +78,8 @@ class CustomScrolledWindow(wx.Window, CustomObject):
         self._sizer.AddGrowableCol(0, 1)
         self._sizer.AddGrowableRow(0, 1)
 
+        self.UpdateScrollbars()
+
         self.SetSizer(self._sizer)
 
         # -------------------- events -------------------- #
@@ -83,7 +89,6 @@ class CustomScrolledWindow(wx.Window, CustomObject):
 
         # vertical scrollbar events
         self._VerticalScrollbar.Bind(wx.EVT_PAINT, self.__OnPaintVerticalScrollbar)
-        #self._VerticalScrollbar.Bind(wx.EVT_MOTION, self.__OnMotionVerticalScrollbar)
 
 
         self._VerticalScrollbar.Bind(wx.EVT_LEFT_DOWN, self.__OnLeftDown)
@@ -93,7 +98,6 @@ class CustomScrolledWindow(wx.Window, CustomObject):
 
         # horizontal scrollbar events
         self._HorizontalScrollbar.Bind(wx.EVT_PAINT, self.__OnPaintHorizontalScrollbar)
-        #self._HorizontalScrollbar.Bind(wx.EVT_MOTION, self.__OnMotionHorizontalScrollbar)
 
 
         self._HorizontalScrollbar.Bind(wx.EVT_LEFT_DOWN, self.__OnLeftDown)
@@ -102,13 +106,55 @@ class CustomScrolledWindow(wx.Window, CustomObject):
         self._HorizontalScrollbar.Bind(wx.EVT_MOTION, self.__OnMotion)
 
 
-        self._scrolledPanel.Bind(wx.EVT_MOUSEWHEEL, self.__OnScroll)
+        #self._scrolledPanel.Bind(wx.EVT_MOUSEWHEEL, self.__OnScroll)
+        self._scrolledPanel.Bind(wx.EVT_SCROLLWIN, self.__OnScrollWin)
 
-        self.Layout()
+        self._sizer.Layout()
+
+
+    def _showVerticalScrollbar(self, show=True):
+        if show:
+            self._sizer.Add(window=self._VerticalScrollbar, pos=(0, 1), span=(1, 1), flag=wx.EXPAND)
+            self._VerticalScrollbar.Show()
+            self._VerticalScrollbarShown = True
+        else:
+            self._sizer.Detach(self._VerticalScrollbar)
+            self._VerticalScrollbar.Hide()
+            self._VerticalScrollbarShown = False
+
+
+    def _showHorizontalScrollbar(self, show=True):
+        if show:
+            self._sizer.Add(window=self._HorizontalScrollbar, pos=(1, 0), span=(1, 1), flag=wx.EXPAND)
+            self._HorizontalScrollbar.Show()
+            self._HorizontalScrollbarShown = True
+        else:
+            self._sizer.Detach(self._HorizontalScrollbar)
+            self._HorizontalScrollbar.Hide()
+            self._HorizontalScrollbarShown = False
+
+
+    def UpdateScrollbars(self):
+        """This method should be called if either config.scrollX or config.scrollY was changed."""
+        # if should display vertical scrollbar and it is not already shown
+        if self._config.scrollY and not self._VerticalScrollbarShown:
+            self._showVerticalScrollbar(True)
+        # if should not display vertical scrollbar and it is shown
+        elif not self._config.scrollY and self._VerticalScrollbarShown:
+            self._showVerticalScrollbar(False)
+
+        # if should display horizontal scrollbar and it is not already shown
+        if self._config.scrollX and not self._HorizontalScrollbarShown:
+            self._showHorizontalScrollbar(True)
+        # if should not display horizontal scrollbar and it is shown
+        elif not self._config.scrollX and self._HorizontalScrollbarShown:
+            self._showHorizontalScrollbar(False)
+
+        self._sizer.Layout()
 
 
     def GetPanel(self):
-        """ Returns the scrolled panel to the user. """
+        """Returns the scrolled panel to the user."""
         return self._scrolledPanel
 
 
@@ -207,12 +253,18 @@ class CustomScrolledWindow(wx.Window, CustomObject):
 
 
             if (scrollbarWindow == self._VerticalScrollbar):
+                if not self._config.scrollY:
+                    event.Skip()
+                    return
                 scrolledPanelFullHeightPX = self._scrolledPanel.GetVirtualSize()[1]
                 scrollbarAreaHeightPX = self._VerticalScrollbar.GetClientSize()[1]
                 scrollbarHeight = self._VerticalBarHeight
                 clickedIn = y + self._VerticalDifference
                 focus = unitsY
             elif (scrollbarWindow == self._HorizontalScrollbar):
+                if not self._config.scrollX:
+                    event.Skip()
+                    return
                 scrolledPanelFullHeightPX = self._scrolledPanel.GetVirtualSize()[0]
                 scrollbarAreaHeightPX = self._HorizontalScrollbar.GetClientSize()[0]
                 scrollbarHeight = self._HorizontalBarHeight
@@ -254,21 +306,24 @@ class CustomScrolledWindow(wx.Window, CustomObject):
             
         event.Skip()
 
-        
 
     def __OnScroll(self, event:wx.MouseEvent):
 
         currentView = self._scrolledPanel.GetViewStart()
         
-        x:int = 0
-        y:int = 0
+        x = 0
+        y = 0
 
         if event.GetWheelAxis() == wx.MOUSE_WHEEL_VERTICAL:
+            if not self._config.scrollY:
+                return
             x = currentView[0]
             y = currentView[1] - (event.GetWheelRotation() / 8)
             #wx.CallAfter(self._VerticalScrollbar.Refresh)
             self._VerticalScrollbar.Refresh()
         elif event.GetWheelAxis() == wx.MOUSE_WHEEL_HORIZONTAL:
+            if not self._config.scrollX:
+                return
             x = currentView[0] - (event.GetWheelRotation() / 8)
             y = currentView[1]
             #wx.CallAfter(self._HorizontalScrollbar.Refresh)
@@ -277,11 +332,105 @@ class CustomScrolledWindow(wx.Window, CustomObject):
         self._scrolledPanel.Scroll(int(x), int(y))
 
 
+    def __OnScrollWin(self, event):
+
+        x = self._scrolledPanel.GetScrollPos(wx.HORIZONTAL)
+        y = self._scrolledPanel.GetScrollPos(wx.VERTICAL)
+
+        print("Scroll event detected")
+
+        if event.GetOrientation() == wx.VERTICAL:
+            if not self._config.scrollY:
+                return
+            y = event.GetPosition()  # Use the scroll position directly
+            self._VerticalScrollbar.Refresh()
+        elif event.GetOrientation() == wx.HORIZONTAL:
+            if not self._config.scrollX:
+                return
+            x = event.GetPosition()  # Use the scroll position directly
+            self._HorizontalScrollbar.Refresh()
+
+        self._scrolledPanel.Scroll(x, y)
+        event.Skip()
+
+        # currentView = self._scrolledPanel.GetViewStart()
+        
+        # x = currentView[0]
+        # y = currentView[1]
+
+        # #print("Scroll event detected")
+
+        # if event.GetOrientation() == wx.VERTICAL:
+        #     if not self._config.scrollY:
+        #         return
+        #     y = event.GetPosition()  # Use the scroll position directly
+        #     self._VerticalScrollbar.Refresh()
+        # elif event.GetOrientation() == wx.HORIZONTAL:
+        #     if not self._config.scrollX:
+        #         return
+        #     x = event.GetPosition()  # Use the scroll position directly
+        #     self._HorizontalScrollbar.Refresh()
+
+        # print(x, y)
+        # self._scrolledPanel.Scroll(int(x), int(y))
+        # event.Skip()  # Ensure the event is processed further
+
+
+
+
+
+        # if event.GetWheelAxis() == wx.MOUSE_WHEEL_VERTICAL:
+        #     if not self._config.scrollY:
+        #         return
+        #     x = currentView[0]
+        #     y = currentView[1] - (event.GetWheelRotation() / 8)
+        #     #wx.CallAfter(self._VerticalScrollbar.Refresh)
+        #     self._VerticalScrollbar.Refresh()
+        # elif event.GetWheelAxis() == wx.MOUSE_WHEEL_HORIZONTAL:
+        #     if not self._config.scrollX:
+        #         return
+        #     x = currentView[0] - (event.GetWheelRotation() / 8)
+        #     y = currentView[1]
+        #     #wx.CallAfter(self._HorizontalScrollbar.Refresh)
+        #     self._HorizontalScrollbar.Refresh()
+
+        # self._scrolledPanel.Scroll(int(x), int(y))
+
+
     def __OnSize(self, event):
         """ Refreshes the scrollbars when the window is resized. """
+
+        clientSize = self._scrolledPanel.GetClientSize()
+        virtualSize = self._scrolledPanel.GetVirtualSize()
+
+        # ---------------------- vertical ------------------------ #
+
+        realV = virtualSize[1]
+        visibleV = clientSize[1]
+
+        # ---------------------- horizontal ------------------------ #
+
+        realH = virtualSize[0]
+        visibleH = clientSize[0]
+
+        # ---------------------- refresh ------------------------ #
+
+        if (visibleV / realV >= 1.0) and self._VerticalScrollbarShown:
+            self._showVerticalScrollbar(False)
+        elif (visibleV / realV < 1.0) and not self._VerticalScrollbarShown:
+            self._showVerticalScrollbar(True)
+
+        if (visibleH / realH >= 1.0) and self._HorizontalScrollbarShown:
+            self._showHorizontalScrollbar(False)
+        elif (visibleH / realH < 1.0) and not self._HorizontalScrollbarShown:
+            self._showHorizontalScrollbar(True)
+
         self._scrolledPanel.Refresh()
         self._VerticalScrollbar.Refresh()
         self._HorizontalScrollbar.Refresh()
+
+        self._sizer.Layout()
+
         event.Skip()
 
         
