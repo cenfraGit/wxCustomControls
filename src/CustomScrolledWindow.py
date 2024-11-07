@@ -83,21 +83,24 @@ class CustomScrolledWindow(wx.Window, CustomObject):
 
         # vertical scrollbar events
         self._VerticalScrollbar.Bind(wx.EVT_PAINT, self.__OnPaintVerticalScrollbar)
-        self._VerticalScrollbar.Bind(wx.EVT_MOTION, self.__OnMotionVerticalScrollbar)
+        #self._VerticalScrollbar.Bind(wx.EVT_MOTION, self.__OnMotionVerticalScrollbar)
 
 
         self._VerticalScrollbar.Bind(wx.EVT_LEFT_DOWN, self.__OnLeftDown)
         self._VerticalScrollbar.Bind(wx.EVT_LEFT_UP, self.__OnLeftUp)
         self._VerticalScrollbar.Bind(wx.EVT_LEAVE_WINDOW, self.__OnLeave)
+        self._VerticalScrollbar.Bind(wx.EVT_MOTION, self.__OnMotion)
 
         # horizontal scrollbar events
         self._HorizontalScrollbar.Bind(wx.EVT_PAINT, self.__OnPaintHorizontalScrollbar)
-        self._HorizontalScrollbar.Bind(wx.EVT_MOTION, self.__OnMotionHorizontalScrollbar)
+        #self._HorizontalScrollbar.Bind(wx.EVT_MOTION, self.__OnMotionHorizontalScrollbar)
 
 
         self._HorizontalScrollbar.Bind(wx.EVT_LEFT_DOWN, self.__OnLeftDown)
         self._HorizontalScrollbar.Bind(wx.EVT_LEFT_UP, self.__OnLeftUp)
         self._HorizontalScrollbar.Bind(wx.EVT_LEAVE_WINDOW, self.__OnLeave)
+        self._HorizontalScrollbar.Bind(wx.EVT_MOTION, self.__OnMotion)
+
 
         self._scrolledPanel.Bind(wx.EVT_MOUSEWHEEL, self.__OnScroll)
 
@@ -150,7 +153,7 @@ class CustomScrolledWindow(wx.Window, CustomObject):
             scrollbarWindow.ReleaseMouse()
             self._Pressed = False
             self._Hover = False
-            self.Refresh()
+            scrollbarWindow.Refresh()
         event.Skip()
 
     
@@ -164,14 +167,14 @@ class CustomScrolledWindow(wx.Window, CustomObject):
         event.Skip()
             
 
-    def __OnMotionVerticalScrollbar(self, event):
-
-        x, y = event.GetPosition() 
-
-        # we check if we have mouse capture. if we dont, just check if
-        # the mouse is hovering the bar.
+    def __OnMotion(self, event:wx.MouseEvent):
         
-        if (self._VerticalScrollbar.HasCapture()):
+        x, y = event.GetPosition()
+        scrollbarWindow = event.GetEventObject()
+
+        # we check if we have mouse capture. if we dont, just check is the mouse is hovering the bar
+
+        if scrollbarWindow.HasCapture():
 
             unitsX, unitsY = self._scrolledPanel.GetScrollPixelsPerUnit()
 
@@ -195,97 +198,62 @@ class CustomScrolledWindow(wx.Window, CustomObject):
             #y (vertical difference) -> x of virtual size
             # then scroll to percentage of virtual size
 
-            scrolledPanelFullHeightPX = self._scrolledPanel.GetVirtualSize()[1]
-            scrollbarAreaHeightPX = self._VerticalScrollbar.GetClientSize()[1]
-
             # scrollbarAreaHeightPX -> scrolledPanelFullHeightPX
             # verticalBarHeight -> px
-
-            verticalBarScrolledTransform = (self._VerticalBarHeight * scrolledPanelFullHeightPX) // scrollbarAreaHeightPX
-            # the very bottom cannot be scrolled down to
-            scrollableRangePX = scrolledPanelFullHeightPX - verticalBarScrolledTransform
-            scrollbarClickRange = scrollbarAreaHeightPX - int(self._VerticalBarHeight)
             # scrollableRangePX -> 100
             # x -> y percentage
             # calculate click position percentage on scrollbar area range
-            clickedIn = y + self._VerticalDifference
+
+
+
+            if (scrollbarWindow == self._VerticalScrollbar):
+                scrolledPanelFullHeightPX = self._scrolledPanel.GetVirtualSize()[1]
+                scrollbarAreaHeightPX = self._VerticalScrollbar.GetClientSize()[1]
+                scrollbarHeight = self._VerticalBarHeight
+                clickedIn = y + self._VerticalDifference
+                focus = unitsY
+            elif (scrollbarWindow == self._HorizontalScrollbar):
+                scrolledPanelFullHeightPX = self._scrolledPanel.GetVirtualSize()[0]
+                scrollbarAreaHeightPX = self._HorizontalScrollbar.GetClientSize()[0]
+                scrollbarHeight = self._HorizontalBarHeight
+                clickedIn = x + self._HorizontalDifference
+                focus = unitsX
+
+            transform = (scrollbarHeight * scrolledPanelFullHeightPX) // scrollbarAreaHeightPX
+
+            # the very bottom cannot be scrolled down to
+            scrollableRangePX = scrolledPanelFullHeightPX - transform
+
+            scrollbarClickRange = scrollbarAreaHeightPX - int(scrollbarHeight)
+
             percentage = clickedIn * 1 / scrollbarClickRange
-            value = (percentage * scrollableRangePX) / unitsY
+
+            value = (percentage * scrollableRangePX) / focus
+
             # scroll
-            self._scrolledPanel.Scroll(-1, int(value))
-            self._VerticalScrollbar.Refresh()
+            if (scrollbarWindow == self._VerticalScrollbar):
+                self._scrolledPanel.Scroll(-1, int(value))
+            elif (scrollbarWindow == self._HorizontalScrollbar):
+                self._scrolledPanel.Scroll(int(value), -1)
+
+            scrollbarWindow.Refresh()
+
         else:
-            if self._VerticalScrollbarRectangle.Contains(x, y):
+
+            if (scrollbarWindow == self._VerticalScrollbar):
+                rectangle = self._VerticalScrollbarRectangle
+            elif (scrollbarWindow == self._HorizontalScrollbar):
+                rectangle = self._HorizontalScrollbarRectangle
+
+            if rectangle.Contains(x, y):
                 self._Hover = True
-                self._VerticalScrollbar.Refresh()
-                #self.Refresh()
+                scrollbarWindow.Refresh()
             else:
                 self._Hover = False
-                self._VerticalScrollbar.Refresh()
-                #self.Refresh()
-        event.Skip()
-
-
-    def __OnMotionHorizontalScrollbar(self, event):
-
-        x, y = event.GetPosition() 
-
-        # we check if we have mouse capture. if we dont, just check if
-        # the mouse is hovering the bar.
-        
-        if (self._HorizontalScrollbar.HasCapture()):
-
-            unitsX, unitsY = self._scrolledPanel.GetScrollPixelsPerUnit()
-
-            # --------------------- plan --------------------- #
+                scrollbarWindow.Refresh()
             
-            # viewStart -> scroll Units
-            # viewStart * scroll Units -> view start in pixels
-
-            # viewStartPX / scroll Units -> viewStart
-
-            # transform bar height into percentage of virtual size to
-            # calculate max scroll range (to bottom of scrolled
-            # panel).  virtual size -> 100% bar height -> 20%
-
-            # transform range
-            # 10 y in verticalscrollbar -> 40 view start in pixels
-
-            # bottom of range -> 100% of virtual size range (not of
-            # scrolled panel, but of scrollable range)
-
-            #y (vertical difference) -> x of virtual size
-            # then scroll to percentage of virtual size
-
-            scrolledPanelFullHeightPX = self._scrolledPanel.GetVirtualSize()[0]
-            scrollbarAreaHeightPX = self._HorizontalScrollbar.GetClientSize()[0]
-
-            # scrollbarAreaHeightPX -> scrolledPanelFullHeightPX
-            # verticalBarHeight -> px
-
-            horizontalBarScrolledTransform = (self._HorizontalBarHeight * scrolledPanelFullHeightPX) // scrollbarAreaHeightPX
-            # the very bottom cannot be scrolled down to
-            scrollableRangePX = scrolledPanelFullHeightPX - horizontalBarScrolledTransform
-            scrollbarClickRange = scrollbarAreaHeightPX - int(self._HorizontalBarHeight)
-            # scrollableRangePX -> 100
-            # x -> y percentage
-            # calculate click position percentage on scrollbar area range
-            clickedIn = x + self._HorizontalDifference
-            percentage = clickedIn * 1 / scrollbarClickRange
-            value = (percentage * scrollableRangePX) / unitsX
-            # scroll
-            self._scrolledPanel.Scroll(int(value), -1)
-            self._HorizontalScrollbar.Refresh()
-        else:
-            if self._HorizontalScrollbarRectangle.Contains(x, y):
-                self._Hover = True
-                self._HorizontalScrollbar.Refresh()
-                #self.Refresh()
-            else:
-                self._Hover = False
-                self._HorizontalScrollbar.Refresh()
-                #self.Refresh()
         event.Skip()
+
         
 
     def __OnScroll(self, event:wx.MouseEvent):

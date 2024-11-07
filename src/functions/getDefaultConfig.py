@@ -106,10 +106,10 @@ def getDefaultConfig(object_type:str) -> CustomConfig:
         "CustomScrolledWindow": {
             "background_colour_default": (255, 0, 0),
             "background_colour_pressed": (255,0, 0),
-            "background_colour_hover": (255,0, 0),
-            "foreground_colour_default": (0, 255, 0),
-            "foreground_colour_pressed": (0, 255, 0),
-            "foreground_colour_hover": (0, 255, 0),
+            "background_colour_hover": (200,0, 0),
+            "foreground_colour_default": (0, 200, 0),
+            "foreground_colour_pressed": (0, 180, 0),
+            "foreground_colour_hover": (0, 180, 0),
 
             "scrollbar_width": dip(15),
             "scrollbar_padding": dip(2)
