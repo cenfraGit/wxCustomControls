@@ -105,7 +105,6 @@ class CustomScrolledWindow(wx.Window, CustomObject):
         self._HorizontalScrollbar.Bind(wx.EVT_LEAVE_WINDOW, self.__OnLeave)
         self._HorizontalScrollbar.Bind(wx.EVT_MOTION, self.__OnMotion)
 
-
         self._scrolledPanel.Bind(wx.EVT_MOUSEWHEEL, self.__OnWheel)
 
         self._sizer.Layout()
