@@ -106,8 +106,7 @@ class CustomScrolledWindow(wx.Window, CustomObject):
         self._HorizontalScrollbar.Bind(wx.EVT_MOTION, self.__OnMotion)
 
 
-        #self._scrolledPanel.Bind(wx.EVT_MOUSEWHEEL, self.__OnScroll)
-        self._scrolledPanel.Bind(wx.EVT_SCROLLWIN, self.__OnScrollWin)
+        self._scrolledPanel.Bind(wx.EVT_MOUSEWHEEL, self.__OnWheel)
 
         self._sizer.Layout()
 
@@ -307,7 +306,7 @@ class CustomScrolledWindow(wx.Window, CustomObject):
         event.Skip()
 
 
-    def __OnScroll(self, event:wx.MouseEvent):
+    def __OnWheel(self, event:wx.MouseEvent):
 
         currentView = self._scrolledPanel.GetViewStart()
         
@@ -330,71 +329,6 @@ class CustomScrolledWindow(wx.Window, CustomObject):
             self._HorizontalScrollbar.Refresh()
 
         self._scrolledPanel.Scroll(int(x), int(y))
-
-
-    def __OnScrollWin(self, event):
-
-        x = self._scrolledPanel.GetScrollPos(wx.HORIZONTAL)
-        y = self._scrolledPanel.GetScrollPos(wx.VERTICAL)
-
-        print("Scroll event detected")
-
-        if event.GetOrientation() == wx.VERTICAL:
-            if not self._config.scrollY:
-                return
-            y = event.GetPosition()  # Use the scroll position directly
-            self._VerticalScrollbar.Refresh()
-        elif event.GetOrientation() == wx.HORIZONTAL:
-            if not self._config.scrollX:
-                return
-            x = event.GetPosition()  # Use the scroll position directly
-            self._HorizontalScrollbar.Refresh()
-
-        self._scrolledPanel.Scroll(x, y)
-        event.Skip()
-
-        # currentView = self._scrolledPanel.GetViewStart()
-        
-        # x = currentView[0]
-        # y = currentView[1]
-
-        # #print("Scroll event detected")
-
-        # if event.GetOrientation() == wx.VERTICAL:
-        #     if not self._config.scrollY:
-        #         return
-        #     y = event.GetPosition()  # Use the scroll position directly
-        #     self._VerticalScrollbar.Refresh()
-        # elif event.GetOrientation() == wx.HORIZONTAL:
-        #     if not self._config.scrollX:
-        #         return
-        #     x = event.GetPosition()  # Use the scroll position directly
-        #     self._HorizontalScrollbar.Refresh()
-
-        # print(x, y)
-        # self._scrolledPanel.Scroll(int(x), int(y))
-        # event.Skip()  # Ensure the event is processed further
-
-
-
-
-
-        # if event.GetWheelAxis() == wx.MOUSE_WHEEL_VERTICAL:
-        #     if not self._config.scrollY:
-        #         return
-        #     x = currentView[0]
-        #     y = currentView[1] - (event.GetWheelRotation() / 8)
-        #     #wx.CallAfter(self._VerticalScrollbar.Refresh)
-        #     self._VerticalScrollbar.Refresh()
-        # elif event.GetWheelAxis() == wx.MOUSE_WHEEL_HORIZONTAL:
-        #     if not self._config.scrollX:
-        #         return
-        #     x = currentView[0] - (event.GetWheelRotation() / 8)
-        #     y = currentView[1]
-        #     #wx.CallAfter(self._HorizontalScrollbar.Refresh)
-        #     self._HorizontalScrollbar.Refresh()
-
-        # self._scrolledPanel.Scroll(int(x), int(y))
 
 
     def __OnSize(self, event):
@@ -602,5 +536,3 @@ class CustomScrolledWindow(wx.Window, CustomObject):
                                     cornerRadius)
         else:
             raise ValueError("Scrollbar Type: Only \"rectangular\" and \"rounded\" values are allowed.")
-
-
