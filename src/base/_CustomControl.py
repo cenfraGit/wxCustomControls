@@ -24,6 +24,7 @@ class CustomControl(wx.Control, CustomObject):
 
         self._Label = kwargs.get("label", None) # not always present
         self._Value = kwargs.get("value", None) # not always present
+        self._Choices = kwargs.get("choices", None) # not always present
             
         # -------------- control state booleans -------------- #
 

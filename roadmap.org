@@ -7,11 +7,11 @@
 
 * DONE CustomStaticBox
 
-* TODO CustomScrolledWindow
-
-* TODO CustomComboBox
+* DONE CustomScrolledWindow
 
 * TODO CustomStaticText
+
+* TODO CustomComboBox
 
 * TODO CustomMenu
 

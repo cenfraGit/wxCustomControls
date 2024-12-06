@@ -121,8 +121,8 @@ class CustomConfig:
 
         self.switch_appearance = kwargs.get("switch_appearance", False)
         self.switch_rounded    = kwargs.get("switch_rounded",    False)
-        self.switch_width      = kwargs.get("switch_width",      50)
-        self.switch_height     = kwargs.get("switch_height",     20)
+        self.switch_width      = kwargs.get("switch_width",      None)
+        self.switch_height     = kwargs.get("switch_height",     None)
         self.switch_radius     = kwargs.get("switch_radius",     0)
         
         self.switch_selector_padding       = kwargs.get("switch_selector_padding",       0)
@@ -132,6 +132,14 @@ class CustomConfig:
         # -------------------- radiobutton -------------------- #
 
         self.radiobutton_diameter = kwargs.get("radiobutton_diameter", 0)
+
+        # ---------------------- combobox ------------------------ #
+
+        self.arrow_width  = kwargs.get("arrow_width",  None)
+        self.arrow_height = kwargs.get("arrow_height", None)
+        self.arrow_colour = kwargs.get("arrow_colour", None)
+        self.arrow_text_separation = kwargs.get("arrow_text_separation", None)
+        self.arrow_text_side       = kwargs.get("arrow_text_side", "right")
 
         # ---------------------- scrollbar ------------------------ #
 
