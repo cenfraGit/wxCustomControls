@@ -97,32 +97,32 @@ class PreviewFrame(wx.Frame):
         S_buttons = wx.GridBagSizer()
         P_buttons.SetSizer(S_buttons)
 
-        buttonText = "Custom Button"
+        textButton = "Custom Button"
 
         # custom buttons examples: since the custom buttons are meant
         # to be different, we will opt for passing the appearance
         # attributes directly to them instead of creating a CustomConfig.
         
-        button1 = CustomButton(P_buttons, label=buttonText)
-        button2 = CustomButton(P_buttons, label=buttonText, size=dip(-1, 40),
+        button1 = CustomButton(P_buttons, label=textButton)
+        button2 = CustomButton(P_buttons, label=textButton, size=dip(-1, 40),
                                background_colour_default=(255, 255, 255),
                                border_colour_default=(0, 0, 0),
                                border_width_default=2)
-        button3 = CustomButton(P_buttons, label=buttonText,
+        button3 = CustomButton(P_buttons, label=textButton,
                                background_linear_gradient_default=(0, 5, 0, 60, (180, 0, 180), (0, 180, 180)),
                                border_width_default=0, corner_radius_default=5)
-        button4 = CustomButton(P_buttons, label=buttonText,
+        button4 = CustomButton(P_buttons, label=textButton,
                                background_linear_gradient_default=(0, 5, 40, 100, (185, 43, 39), (21, 101, 192)),
                                border_width_default=0, corner_radius_default=10,
                                text_foreground_colour_default=(220, 220, 220))
 
-        button5 = CustomButton(P_buttons, label=buttonText,
+        button5 = CustomButton(P_buttons, label=textButton,
                                image_default=image, image_size_default=image_size)
-        button6 = CustomButton(P_buttons, label=buttonText,
+        button6 = CustomButton(P_buttons, label=textButton,
                                image_default=image, image_size_default=image_size, image_text_side="left")
-        button7 = CustomButton(P_buttons, label=buttonText,
+        button7 = CustomButton(P_buttons, label=textButton,
                                image_default=image, image_size_default=image_size, image_text_side="up")
-        button8 = CustomButton(P_buttons, label=buttonText,
+        button8 = CustomButton(P_buttons, label=textButton,
                                image_default=image, image_size_default=image_size, image_text_side="down")
 
 
@@ -140,10 +140,33 @@ class PreviewFrame(wx.Frame):
         S_buttons.AddGrowableCol(1, 1)
         S_buttons.AddGrowableCol(2, 1)
         S_buttons.AddGrowableCol(3, 1)
-
         S_buttons.Layout()
 
         # --------------------- checkbox panel --------------------- #
+        # panel to showcase some checkbox and switch examples.
+
+        P_checkbox = CustomPanel(P_scrolled, config=configPanel)
+        S_checkbox = wx.GridBagSizer()
+        P_buttons.SetSizer(S_buttons)
+
+        textCheckbox = "Custom CheckBox"
+        textSwitch = "Cutom Switch"
+
+        # the custom checkbox can also have the appearance of a
+        # switch, since both have the same functionality. You can
+        # customize both the checkbox and the switch appearance
+        # individually.
+
+        checkbox1 = CustomCheckBox(P_checkbox, label=textCheckbox)
+                                   
+
+        S_checkbox.Add(checkbox1, pos=(0, 0), flag=wx.EXPAND|wx.LEFT|wx.TOP, border=dip(9))
+
+        S_checkbox.AddGrowableCol(0, 1)
+        # S_checkbox.AddGrowableCol(1, 1)
+        # S_checkbox.AddGrowableCol(2, 1)
+        # S_checkbox.AddGrowableCol(3, 1)
+        S_checkbox.Layout()
 
         
         
@@ -164,8 +187,7 @@ class PreviewFrame(wx.Frame):
         # panel's sizer.
         
         S_scrolled.Add(P_buttons, pos=(0, 0), flag=wx.EXPAND|wx.LEFT|wx.TOP|wx.RIGHT, border=dip(8))
-
-        
+        S_scrolled.Add(P_checkbox, pos=(1, 0), flag=wx.EXPAND|wx.LEFT|wx.TOP|wx.RIGHT, border=dip(8))
         S_scrolled.AddGrowableCol(0, 1)
 
         
